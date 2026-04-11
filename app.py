@@ -659,6 +659,8 @@ with tab_hora:
         fig_hr.update_layout(
             **LAYOUT, height=280,
             title="PnL y Win Rate por Hora",
+        )
+        fig_hr.update_layout(
             yaxis2=dict(overlaying="y", side="right", ticksuffix="%",
                        gridcolor="transparent", color=TEAL)
         )
