@@ -651,19 +651,11 @@ with tab_hora:
         ))
         fig_hr.add_trace(go.Scatter(
             x=hr_g["hour"], y=hr_g["win_rate"],
-            mode="lines+markers", name="Win Rate",
+            mode="lines+markers", name="Win Rate %",
             line=dict(color=TEAL, width=2),
-            yaxis="y2",
             hovertemplate="Win Rate: %{y:.1f}%<extra></extra>"
         ))
-        fig_hr.update_layout(
-            **LAYOUT, height=280,
-            title="PnL y Win Rate por Hora",
-        )
-        fig_hr.update_layout(
-            yaxis2=dict(overlaying="y", side="right", ticksuffix="%",
-                       gridcolor="transparent", tickfont=dict(color=TEAL))
-        )
+        fig_hr.update_layout(**LAYOUT, height=280, title="PnL y Win Rate por Hora")
         st.plotly_chart(fig_hr, use_container_width=True)
 
     with col_h2:
