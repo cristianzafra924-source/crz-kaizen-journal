@@ -1006,40 +1006,37 @@ with tab_kaizen:
     xp_pct     = min(xp_current / xp_next * 100, 100) if xp_next else 100
 
     # ── Header gaming ────────────────────────────────────────────────────────
-    st.markdown(f"""
-<div style='background:linear-gradient(135deg,#080c14 0%,#0a1628 50%,#080c14 100%);
-     border:1px solid {lvl_color}33;border-radius:12px;padding:24px;margin-bottom:20px;
-     position:relative;overflow:hidden;'>
-  <div style='position:absolute;top:0;left:0;right:0;height:2px;
-       background:linear-gradient(90deg,transparent,{lvl_color},{lvl_color},transparent);'></div>
-
-  <div style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;'>
-
-    <div>
-      <div style='font-size:11px;color:#475569;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;'>Nivel {lvl}</div>
-      <div style='font-size:26px;font-weight:800;color:{lvl_color};letter-spacing:0.05em;'>{lvl_icon} {lvl_name}</div>
-      <div style='margin-top:10px;'>
-        <div style='display:flex;justify-content:space-between;font-size:10px;color:#475569;margin-bottom:4px;'>
-          <span>XP: {xp_current}</span><span>Siguiente nivel: {xp_next} XP</span>
-        </div>
-        <div style='background:#1e2a3a;border-radius:20px;height:10px;width:300px;overflow:hidden;'>
-          <div style='background:linear-gradient(90deg,{lvl_color}88,{lvl_color});
-               width:{xp_pct}%;height:100%;border-radius:20px;
-               box-shadow:0 0 8px {lvl_color}66;'></div>
-        </div>
-      </div>
-    </div>
-
-    <div style='text-align:center;'>
-      <div style='font-size:10px;color:#475569;letter-spacing:0.1em;text-transform:uppercase;'>KAIZEN SCORE</div>
-      <div style='font-family:JetBrains Mono;font-size:64px;font-weight:800;
-           color:{lvl_color};line-height:1;text-shadow:0 0 20px {lvl_color}44;'>{score}</div>
-      <div style='font-size:11px;color:#475569;'>/100 puntos</div>
-    </div>
-
-  </div>
-</div>
-""", unsafe_allow_html=True)
+    lc33 = lvl_color + "33"
+    lc44 = lvl_color + "44"
+    lc66 = lvl_color + "66"
+    lc88 = lvl_color + "88"
+    st.markdown(
+        "<div style='background:linear-gradient(135deg,#080c14 0%,#0a1628 50%,#080c14 100%);"
+        f"border:1px solid {lc33};border-radius:12px;padding:24px;margin-bottom:20px;"
+        "position:relative;overflow:hidden;'>"
+        "<div style='position:absolute;top:0;left:0;right:0;height:2px;"
+        f"background:linear-gradient(90deg,transparent,{lvl_color},{lvl_color},transparent);'></div>"
+        "<div style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;'>"
+        "<div>"
+        f"<div style='font-size:11px;color:#475569;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;'>Nivel {lvl}</div>"
+        f"<div style='font-size:26px;font-weight:800;color:{lvl_color};letter-spacing:0.05em;'>{lvl_icon} {lvl_name}</div>"
+        "<div style='margin-top:10px;'>"
+        "<div style='display:flex;justify-content:space-between;font-size:10px;color:#475569;margin-bottom:4px;'>"
+        f"<span>XP: {xp_current}</span><span>Siguiente nivel: {xp_next} XP</span>"
+        "</div>"
+        "<div style='background:#1e2a3a;border-radius:20px;height:10px;width:300px;overflow:hidden;'>"
+        f"<div style='background:linear-gradient(90deg,{lc88},{lvl_color});"
+        f"width:{xp_pct:.0f}%;height:100%;border-radius:20px;"
+        f"box-shadow:0 0 8px {lc66};'></div>"
+        "</div></div></div>"
+        "<div style='text-align:center;'>"
+        "<div style='font-size:10px;color:#475569;letter-spacing:0.1em;text-transform:uppercase;'>KAIZEN SCORE</div>"
+        f"<div style='font-family:JetBrains Mono;font-size:64px;font-weight:800;"
+        f"color:{lvl_color};line-height:1;text-shadow:0 0 20px {lc44};'>{score}</div>"
+        "<div style='font-size:11px;color:#475569;'>/100 puntos</div>"
+        "</div></div></div>",
+        unsafe_allow_html=True
+    )
 
     # ── Stats + XP breakdown ─────────────────────────────────────────────────
     col_stats, col_badges = st.columns([3, 2])
