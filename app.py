@@ -270,8 +270,14 @@ AMBER  = "#f59e0b"
 PURPLE = "#8b5cf6"
 MUTED  = "#475569"
 
+# ── Global theme toggle ────────────────────────────────────────────────────────
+if "light_mode" not in st.session_state:
+    st.session_state.light_mode = False
+
 # ── Header ─────────────────────────────────────────────────────────────────────
-st.markdown("""
+col_hd, col_toggle = st.columns([5, 1])
+with col_hd:
+    st.markdown("""
 <div class="crz-header">
   <div>
     <div class="crz-logo">CRZ <span>Kaizen</span> Journal</div>
@@ -280,6 +286,31 @@ st.markdown("""
   <div style="font-size:11px;color:#475569;">改善 · 1% mejor cada día</div>
 </div>
 """, unsafe_allow_html=True)
+with col_toggle:
+    st.markdown("<div style='padding-top:12px;'>", unsafe_allow_html=True)
+    light_mode = st.toggle("☀️", value=st.session_state.light_mode, help="Modo claro / oscuro")
+    st.session_state.light_mode = light_mode
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# Apply light mode CSS globally
+if light_mode:
+    st.markdown("""<style>
+    .stApp { background: #f8fafc !important; }
+    .crz-header { background: #ffffff !important; border-color: #e2e8f0 !important; }
+    .crz-logo { color: #0f172a !important; }
+    .crz-tagline { color: #64748b !important; }
+    .metric-card { background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important; }
+    .metric-value { color: #0f172a !important; }
+    .metric-sub { color: #64748b !important; }
+    .stTabs [data-baseweb="tab-list"] { border-color: #e2e8f0 !important; }
+    .stTabs [data-baseweb="tab"] { color: #64748b !important; }
+    .stTabs [aria-selected="true"] { color: #0f172a !important; border-color: #2dd4bf !important; }
+    p, span, div, label, h1, h2, h3, h4 { color: #0f172a !important; }
+    [data-testid="stDataFrame"] * { color: #0f172a !important; background: #ffffff !important; }
+    .stSelectbox div[data-baseweb="select"] { background: #ffffff !important; border-color: #e2e8f0 !important; }
+    .stSelectbox div[data-baseweb="select"] * { color: #0f172a !important; }
+    hr { border-color: #e2e8f0 !important; }
+    </style>""", unsafe_allow_html=True)
 
 # ── Upload ─────────────────────────────────────────────────────────────────────
 uploaded = st.file_uploader(
@@ -489,11 +520,8 @@ with tab_cal:
         if st.button("▶▶", help="Último mes"):
             st.session_state.cal_idx = len(months_str) - 1
 
-    # Light/dark toggle
-    col_toggle, _ = st.columns([1, 4])
-    with col_toggle:
-        light_mode = st.toggle("☀️ Modo claro", value=st.session_state.cal_light)
-        st.session_state.cal_light = light_mode
+    # Light/dark toggle uses global setting
+    light_mode = st.session_state.light_mode
 
     sel_month = months_str[st.session_state.cal_idx]
 
