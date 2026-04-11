@@ -91,14 +91,14 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 /* Nav tabs */
 .stTabs [data-baseweb="tab-list"] {
     background: transparent;
-    border-bottom: 1px solid #1e2a3a;
+    border-bottom: 1px solid #0f1923;
     gap: 0;
 }
 .stTabs [data-baseweb="tab"] {
-    color: #475569;
-    font-size: 12px;
+    color: #334155;
+    font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     padding: 12px 20px;
     border-radius: 0;
     text-transform: uppercase;
@@ -106,7 +106,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .stTabs [aria-selected="true"] {
     background: transparent !important;
     color: #2dd4bf !important;
-    border-bottom: 2px solid #2dd4bf !important;
+    border-bottom: 1px solid #2dd4bf !important;
 }
 
 /* Upload zone */
@@ -256,19 +256,21 @@ def parse_mt5(file) -> dict:
 
 # ── Chart theme ────────────────────────────────────────────────────────────────
 LAYOUT = dict(
-    paper_bgcolor="#0d1117", plot_bgcolor="#0d1117",
-    font=dict(color="#64748b", family="JetBrains Mono", size=11),
-    margin=dict(l=16, r=16, t=24, b=16),
-    xaxis=dict(gridcolor="#1e2a3a", showgrid=True, zeroline=False),
-    yaxis=dict(gridcolor="#1e2a3a", showgrid=True, zeroline=False),
+    paper_bgcolor="#080c14", plot_bgcolor="#080c14",
+    font=dict(color="#64748b", family="Inter, sans-serif", size=11),
+    margin=dict(l=16, r=16, t=32, b=16),
+    xaxis=dict(gridcolor="#0f1923", showgrid=True, zeroline=False,
+               linecolor="#1e2a3a", tickcolor="#1e2a3a"),
+    yaxis=dict(gridcolor="#0f1923", showgrid=True, zeroline=False,
+               linecolor="#1e2a3a", tickcolor="#1e2a3a"),
 )
-GREEN  = "#22c55e"
-RED    = "#ef4444"
+GREEN  = "#10b981"
+RED    = "#f43f5e"
 TEAL   = "#2dd4bf"
-BLUE   = "#3b82f6"
+BLUE   = "#6366f1"
 AMBER  = "#f59e0b"
-PURPLE = "#8b5cf6"
-MUTED  = "#475569"
+PURPLE = "#a78bfa"
+MUTED  = "#334155"
 
 # ── Global theme toggle ────────────────────────────────────────────────────────
 if "light_mode" not in st.session_state:
@@ -384,8 +386,8 @@ st.markdown(f"""
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
 tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen = st.tabs([
-    "📊 Dashboard", "📅 Calendario", "📋 Operaciones",
-    "🎯 Por Símbolo", "⏰ Por Horario", "🧠 Kaizen Score"
+    "◈  Dashboard", "⬚  Calendario", "≡  Operaciones",
+    "◎  Por Símbolo", "◷  Por Horario", "△  Kaizen Score"
 ])
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -427,20 +429,19 @@ with tab_dash:
         fig_eq.add_trace(go.Scatter(
             x=df_s["close_dt"], y=df_s["equity"],
             mode="lines", name="Equity",
-            line=dict(color=TEAL, width=2),
+            line=dict(color=TEAL, width=1.5, shape="spline", smoothing=0.3),
             fill="tozeroy",
-            fillcolor="rgba(45,212,191,0.06)"
+            fillcolor="rgba(45,212,191,0.04)"
         ))
-        # Underwater (drawdown fill)
-        peak = df_s["equity"].cummax()
         fig_eq.add_trace(go.Scatter(
             x=df_s["close_dt"], y=peak,
             mode="lines", name="Peak",
             line=dict(color=MUTED, width=1, dash="dot"),
             showlegend=False
         ))
-        fig_eq.add_hline(y=0, line_dash="dash", line_color=MUTED, opacity=0.4)
-        fig_eq.update_layout(**LAYOUT, height=260)
+        fig_eq.add_hline(y=0, line_dash="dash", line_color=MUTED, opacity=0.3)
+        fig_eq.update_layout(**LAYOUT, height=260,
+            title=dict(text="Curva de Equity", font=dict(size=12, color="#94a3b8")))
         st.plotly_chart(fig_eq, use_container_width=True)
 
     with col_daily:
@@ -451,10 +452,13 @@ with tab_dash:
         fig_daily = go.Figure(go.Bar(
             x=daily["fecha"], y=daily["pnl"],
             marker_color=colors_bar,
+            marker_line_width=0,
+            opacity=0.85,
             hovertemplate="%{x}<br>PnL: $%{y:+,.2f}<extra></extra>"
         ))
-        fig_daily.add_hline(y=0, line_color=MUTED, opacity=0.4)
-        fig_daily.update_layout(**LAYOUT, height=260)
+        fig_daily.add_hline(y=0, line_color=MUTED, opacity=0.3, line_width=1)
+        fig_daily.update_layout(**LAYOUT, height=260,
+            title=dict(text="PnL Diario", font=dict(size=12, color="#94a3b8")))
         st.plotly_chart(fig_daily, use_container_width=True)
 
     # Win/Loss distribution + RR ratio
