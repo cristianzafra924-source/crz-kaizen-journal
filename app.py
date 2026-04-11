@@ -983,7 +983,7 @@ with tab_hora:
     st.plotly_chart(fig_heat, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB KAIZEN SCORE — FITNESS RINGS STYLE
+# TAB KAIZEN SCORE — ANIMATED CARDS
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_kaizen:
 
@@ -999,111 +999,165 @@ with tab_kaizen:
     elif score >= 40: lvl_name, lvl_color, lvl_emoji = "En progreso","#f59e0b","📈"
     else:             lvl_name, lvl_color, lvl_emoji = "Entrena más","#f43f5e","🎯"
 
-    best_hour = hr_g.loc[hr_g["pnl"].idxmax(), "hour"] if len(hr_g) else 0
-    worst_hour= hr_g.loc[hr_g["pnl"].idxmin(), "hour"] if len(hr_g) else 0
-    best_sym  = sym_g.iloc[0]["symbol"] if len(sym_g) else "—"
-    worst_sym = sym_g.iloc[-1]["symbol"] if len(sym_g) else "—"
+    best_hour  = hr_g.loc[hr_g["pnl"].idxmax(), "hour"] if len(hr_g) else 0
+    worst_hour = hr_g.loc[hr_g["pnl"].idxmin(), "hour"] if len(hr_g) else 0
+    best_sym   = sym_g.iloc[0]["symbol"] if len(sym_g) else "—"
+    worst_sym  = sym_g.iloc[-1]["symbol"] if len(sym_g) else "—"
 
-    def ring_svg(pct, color, size=120, stroke=12, label="", value=""):
-        r = (size - stroke) / 2
-        circ = 2 * 3.14159 * r
-        dash = circ * min(pct / 100, 1)
-        gap  = circ - dash
-        cx = size / 2
-        return f"""
-<svg width="{size}" height="{size}" viewBox="0 0 {size} {size}">
-  <circle cx="{cx}" cy="{cx}" r="{r}"
-    fill="none" stroke="#1e2a3a" stroke-width="{stroke}"/>
-  <circle cx="{cx}" cy="{cx}" r="{r}"
-    fill="none" stroke="{color}" stroke-width="{stroke}"
-    stroke-dasharray="{dash:.1f} {gap:.1f}"
-    stroke-linecap="round"
-    transform="rotate(-90 {cx} {cx})"
-    style="filter:drop-shadow(0 0 4px {color}88)"/>
-  <text x="{cx}" y="{cx-6}" text-anchor="middle"
-    font-family="JetBrains Mono" font-size="16" font-weight="700"
-    fill="{color}">{value}</text>
-  <text x="{cx}" y="{cx+12}" text-anchor="middle"
-    font-family="Inter" font-size="9" fill="#64748b">{label}</text>
-</svg>"""
+    # CSS animations
+    st.markdown("""
+<style>
+@keyframes fillBar {
+  from { width: 0%; }
+  to   { width: var(--target); }
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.kz-card {
+  background: #0a0f1a;
+  border: 1px solid #1e2a3a;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 12px;
+  animation: fadeUp 0.5s ease forwards;
+  position: relative;
+  overflow: hidden;
+}
+.kz-card::before {
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent,#2dd4bf),transparent);
+}
+.kz-bar-track {
+  background: #1e2a3a;
+  border-radius: 20px;
+  height: 8px;
+  overflow: hidden;
+  margin: 10px 0 5px;
+}
+.kz-bar-fill {
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  box-shadow: 0 0 8px var(--glow);
+  animation: fillBar 1.4s cubic-bezier(0.4,0,0.2,1) forwards;
+  width: var(--target);
+}
+.kz-score-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 88px;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+</style>
+""", unsafe_allow_html=True)
 
-    # ── Main score ring ───────────────────────────────────────────────────────
-    col_main, col_rings = st.columns([1, 2])
+    # ── Score principal ───────────────────────────────────────────────────────
+    col_sc, col_metrics = st.columns([1, 2])
 
-    with col_main:
-        main_ring = ring_svg(score, lvl_color, size=200, stroke=18,
-                             label="KAIZEN SCORE", value=str(score))
+    with col_sc:
         st.markdown(f"""
-<div style='text-align:center;background:#0a0f1a;border:1px solid #1e2a3a;
-     border-radius:16px;padding:24px;'>
-  {main_ring}
-  <div style='font-size:20px;font-weight:800;color:{lvl_color};margin-top:8px;'>{lvl_emoji} {lvl_name}</div>
-  <div style='font-size:11px;color:#475569;margin-top:4px;letter-spacing:0.1em;'>改善 · 1% mejor cada día</div>
+<div class="kz-card" style="--accent:{lvl_color};text-align:center;padding:32px 20px;">
+  <div style="font-size:10px;color:#475569;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Kaizen Score</div>
+  <div class="kz-score-num" style="--c1:{lvl_color};--c2:#f1f5f9;">{score}</div>
+  <div style="font-size:12px;color:#64748b;margin-top:4px;">/100 puntos</div>
+  <div class="kz-bar-track" style="margin-top:16px;">
+    <div class="kz-bar-fill" style="--target:{score}%;--c1:{lvl_color}88;--c2:{lvl_color};--glow:{lvl_color};"></div>
+  </div>
+  <div style="font-size:17px;font-weight:700;color:{lvl_color};margin-top:14px;">{lvl_emoji} {lvl_name}</div>
+  <div style="font-size:10px;color:#475569;margin-top:6px;letter-spacing:0.08em;">改善 · 1% mejor cada día</div>
 </div>""", unsafe_allow_html=True)
 
-    with col_rings:
-        st.markdown("<div style='font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;'>Anillos de Actividad</div>", unsafe_allow_html=True)
-
-        rings_data = [
-            (wr_score/30*100,  BLUE,   "Win Rate",    f"{stats['win_rate']:.0f}%",  f"Objetivo >60% · Actual {stats['win_rate']:.1f}%"),
-            (pf_score/30*100,  TEAL,   "Factor",      f"{stats['pfactor']:.1f}x",   f"Objetivo >2.0 · Actual {stats['pfactor']:.2f}"),
-            (rr_score/20*100,  PURPLE, "R/R Ratio",   f"{rr_ratio:.1f}x",           f"Objetivo >2.0 · Actual {rr_ratio:.2f}"),
-            (dd_score/20*100,  AMBER,  "Drawdown",    f"{abs(stats['max_dd']):.0f}%",f"Objetivo <10% · Actual {stats['max_dd']:.1f}%"),
+    with col_metrics:
+        metrics_data = [
+            ("🎯", "Win Rate",         f"{stats['win_rate']:.1f}%",  wr_score/30*100,  BLUE,   "#818cf8", f"Objetivo >60%",   stats["win_rate"] >= 60),
+            ("⚖️", "Factor Beneficio",  f"{stats['pfactor']:.2f}x",  pf_score/30*100,  TEAL,   "#22d3ee", f"Objetivo >2.0",   stats["pfactor"] >= 2.0),
+            ("📏", "Risk / Reward",     f"{rr_ratio:.2f}x",          rr_score/20*100,  PURPLE, "#c084fc", f"Objetivo >2.0",   rr_ratio >= 2.0),
+            ("🛡️", "Control Drawdown",  f"{stats['max_dd']:.1f}%",   dd_score/20*100,  AMBER,  "#fcd34d", f"Objetivo >-10%",  stats["max_dd"] > -10),
         ]
 
-        r1, r2 = st.columns(2)
-        for i, (pct, col, label, val, desc) in enumerate(rings_data):
-            ring = ring_svg(pct, col, size=110, stroke=10, label=label, value=val)
-            achieved = pct >= 100
-            badge = f"<span style='font-size:9px;color:#10b981;font-weight:700;'>✓ OK</span>" if achieved else f"<span style='font-size:9px;color:#475569;'>{int(pct):.0f}%</span>"
-            html = f"""
-<div style='background:#0a0f1a;border:1px solid #1e2a3a;border-radius:12px;
-     padding:12px;text-align:center;margin-bottom:8px;'>
-  {ring}
-  <div style='font-size:10px;color:#64748b;margin-top:4px;line-height:1.3;'>{desc}</div>
-  <div style='margin-top:4px;'>{badge}</div>
-</div>"""
-            if i % 2 == 0:
-                r1.markdown(html, unsafe_allow_html=True)
-            else:
-                r2.markdown(html, unsafe_allow_html=True)
+        for icon, name, val, pct, c1, c2, obj, ok in metrics_data:
+            badge = (
+                "<span style='font-size:9px;color:#10b981;font-weight:700;"
+                "background:#052e16;padding:2px 8px;border-radius:10px;'>✓ OK</span>"
+                if ok else
+                f"<span style='font-size:9px;color:#475569;"
+                f"background:#0f1923;padding:2px 8px;border-radius:10px;'>{pct:.0f}%</span>"
+            )
+            st.markdown(f"""
+<div class="kz-card" style="--accent:{c1};">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:22px;">{icon}</span>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#e2e8f0;">{name}</div>
+        <div style="font-size:10px;color:#475569;">{obj}</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      {badge}
+      <div style="font-family:'JetBrains Mono';font-size:22px;font-weight:700;color:{c1};">{val}</div>
+    </div>
+  </div>
+  <div class="kz-bar-track">
+    <div class="kz-bar-fill" style="--target:{min(pct,100):.0f}%;--c1:{c1}66;--c2:{c2};--glow:{c1};"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;font-size:9px;color:#334155;">
+    <span>0</span>
+    <span style="color:{c1};font-weight:600;">{pct:.0f} / 100 pts</span>
+    <span>100</span>
+  </div>
+</div>""", unsafe_allow_html=True)
 
-    # ── Weekly summary rings ──────────────────────────────────────────────────
-    st.divider()
-    st.markdown("<div style='font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;'>📋 Plan de Mejora Personalizado</div>", unsafe_allow_html=True)
+    # ── Plan de mejora ────────────────────────────────────────────────────────
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(
+        "<div style='font-size:11px;font-weight:700;color:#94a3b8;"
+        "letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;'>"
+        "📋 Plan de Mejora</div>",
+        unsafe_allow_html=True
+    )
 
     improvements = []
     if stats["win_rate"] < 60:
-        improvements.append((BLUE, "🎯", "Win Rate",
-            f"Estás al {stats['win_rate']:.1f}% — necesitas llegar al 60%",
-            "Sé más selectivo en tus entradas. Menos operaciones, más calidad."))
+        improvements.append((BLUE,   "🎯", "Win Rate",
+            f"Actual {stats['win_rate']:.1f}% · Objetivo 60%",
+            "Sé más selectivo. Menos operaciones, más calidad en las entradas."))
     if stats["pfactor"] < 2.0:
-        improvements.append((TEAL, "⚖️", "Factor Beneficio",
-            f"Estás en {stats['pfactor']:.2f} — necesitas llegar a 2.0",
+        improvements.append((TEAL,   "⚖️", "Factor Beneficio",
+            f"Actual {stats['pfactor']:.2f} · Objetivo 2.0",
             "Deja correr más las ganadoras. Mueve el stop a breakeven antes."))
     if rr_ratio < 2.0:
         improvements.append((PURPLE, "📏", "Risk/Reward",
-            f"Estás en {rr_ratio:.2f} — necesitas llegar a 2.0",
-            f"Por cada 1$ de riesgo busca 2$ de beneficio mínimo."))
+            f"Actual {rr_ratio:.2f} · Objetivo 2.0",
+            "Por cada 1$ de riesgo busca 2$ mínimo de beneficio."))
     if stats["max_dd"] < -10:
-        improvements.append((AMBER, "🛡️", "Drawdown",
-            f"Estás en {stats['max_dd']:.1f}% — objetivo por encima de -10%",
-            "Reduce el tamaño de posición. La consistencia es más importante que el profit."))
+        improvements.append((AMBER,  "🛡️", "Drawdown",
+            f"Actual {stats['max_dd']:.1f}% · Objetivo >-10%",
+            "Reduce el tamaño de posición. La consistencia antes que el profit."))
     improvements.append((TEAL, "⏰", "Horario Óptimo",
-        f"Tu mejor hora es las {best_hour}:00 — tu peor las {worst_hour}:00",
-        f"Concentra tus operaciones entre las {best_hour}:00 y las {best_hour+2}:00."))
+        f"Mejor {best_hour}:00 · Peor {worst_hour}:00",
+        f"Concentra las operaciones entre las {best_hour}:00 y {best_hour+2}:00."))
     improvements.append((BLUE, "💹", "Especialización",
-        f"Tu mejor activo es {best_sym} — evita {worst_sym}",
-        f"El 80% de tu PnL viene de pocos activos. Especialízate en {best_sym}."))
+        f"Mejor {best_sym} · Evitar {worst_sym}",
+        f"El 80% del PnL viene de pocos activos. Especialízate en {best_sym}."))
 
-    imp_cols = st.columns(3)
+    cols3 = st.columns(3)
     for i, (col, icon, title, stat_txt, advice) in enumerate(improvements[:6]):
-        with imp_cols[i % 3]:
+        with cols3[i % 3]:
             st.markdown(f"""
-<div style='background:#0a0f1a;border:1px solid #1e2a3a;border-left:3px solid {col};
-     border-radius:8px;padding:14px;margin-bottom:10px;min-height:130px;'>
-  <div style='font-size:16px;margin-bottom:6px;'>{icon}</div>
-  <div style='font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:4px;'>{title}</div>
-  <div style='font-size:10px;color:{col};margin-bottom:6px;font-weight:600;'>{stat_txt}</div>
-  <div style='font-size:10px;color:#475569;line-height:1.4;'>{advice}</div>
+<div class="kz-card" style="--accent:{col};min-height:120px;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <span style="font-size:18px;">{icon}</span>
+    <span style="font-size:11px;font-weight:700;color:#e2e8f0;">{title}</span>
+  </div>
+  <div style="font-size:10px;color:{col};font-weight:600;margin-bottom:5px;">{stat_txt}</div>
+  <div style="font-size:10px;color:#475569;line-height:1.5;">{advice}</div>
 </div>""", unsafe_allow_html=True)
