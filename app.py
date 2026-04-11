@@ -330,12 +330,19 @@ uploaded = st.file_uploader(
 )
 
 if not uploaded:
-    st.markdown("""
-<div class="upload-zone">
+    _lm = st.session_state.light_mode
+    _bg = "#ffffff" if _lm else "#0d1117"
+    _border = "#e2e8f0" if _lm else "#1e2a3a"
+    _title = "#0f172a" if _lm else "#f1f5f9"
+    _sub = "#64748b" if _lm else "#64748b"
+    _sub2 = "#94a3b8" if _lm else "#334155"
+    st.markdown(f"""
+<div style="background:{_bg};border:1.5px dashed {_border};border-radius:12px;
+     padding:60px 40px;text-align:center;margin:40px auto;max-width:600px;">
   <div style="font-size:48px;margin-bottom:16px;">📊</div>
-  <div style="font-size:20px;font-weight:600;color:#f1f5f9;margin-bottom:8px;">Analiza tu trading</div>
-  <div style="font-size:14px;color:#64748b;margin-bottom:4px;">Sube tu historial exportado desde MetaTrader 5</div>
-  <div style="font-size:12px;color:#334155;">MT5 → Historial → Click derecho → Guardar como informe (.xlsx)</div>
+  <div style="font-size:20px;font-weight:600;color:{_title};margin-bottom:8px;">Analiza tu trading</div>
+  <div style="font-size:14px;color:{_sub};margin-bottom:4px;">Sube tu historial exportado desde MetaTrader 5</div>
+  <div style="font-size:12px;color:{_sub2};">MT5 → Historial → Click derecho → Guardar como informe (.xlsx)</div>
 </div>
 """, unsafe_allow_html=True)
     st.stop()
@@ -355,17 +362,22 @@ df_s  = stats["df_sorted"]
 
 # ── Trader bar ─────────────────────────────────────────────────────────────────
 pnl_color = GREEN if stats["pnl_net"] >= 0 else RED
+_lm = st.session_state.light_mode
+_bar_bg = "#ffffff" if _lm else "#0d1117"
+_bar_border = "#e2e8f0" if _lm else "#1e2a3a"
+_bar_title = "#0f172a" if _lm else "#f1f5f9"
+_bar_sub = "#64748b"
 st.markdown(f"""
-<div style="background:#0d1117;border:1px solid #1e2a3a;border-left:4px solid {TEAL};
+<div style="background:{_bar_bg};border:1px solid {_bar_border};border-left:4px solid {TEAL};
      border-radius:8px;padding:14px 20px;margin-bottom:24px;
      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
   <div>
-    <div style="font-size:16px;font-weight:600;color:#f1f5f9;">{meta['trader'] or 'Mi Cuenta'}</div>
-    <div style="font-size:11px;color:#475569;margin-top:2px;">{meta['cuenta']} · {meta['empresa']} · {meta['fecha']}</div>
+    <div style="font-size:16px;font-weight:600;color:{_bar_title};">{meta['trader'] or 'Mi Cuenta'}</div>
+    <div style="font-size:11px;color:{_bar_sub};margin-top:2px;">{meta['cuenta']} · {meta['empresa']} · {meta['fecha']}</div>
   </div>
   <div style="display:flex;gap:24px;flex-wrap:wrap;">
     <div style="text-align:center;">
-      <div style="font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:0.1em;">PnL Total</div>
+      <div style="font-size:10px;color:{_bar_sub};text-transform:uppercase;letter-spacing:0.1em;">PnL Total</div>
       <div style="font-family:'JetBrains Mono';font-size:18px;font-weight:600;color:{pnl_color};">{stats['pnl_net']:+,.2f}$</div>
     </div>
     <div style="text-align:center;">
@@ -386,8 +398,8 @@ st.markdown(f"""
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
 tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen = st.tabs([
-    "◈  Dashboard", "⬚  Calendario", "≡  Operaciones",
-    "◎  Por Símbolo", "◷  Por Horario", "△  Kaizen Score"
+    "🔴 ◈ Dashboard", "🔵 ⬚ Calendario", "🟢 ≡ Operaciones",
+    "🟡 ◎ Símbolo", "🌸 ◷ Horario", "⚪ △ Kaizen"
 ])
 
 # ══════════════════════════════════════════════════════════════════════════════
