@@ -585,6 +585,7 @@ with tab_sym:
             marker_color=[GREEN if v >= 0 else RED for v in sym_g["PnL"]],
             text=[f"${v:+,.0f}" for v in sym_g["PnL"]],
             textposition="outside",
+            textfont=dict(color="#f1f5f9", size=11),
             hovertemplate="%{x}<br>PnL: $%{y:+,.2f}<extra></extra>"
         ))
         fig_sym.update_layout(**LAYOUT, height=280, title="PnL por Símbolo")
@@ -597,6 +598,7 @@ with tab_sym:
             marker_color=BLUE,
             text=[f"{v:.0f}%" for v in sym_g["Win_Rate"]],
             textposition="outside",
+            textfont=dict(color="#f1f5f9", size=11),
         ))
         fig_wr.add_hline(y=50, line_dash="dash", line_color=MUTED, opacity=0.5)
         fig_wr.update_layout(**LAYOUT, height=280, title="Win Rate por Símbolo")
@@ -607,6 +609,7 @@ with tab_sym:
         sym_g[["symbol","Ops","Ganadoras","Win_Rate","PnL","Factor","Mejor","Peor"]]
         .rename(columns={"symbol":"Símbolo","Win_Rate":"Win Rate %","Factor":"Factor Ben."})
         .style
+        .set_properties(**{"color": "#e2e8f0"})
         .map(color_profit, subset=["PnL","Mejor","Peor"])
         .format({"Win Rate %":"{:.1f}%","PnL":"{:+.2f}","Factor Ben.":"{:.2f}",
                  "Mejor":"{:+.2f}","Peor":"{:.2f}"}),
