@@ -310,7 +310,13 @@ if light_mode:
     [data-testid="stDataFrame"] th { color: #0f172a !important; background: #f1f5f9 !important; }
     [data-testid="stDataFrame"] td { color: #0f172a !important; background: #ffffff !important; }
     .stSelectbox div[data-baseweb="select"] { background: #ffffff !important; border-color: #e2e8f0 !important; }
-    .stSelectbox div[data-baseweb="select"] * { color: #0f172a !important; }
+    .stSelectbox div[data-baseweb="select"] * { color: #0f172a !important; background: #ffffff !important; }
+    .stSelectbox [data-baseweb="popover"] { background: #ffffff !important; }
+    .stSelectbox [data-baseweb="popover"] * { color: #0f172a !important; background: #ffffff !important; }
+    [data-baseweb="select"] * { color: #0f172a !important; }
+    [data-baseweb="popover"] * { color: #0f172a !important; background: #ffffff !important; }
+    [role="option"] { color: #0f172a !important; background: #ffffff !important; }
+    [role="option"]:hover { background: #f1f5f9 !important; }
     hr { border-color: #e2e8f0 !important; }
     </style>""", unsafe_allow_html=True)
 
