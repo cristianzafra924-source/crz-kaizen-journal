@@ -306,7 +306,9 @@ if light_mode:
     .stTabs [data-baseweb="tab"] { color: #64748b !important; }
     .stTabs [aria-selected="true"] { color: #0f172a !important; border-color: #2dd4bf !important; }
     p, span, div, label, h1, h2, h3, h4 { color: #0f172a !important; }
-    [data-testid="stDataFrame"] * { color: #0f172a !important; background: #ffffff !important; }
+    [data-testid="stDataFrame"] * { color: #0f172a !important; }
+    [data-testid="stDataFrame"] th { color: #0f172a !important; background: #f1f5f9 !important; }
+    [data-testid="stDataFrame"] td { color: #0f172a !important; background: #ffffff !important; }
     .stSelectbox div[data-baseweb="select"] { background: #ffffff !important; border-color: #e2e8f0 !important; }
     .stSelectbox div[data-baseweb="select"] * { color: #0f172a !important; }
     hr { border-color: #e2e8f0 !important; }
@@ -638,9 +640,9 @@ with tab_ops:
 
     def color_profit(val):
         if isinstance(val, (int, float)):
-            if val > 0: return "color: #22c55e; font-weight: 600"
-            if val < 0: return "color: #ef4444; font-weight: 600"
-        return "color: #94a3b8"
+            if val > 0: return "color: #16a34a; font-weight: 600"
+            if val < 0: return "color: #dc2626; font-weight: 600"
+        return ""
 
     st.dataframe(
         display.style
