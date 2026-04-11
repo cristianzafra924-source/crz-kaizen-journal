@@ -461,54 +461,110 @@ with tab_cal:
     ).reset_index()
     daily_cal["close_date"] = pd.to_datetime(daily_cal["close_date"])
 
-    months = sorted(daily_cal["close_date"].dt.to_period("M").unique(), reverse=True)
-    sel_month = st.selectbox(
-        "Mes",
-        options=[str(m) for m in months],
-        label_visibility="collapsed"
-    )
+    months = sorted(daily_cal["close_date"].dt.to_period("M").unique())
+    months_str = [str(m) for m in months]
+
+    # Session state for calendar navigation and theme
+    if "cal_idx" not in st.session_state:
+        st.session_state.cal_idx = len(months_str) - 1
+    if "cal_light" not in st.session_state:
+        st.session_state.cal_light = False
+
+    # Navigation bar
+    nav1, nav2, nav3, nav4, nav5 = st.columns([1, 1, 3, 1, 1])
+    with nav1:
+        if st.button("◀◀", help="Primer mes"):
+            st.session_state.cal_idx = 0
+    with nav2:
+        if st.button("◀", help="Mes anterior"):
+            st.session_state.cal_idx = max(0, st.session_state.cal_idx - 1)
+    with nav3:
+        sel_month = st.selectbox("Mes", months_str,
+            index=st.session_state.cal_idx, label_visibility="collapsed")
+        st.session_state.cal_idx = months_str.index(sel_month)
+    with nav4:
+        if st.button("▶", help="Mes siguiente"):
+            st.session_state.cal_idx = min(len(months_str)-1, st.session_state.cal_idx + 1)
+    with nav5:
+        if st.button("▶▶", help="Último mes"):
+            st.session_state.cal_idx = len(months_str) - 1
+
+    # Light/dark toggle
+    col_toggle, _ = st.columns([1, 4])
+    with col_toggle:
+        light_mode = st.toggle("☀️ Modo claro", value=st.session_state.cal_light)
+        st.session_state.cal_light = light_mode
+
+    sel_month = months_str[st.session_state.cal_idx]
+
+    # Calendar colors based on mode
+    if light_mode:
+        bg_main    = "#ffffff"
+        bg_win     = "#dcfce7"
+        bg_loss    = "#fee2e2"
+        border_win = "#16a34a"
+        border_loss= "#dc2626"
+        text_day   = "#374151"
+        text_empty = "#d1d5db"
+        text_ops   = "#6b7280"
+        header_col = "#374151"
+    else:
+        bg_main    = "#0d1117"
+        bg_win     = "#052e16"
+        bg_loss    = "#2d0a0a"
+        border_win = "#166534"
+        border_loss= "#991b1b"
+        text_day   = "#94a3b8"
+        text_empty = "#1e2a3a"
+        text_ops   = "#475569"
+        header_col = "#475569"
 
     y, m = int(sel_month[:4]), int(sel_month[5:7])
+    month_names = {1:"Enero",2:"Febrero",3:"Marzo",4:"Abril",5:"Mayo",6:"Junio",
+                   7:"Julio",8:"Agosto",9:"Septiembre",10:"Octubre",11:"Noviembre",12:"Diciembre"}
+    st.markdown(f"<div style='text-align:center;font-size:16px;font-weight:700;color:#f1f5f9;margin:8px 0;'>{month_names[m]} {y}</div>", unsafe_allow_html=True)
+
     month_data = daily_cal[daily_cal["close_date"].dt.to_period("M") == sel_month]
     day_map = {row["close_date"].day: row for _, row in month_data.iterrows()}
 
     days_in_month = calendar.monthrange(y, m)[1]
-    first_weekday = calendar.monthrange(y, m)[0]  # 0=Mon
+    first_weekday = calendar.monthrange(y, m)[0]
     day_names = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 
-    # Header
+    # Header days
     cols_h = st.columns(7)
     for i, d in enumerate(day_names):
-        cols_h[i].markdown(f"<div style='text-align:center;font-size:11px;color:#475569;font-weight:600;padding:6px 0;'>{d}</div>", unsafe_allow_html=True)
+        cols_h[i].markdown(f"<div style='text-align:center;font-size:11px;color:{header_col};font-weight:600;padding:6px 0;'>{d}</div>", unsafe_allow_html=True)
 
     # Grid
     total_cells = first_weekday + days_in_month
     rows_needed = (total_cells + 6) // 7
-
     cell = 0
+
     for week in range(rows_needed):
         cols = st.columns(7)
         for wd in range(7):
             day_num = cell - first_weekday + 1
             if cell < first_weekday or day_num > days_in_month:
-                cols[wd].markdown("<div class='cal-day empty'>·</div>", unsafe_allow_html=True)
+                cols[wd].markdown(f"<div style='background:{bg_main};border:1px solid {text_empty};border-radius:4px;padding:6px;min-height:52px;opacity:0.2;text-align:center;'>·</div>", unsafe_allow_html=True)
             else:
                 if day_num in day_map:
                     row = day_map[day_num]
                     pnl = row["pnl"]
                     ops = row["ops"]
-                    cls = "win" if pnl >= 0 else "loss"
+                    bg    = bg_win if pnl >= 0 else bg_loss
+                    bord  = border_win if pnl >= 0 else border_loss
                     color = GREEN if pnl >= 0 else RED
                     cols[wd].markdown(f"""
-<div class='cal-day {cls}'>
-  <div style='font-size:11px;color:#94a3b8;font-weight:600;'>{day_num}</div>
-  <div style='font-family:JetBrains Mono;font-size:11px;color:{color};font-weight:600;'>{pnl:+,.0f}$</div>
-  <div style='font-size:9px;color:#475569;'>{ops} ops</div>
+<div style='background:{bg};border:1px solid {bord};border-radius:4px;padding:6px;min-height:52px;text-align:center;'>
+  <div style='font-size:11px;color:{text_day};font-weight:600;'>{day_num}</div>
+  <div style='font-family:JetBrains Mono;font-size:11px;color:{color};font-weight:700;'>{pnl:+,.0f}$</div>
+  <div style='font-size:9px;color:{text_ops};'>{ops} ops</div>
 </div>""", unsafe_allow_html=True)
                 else:
                     cols[wd].markdown(f"""
-<div class='cal-day'>
-  <div style='font-size:11px;color:#334155;'>{day_num}</div>
+<div style='background:{bg_main};border:1px solid {text_empty};border-radius:4px;padding:6px;min-height:52px;text-align:center;'>
+  <div style='font-size:11px;color:{text_day};'>{day_num}</div>
 </div>""", unsafe_allow_html=True)
             cell += 1
 
