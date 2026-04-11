@@ -983,107 +983,177 @@ with tab_hora:
     st.plotly_chart(fig_heat, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB KAIZEN SCORE
+# TAB KAIZEN SCORE — GAMING STYLE
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_kaizen:
-    st.markdown("#### Tu Kaizen Score — Mejora Continua")
 
     score = stats["kaizen_score"]
-    if score >= 80:   nivel, color_s, emoji = "Excelente", GREEN, "🏆"
-    elif score >= 60: nivel, color_s, emoji = "Bueno", TEAL, "📈"
-    elif score >= 40: nivel, color_s, emoji = "En desarrollo", AMBER, "⚡"
-    else:             nivel, color_s, emoji = "Necesita trabajo", RED, "🎯"
+    wr_score  = min(stats["win_rate"] / 60 * 30, 30)
+    pf_score  = min(stats["pfactor"] / 2 * 30, 30)
+    rr_ratio  = abs(stats["avg_win"] / stats["avg_loss"]) if stats["avg_loss"] else 0
+    rr_score  = min(rr_ratio / 2 * 20, 20)
+    dd_score  = max(20 + stats["max_dd"] / 5, 0)
 
-    col_score, col_breakdown = st.columns([1, 2])
+    # Level system
+    if score >= 90:   lvl, lvl_name, lvl_color, lvl_icon = 5, "MASTER TRADER",    "#f59e0b", "👑"
+    elif score >= 75: lvl, lvl_name, lvl_color, lvl_icon = 4, "ELITE TRADER",     "#a78bfa", "💎"
+    elif score >= 60: lvl, lvl_name, lvl_color, lvl_icon = 3, "PRO TRADER",       "#2dd4bf", "⚡"
+    elif score >= 40: lvl, lvl_name, lvl_color, lvl_icon = 2, "TRADER EN RACHA",  "#3b82f6", "📈"
+    else:             lvl, lvl_name, lvl_color, lvl_icon = 1, "TRADER NOVATO",    "#64748b", "🎯"
 
-    with col_score:
-        # Gauge
-        fig_gauge = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=score,
-            domain={"x":[0,1],"y":[0,1]},
-            number={"font":{"size":48,"color":color_s,"family":"JetBrains Mono"},"suffix":"/100"},
-            gauge={
-                "axis":{"range":[0,100],"tickcolor":MUTED,"tickfont":{"color":MUTED}},
-                "bar":{"color":color_s,"thickness":0.25},
-                "bgcolor":"#0d1117",
-                "borderwidth":0,
-                "steps":[
-                    {"range":[0,40],"color":"#2d0a0a"},
-                    {"range":[40,60],"color":"#1c1a06"},
-                    {"range":[60,80],"color":"#052e16"},
-                    {"range":[80,100],"color":"#042f2e"},
-                ],
-                "threshold":{"line":{"color":color_s,"width":3},"thickness":0.75,"value":score}
-            }
-        ))
-        fig_gauge.update_layout(
-            paper_bgcolor="#0d1117", plot_bgcolor="#0d1117",
-            margin=dict(l=20,r=20,t=20,b=20), height=260
-        )
-        st.plotly_chart(fig_gauge, use_container_width=True)
-        st.markdown(f"""
-<div style='text-align:center;padding:8px;'>
-  <div style='font-size:32px;'>{emoji}</div>
-  <div style='font-size:18px;font-weight:700;color:{color_s};'>{nivel}</div>
-  <div style='font-size:12px;color:#475569;margin-top:4px;'>改善 · Mejora continua</div>
-</div>""", unsafe_allow_html=True)
+    xp_current = score
+    xp_next    = min((lvl) * 20, 100)
+    xp_pct     = min(xp_current / xp_next * 100, 100) if xp_next else 100
 
-    with col_breakdown:
-        st.markdown("##### Desglose del Score")
-        wr_score  = min(stats["win_rate"] / 60 * 30, 30)
-        pf_score  = min(stats["pfactor"] / 2 * 30, 30)
-        rr_ratio  = abs(stats["avg_win"] / stats["avg_loss"]) if stats["avg_loss"] else 0
-        rr_score  = min(rr_ratio / 2 * 20, 20)
-        dd_score  = max(20 + stats["max_dd"] / 5, 0)
+    # ── Header gaming ────────────────────────────────────────────────────────
+    st.markdown(f"""
+<div style='background:linear-gradient(135deg,#080c14 0%,#0a1628 50%,#080c14 100%);
+     border:1px solid {lvl_color}33;border-radius:12px;padding:24px;margin-bottom:20px;
+     position:relative;overflow:hidden;'>
+  <div style='position:absolute;top:0;left:0;right:0;height:2px;
+       background:linear-gradient(90deg,transparent,{lvl_color},{lvl_color},transparent);'></div>
 
-        metrics_score = [
-            ("Win Rate", wr_score, 30, f"{stats['win_rate']:.1f}% (objetivo >60%)", BLUE),
-            ("Factor Beneficio", pf_score, 30, f"{stats['pfactor']:.2f} (objetivo >2.0)", TEAL),
-            ("Risk/Reward", rr_score, 20, f"{rr_ratio:.2f} (objetivo >2.0)", PURPLE),
-            ("Control DD", dd_score, 20, f"{stats['max_dd']:.1f}% máx drawdown", AMBER),
+  <div style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;'>
+
+    <div>
+      <div style='font-size:11px;color:#475569;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;'>Nivel {lvl}</div>
+      <div style='font-size:26px;font-weight:800;color:{lvl_color};letter-spacing:0.05em;'>{lvl_icon} {lvl_name}</div>
+      <div style='margin-top:10px;'>
+        <div style='display:flex;justify-content:space-between;font-size:10px;color:#475569;margin-bottom:4px;'>
+          <span>XP: {xp_current}</span><span>Siguiente nivel: {xp_next} XP</span>
+        </div>
+        <div style='background:#1e2a3a;border-radius:20px;height:10px;width:300px;overflow:hidden;'>
+          <div style='background:linear-gradient(90deg,{lvl_color}88,{lvl_color});
+               width:{xp_pct}%;height:100%;border-radius:20px;
+               box-shadow:0 0 8px {lvl_color}66;'></div>
+        </div>
+      </div>
+    </div>
+
+    <div style='text-align:center;'>
+      <div style='font-size:10px;color:#475569;letter-spacing:0.1em;text-transform:uppercase;'>KAIZEN SCORE</div>
+      <div style='font-family:JetBrains Mono;font-size:64px;font-weight:800;
+           color:{lvl_color};line-height:1;text-shadow:0 0 20px {lvl_color}44;'>{score}</div>
+      <div style='font-size:11px;color:#475569;'>/100 puntos</div>
+    </div>
+
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    # ── Stats + XP breakdown ─────────────────────────────────────────────────
+    col_stats, col_badges = st.columns([3, 2])
+
+    with col_stats:
+        st.markdown("<div style='font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;'>⚔️ Estadísticas de Combate</div>", unsafe_allow_html=True)
+
+        stat_items = [
+            ("Win Rate", wr_score, 30, f"{stats['win_rate']:.1f}%", BLUE,
+             "🎯", "Objetivo: >60%", stats["win_rate"] >= 60),
+            ("Factor Beneficio", pf_score, 30, f"{stats['pfactor']:.2f}x", TEAL,
+             "⚖️", "Objetivo: >2.0", stats["pfactor"] >= 2.0),
+            ("Risk/Reward", rr_score, 20, f"{rr_ratio:.2f}x", PURPLE,
+             "📏", "Objetivo: >2.0", rr_ratio >= 2.0),
+            ("Control Drawdown", dd_score, 20, f"{stats['max_dd']:.1f}%", AMBER,
+             "🛡️", "Objetivo: >-10%", stats["max_dd"] > -10),
         ]
 
-        for name, val, max_val, desc, col in metrics_score:
+        for name, val, max_val, display, col, icon, objetivo, achieved in stat_items:
             pct = val / max_val * 100
+            status = f"<span style='color:{GREEN};font-size:10px;'>✓ COMPLETADO</span>" if achieved else f"<span style='color:#475569;font-size:10px;'>{objetivo}</span>"
             st.markdown(f"""
-<div style='margin-bottom:16px;'>
-  <div style='display:flex;justify-content:space-between;margin-bottom:4px;'>
-    <span style='font-size:12px;font-weight:600;color:#f1f5f9;'>{name}</span>
-    <span style='font-family:JetBrains Mono;font-size:12px;color:{col};'>{val:.1f}/{max_val}</span>
+<div style='background:#0a0f1a;border:1px solid #1e2a3a;border-radius:8px;
+     padding:14px 16px;margin-bottom:8px;'>
+  <div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;'>
+    <div style='display:flex;align-items:center;gap:8px;'>
+      <span style='font-size:16px;'>{icon}</span>
+      <span style='font-size:12px;font-weight:600;color:#e2e8f0;'>{name}</span>
+    </div>
+    <div style='display:flex;align-items:center;gap:12px;'>
+      {status}
+      <span style='font-family:JetBrains Mono;font-size:14px;font-weight:700;color:{col};'>{display}</span>
+    </div>
   </div>
-  <div style='background:#1e2a3a;border-radius:4px;height:8px;overflow:hidden;'>
-    <div style='background:{col};width:{pct}%;height:100%;border-radius:4px;transition:width 0.3s;'></div>
+  <div style='background:#1e2a3a;border-radius:20px;height:6px;overflow:hidden;'>
+    <div style='background:linear-gradient(90deg,{col}66,{col});
+         width:{pct}%;height:100%;border-radius:20px;
+         box-shadow:0 0 6px {col}44;'></div>
   </div>
-  <div style='font-size:10px;color:#475569;margin-top:3px;'>{desc}</div>
+  <div style='display:flex;justify-content:space-between;margin-top:4px;'>
+    <span style='font-size:9px;color:#334155;'>0</span>
+    <span style='font-size:9px;color:{col};font-weight:600;'>{val:.0f}/{max_val} XP</span>
+    <span style='font-size:9px;color:#334155;'>{max_val}</span>
+  </div>
 </div>""", unsafe_allow_html=True)
 
-    st.divider()
-    st.markdown("##### Plan Kaizen — Áreas de Mejora")
+    with col_badges:
+        st.markdown("<div style='font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;'>🏆 Logros Desbloqueados</div>", unsafe_allow_html=True)
 
-    suggestions = []
-    if stats["win_rate"] < 50:
-        suggestions.append(("🎯", "Win Rate bajo el 50%", "Revisa tus entradas. Sé más selectivo — menos operaciones pero de mayor calidad.", RED))
-    if stats["pfactor"] < 1.5:
-        suggestions.append(("⚖️", "Factor Beneficio bajo", "Trabaja el ratio riesgo/recompensa. Deja correr más las ganadoras y corta antes las perdedoras.", AMBER))
-    if rr_ratio < 1.5:
-        suggestions.append(("📏", "RR Ratio mejorable", "Busca setups con mínimo 1:2 de RR. Si tu stop es 20 pips, tu objetivo debe ser 40 pips.", AMBER))
-    if stats["max_dd"] < -10:
-        suggestions.append(("🛡️", "Drawdown elevado", "Reduce el tamaño de posición. El control del riesgo es la base de la consistencia.", RED))
+        badges = [
+            ("🎯", "Sniper", "Win Rate >50%", stats["win_rate"] >= 50),
+            ("💰", "Rentable", "PnL positivo", stats["pnl_net"] > 0),
+            ("⚡", "Consistente", "Factor >1.5", stats["pfactor"] >= 1.5),
+            ("🛡️", "Gestor de Riesgo", "DD <10%", stats["max_dd"] > -10),
+            ("🔥", "En Racha", "WR >60%", stats["win_rate"] >= 60),
+            ("💎", "Elite", "Factor >2.0", stats["pfactor"] >= 2.0),
+            ("👑", "Master", "Score >80", score >= 80),
+            ("🚀", "Operaciones", ">50 trades", stats["total_ops"] >= 50),
+        ]
 
-    # Best hour
+        for icon, name, desc, unlocked in badges:
+            if unlocked:
+                st.markdown(f"""
+<div style='background:linear-gradient(135deg,#0d1117,#0a1628);
+     border:1px solid {TEAL}44;border-radius:8px;padding:10px 12px;
+     margin-bottom:6px;display:flex;align-items:center;gap:10px;'>
+  <span style='font-size:22px;'>{icon}</span>
+  <div>
+    <div style='font-size:12px;font-weight:700;color:#f1f5f9;'>{name}</div>
+    <div style='font-size:10px;color:{TEAL};'>{desc}</div>
+  </div>
+  <span style='margin-left:auto;font-size:10px;color:{GREEN};font-weight:600;'>✓</span>
+</div>""", unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+<div style='background:#080c14;border:1px solid #1e2a3a;border-radius:8px;
+     padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;
+     opacity:0.4;filter:grayscale(1);'>
+  <span style='font-size:22px;'>🔒</span>
+  <div>
+    <div style='font-size:12px;font-weight:700;color:#475569;'>{name}</div>
+    <div style='font-size:10px;color:#334155;'>{desc}</div>
+  </div>
+</div>""", unsafe_allow_html=True)
+
+    # ── Misiones activas ──────────────────────────────────────────────────────
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;'>📋 Misiones Activas</div>", unsafe_allow_html=True)
+
     best_hour = hr_g.loc[hr_g["pnl"].idxmax(), "hour"] if len(hr_g) else 0
-    worst_hour = hr_g.loc[hr_g["pnl"].idxmin(), "hour"] if len(hr_g) else 0
-    suggestions.append(("⏰", f"Tu mejor hora: {best_hour}:00", f"Concentra tus operaciones en tu horario más rentable. Evita operar a las {worst_hour}:00.", TEAL))
-
-    best_sym = sym_g.iloc[0]["symbol"] if len(sym_g) else "—"
+    worst_hour= hr_g.loc[hr_g["pnl"].idxmin(), "hour"] if len(hr_g) else 0
+    best_sym  = sym_g.iloc[0]["symbol"] if len(sym_g) else "—"
     worst_sym = sym_g.iloc[-1]["symbol"] if len(sym_g) else "—"
-    suggestions.append(("🎯", f"Mejor símbolo: {best_sym}", f"Especialízate en lo que mejor te funciona. Considera reducir exposición en {worst_sym}.", GREEN))
 
-    for icon, title, desc, col in suggestions:
-        st.markdown(f"""
-<div style='background:#0d1117;border:1px solid #1e2a3a;border-left:4px solid {col};
-     border-radius:6px;padding:14px 16px;margin-bottom:10px;'>
-  <div style='font-size:13px;font-weight:600;color:#f1f5f9;margin-bottom:4px;'>{icon} {title}</div>
-  <div style='font-size:12px;color:#64748b;'>{desc}</div>
+    missions = []
+    if stats["win_rate"] < 60:
+        missions.append(("🎯", f"Sube tu Win Rate al 60%", f"Actual: {stats['win_rate']:.1f}% — Faltan {60-stats['win_rate']:.1f}%", RED, stats["win_rate"]/60*100))
+    if stats["pfactor"] < 2.0:
+        missions.append(("⚖️", f"Alcanza Factor Beneficio 2.0", f"Actual: {stats['pfactor']:.2f} — Deja correr más las ganadoras", AMBER, stats["pfactor"]/2*100))
+    if rr_ratio < 2.0:
+        missions.append(("📏", f"Mejora tu RR Ratio a 2.0", f"Actual: {rr_ratio:.2f} — Busca setups con TP doble que el SL", PURPLE, rr_ratio/2*100))
+    missions.append(("⏰", f"Opera más en tu hora dorada: {best_hour}:00", f"Evita operar a las {worst_hour}:00 — diferencia de rendimiento clave", TEAL, 100))
+    missions.append(("💹", f"Especialízate en {best_sym}", f"Es tu mejor activo. Reduce exposición en {worst_sym}", BLUE, 100))
+
+    m_cols = st.columns(min(len(missions), 3))
+    for i, (icon, title, desc, col, prog) in enumerate(missions[:3]):
+        with m_cols[i]:
+            st.markdown(f"""
+<div style='background:#0a0f1a;border:1px solid #1e2a3a;border-top:3px solid {col};
+     border-radius:8px;padding:14px;height:140px;'>
+  <div style='font-size:18px;margin-bottom:6px;'>{icon}</div>
+  <div style='font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:4px;line-height:1.3;'>{title}</div>
+  <div style='font-size:10px;color:#475569;margin-bottom:8px;line-height:1.4;'>{desc}</div>
+  <div style='background:#1e2a3a;border-radius:10px;height:4px;'>
+    <div style='background:{col};width:{min(prog,100):.0f}%;height:100%;border-radius:10px;'></div>
+  </div>
 </div>""", unsafe_allow_html=True)
