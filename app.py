@@ -662,7 +662,7 @@ with tab_hora:
         )
         fig_hr.update_layout(
             yaxis2=dict(overlaying="y", side="right", ticksuffix="%",
-                       gridcolor="transparent", color=TEAL)
+                       gridcolor="transparent", tickfont=dict(color=TEAL))
         )
         st.plotly_chart(fig_hr, use_container_width=True)
 
