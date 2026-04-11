@@ -425,6 +425,7 @@ with tab_dash:
 
     with col_eq:
         st.markdown("#### Curva de Equity")
+        peak = df_s["equity"].cummax()
         fig_eq = go.Figure()
         fig_eq.add_trace(go.Scatter(
             x=df_s["close_dt"], y=df_s["equity"],
