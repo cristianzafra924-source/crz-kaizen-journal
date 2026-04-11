@@ -448,39 +448,84 @@ with tab_dash:
     with col_eq:
         st.markdown("#### Curva de Equity")
         peak = df_s["equity"].cummax()
+        # Find max and min points
+        idx_max = df_s["equity"].idxmax()
+        idx_min = df_s["equity"].idxmin()
         fig_eq = go.Figure()
-        fig_eq.add_trace(go.Scatter(
-            x=df_s["close_dt"], y=df_s["equity"],
-            mode="lines", name="Equity",
-            line=dict(color=TEAL, width=1.5, shape="spline", smoothing=0.3),
-            fill="tozeroy",
-            fillcolor="rgba(45,212,191,0.04)"
-        ))
+        # Drawdown fill area
         fig_eq.add_trace(go.Scatter(
             x=df_s["close_dt"], y=peak,
             mode="lines", name="Peak",
-            line=dict(color=MUTED, width=1, dash="dot"),
-            showlegend=False
+            line=dict(color="rgba(45,212,191,0)", width=0),
+            showlegend=False, hoverinfo="skip"
+        ))
+        fig_eq.add_trace(go.Scatter(
+            x=df_s["close_dt"], y=df_s["equity"],
+            mode="lines", name="Equity",
+            line=dict(color="rgba(244,63,94,0)", width=0),
+            fill="tonexty",
+            fillcolor="rgba(244,63,94,0.08)",
+            showlegend=False, hoverinfo="skip"
+        ))
+        # Main equity line
+        fig_eq.add_trace(go.Scatter(
+            x=df_s["close_dt"], y=df_s["equity"],
+            mode="lines", name="Equity",
+            line=dict(color=TEAL, width=2, shape="spline", smoothing=0.4),
+            fill="tozeroy",
+            fillcolor="rgba(45,212,191,0.05)",
+            hovertemplate="%{x|%d %b %Y}<br>Equity: $%{y:+,.2f}<extra></extra>"
+        ))
+        # Max point
+        fig_eq.add_trace(go.Scatter(
+            x=[df_s.loc[idx_max, "close_dt"]],
+            y=[df_s.loc[idx_max, "equity"]],
+            mode="markers+text",
+            marker=dict(color=GREEN, size=8, symbol="circle"),
+            text=[f"Máx ${df_s.loc[idx_max,'equity']:+,.0f}"],
+            textposition="top center",
+            textfont=dict(size=9, color=GREEN),
+            showlegend=False, hoverinfo="skip"
+        ))
+        # Min point
+        fig_eq.add_trace(go.Scatter(
+            x=[df_s.loc[idx_min, "close_dt"]],
+            y=[df_s.loc[idx_min, "equity"]],
+            mode="markers+text",
+            marker=dict(color=RED, size=8, symbol="circle"),
+            text=[f"Mín ${df_s.loc[idx_min,'equity']:+,.0f}"],
+            textposition="bottom center",
+            textfont=dict(size=9, color=RED),
+            showlegend=False, hoverinfo="skip"
         ))
         fig_eq.add_hline(y=0, line_dash="dash", line_color=MUTED, opacity=0.3)
-        fig_eq.update_layout(**LAYOUT, height=260,
+        fig_eq.update_layout(**LAYOUT, height=280,
             title=dict(text="Curva de Equity", font=dict(size=12, color="#94a3b8")))
         st.plotly_chart(fig_eq, use_container_width=True)
 
     with col_daily:
-        st.markdown("#### PnL Diario")
+        st.markdown("#### PnL Diario + Tendencia")
         daily = df_s.groupby("close_date")["pnl_net"].sum().reset_index()
         daily.columns = ["fecha", "pnl"]
+        daily["ma7"] = daily["pnl"].rolling(7, min_periods=1).mean()
         colors_bar = [GREEN if v >= 0 else RED for v in daily["pnl"]]
-        fig_daily = go.Figure(go.Bar(
+        fig_daily = go.Figure()
+        fig_daily.add_trace(go.Bar(
             x=daily["fecha"], y=daily["pnl"],
             marker_color=colors_bar,
             marker_line_width=0,
-            opacity=0.85,
+            opacity=0.7,
+            name="PnL",
             hovertemplate="%{x}<br>PnL: $%{y:+,.2f}<extra></extra>"
         ))
+        fig_daily.add_trace(go.Scatter(
+            x=daily["fecha"], y=daily["ma7"],
+            mode="lines", name="Media 7d",
+            line=dict(color=AMBER, width=1.5, dash="dot"),
+            hovertemplate="Media 7d: $%{y:+,.2f}<extra></extra>"
+        ))
         fig_daily.add_hline(y=0, line_color=MUTED, opacity=0.3, line_width=1)
-        fig_daily.update_layout(**LAYOUT, height=260,
+        fig_daily.update_layout(**LAYOUT, height=280,
             title=dict(text="PnL Diario", font=dict(size=12, color="#94a3b8")))
         st.plotly_chart(fig_daily, use_container_width=True)
 
@@ -488,31 +533,58 @@ with tab_dash:
     col_wl, col_rr = st.columns(2)
 
     with col_wl:
-        st.markdown("#### Distribución Ganancia / Pérdida")
-        wins  = df[df.profit > 0]["profit"].tolist()
-        losses= df[df.profit < 0]["profit"].tolist()
+        st.markdown("#### Distribución de Resultados")
+        wins   = df[df.profit > 0]["profit"].tolist()
+        losses = df[df.profit < 0]["profit"].tolist()
         fig_wl = go.Figure()
-        fig_wl.add_trace(go.Histogram(x=wins,   name="Ganadoras", marker_color=GREEN, opacity=0.7, nbinsx=20))
-        fig_wl.add_trace(go.Histogram(x=losses, name="Perdedoras", marker_color=RED,   opacity=0.7, nbinsx=20))
-        fig_wl.update_layout(**LAYOUT, height=220, barmode="overlay")
+        fig_wl.add_trace(go.Histogram(
+            x=wins, name="Ganadoras",
+            marker_color=GREEN, opacity=0.6,
+            nbinsx=20, marker_line_width=0
+        ))
+        fig_wl.add_trace(go.Histogram(
+            x=losses, name="Perdedoras",
+            marker_color=RED, opacity=0.6,
+            nbinsx=20, marker_line_width=0
+        ))
+        # Add vertical lines for averages
+        fig_wl.add_vline(x=stats["avg_win"], line_color=GREEN,
+            line_dash="dash", opacity=0.8, line_width=1.5,
+            annotation_text=f"Media G: ${stats['avg_win']:,.0f}",
+            annotation_font_color=GREEN, annotation_font_size=9)
+        fig_wl.add_vline(x=stats["avg_loss"], line_color=RED,
+            line_dash="dash", opacity=0.8, line_width=1.5,
+            annotation_text=f"Media P: ${stats['avg_loss']:,.0f}",
+            annotation_font_color=RED, annotation_font_size=9)
+        fig_wl.update_layout(**LAYOUT, height=240, barmode="overlay",
+            title=dict(text="Distribución Resultados", font=dict(size=12, color="#94a3b8")))
         st.plotly_chart(fig_wl, use_container_width=True)
 
     with col_rr:
-        st.markdown("#### Avg Win vs Avg Loss")
-        fig_rr = go.Figure(go.Bar(
-            x=["Ganancia Media", "Pérdida Media"],
-            y=[stats["avg_win"], abs(stats["avg_loss"])],
-            marker_color=[GREEN, RED],
-            text=[f"${stats['avg_win']:,.2f}", f"${abs(stats['avg_loss']):,.2f}"],
-            textposition="outside"
-        ))
+        st.markdown("#### Win vs Loss — Comparativa")
         rr = abs(stats["avg_win"] / stats["avg_loss"]) if stats["avg_loss"] else 0
+        fig_rr = go.Figure()
+        # Horizontal bars
+        fig_rr.add_trace(go.Bar(
+            y=["Ganancia Media", "Pérdida Media"],
+            x=[stats["avg_win"], abs(stats["avg_loss"])],
+            orientation="h",
+            marker_color=[GREEN, RED],
+            marker_line_width=0,
+            opacity=0.85,
+            text=[f"${stats['avg_win']:,.2f}", f"${abs(stats['avg_loss']):,.2f}"],
+            textposition="outside",
+            textfont=dict(color="#e2e8f0", size=11),
+            hovertemplate="%{y}: $%{x:,.2f}<extra></extra>"
+        ))
         fig_rr.add_annotation(
-            x=0.5, y=0.9, xref="paper", yref="paper",
-            text=f"RR Ratio: {rr:.2f}",
-            font=dict(size=14, color=TEAL), showarrow=False
+            x=0.98, y=0.05, xref="paper", yref="paper",
+            text=f"RR: {rr:.2f}x",
+            font=dict(size=16, color=TEAL, family="JetBrains Mono"),
+            showarrow=False, align="right"
         )
-        fig_rr.update_layout(**LAYOUT, height=220, showlegend=False)
+        fig_rr.update_layout(**LAYOUT, height=240, showlegend=False,
+            title=dict(text="Avg Win vs Avg Loss", font=dict(size=12, color="#94a3b8")))
         st.plotly_chart(fig_rr, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -720,31 +792,75 @@ with tab_sym:
     col_bar, col_wr = st.columns(2)
 
     with col_bar:
-        fig_sym = go.Figure(go.Bar(
-            x=sym_g["symbol"],
-            y=sym_g["PnL"],
+        # Bar + scatter win rate overlay
+        fig_sym = go.Figure()
+        fig_sym.add_trace(go.Bar(
+            x=sym_g["symbol"], y=sym_g["PnL"],
             marker_color=[GREEN if v >= 0 else RED for v in sym_g["PnL"]],
-            text=[f"${v:+,.0f}" for v in sym_g["PnL"]],
-            textposition="outside",
-            textfont=dict(color="#f1f5f9", size=11),
+            marker_line_width=0, opacity=0.8,
+            name="PnL",
             hovertemplate="%{x}<br>PnL: $%{y:+,.2f}<extra></extra>"
         ))
-        fig_sym.update_layout(**LAYOUT, height=280, title="PnL por Símbolo")
+        fig_sym.add_trace(go.Scatter(
+            x=sym_g["symbol"], y=sym_g["Win_Rate"],
+            mode="markers+text",
+            marker=dict(color=AMBER, size=10, symbol="diamond"),
+            text=[f"{v:.0f}%" for v in sym_g["Win_Rate"]],
+            textposition="top center",
+            textfont=dict(size=9, color=AMBER),
+            name="Win Rate",
+            yaxis="y2",
+            hovertemplate="%{x}<br>Win Rate: %{y:.1f}%<extra></extra>"
+        ))
+        fig_sym.update_layout(**LAYOUT, height=300,
+            title=dict(text="PnL + Win Rate por Símbolo", font=dict(size=12, color="#94a3b8")),
+            yaxis2=dict(overlaying="y", side="right", ticksuffix="%",
+                       showgrid=False, tickfont=dict(color=AMBER, size=10))
+        )
         st.plotly_chart(fig_sym, use_container_width=True)
 
     with col_wr:
-        fig_wr = go.Figure(go.Bar(
-            x=sym_g["symbol"],
-            y=sym_g["Win_Rate"],
-            marker_color=BLUE,
-            text=[f"{v:.0f}%" for v in sym_g["Win_Rate"]],
-            textposition="outside",
-            textfont=dict(color="#f1f5f9", size=11),
-        ))
-        fig_wr.add_hline(y=50, line_dash="dash", line_color=MUTED, opacity=0.5)
-        fig_wr.update_layout(**LAYOUT, height=280, title="Win Rate por Símbolo")
-        fig_wr.update_yaxes(range=[0, 105], ticksuffix="%")
-        st.plotly_chart(fig_wr, use_container_width=True)
+        # Radar chart
+        if len(sym_g) >= 3:
+            fig_radar = go.Figure(go.Scatterpolar(
+                r=sym_g["Win_Rate"].tolist(),
+                theta=sym_g["symbol"].tolist(),
+                fill="toself",
+                fillcolor=f"rgba(99,102,241,0.15)",
+                line=dict(color=BLUE, width=2),
+                marker=dict(color=BLUE, size=6),
+                name="Win Rate"
+            ))
+            fig_radar.update_layout(
+                polar=dict(
+                    bgcolor="#080c14",
+                    radialaxis=dict(visible=True, range=[0, 100],
+                                   gridcolor="#1e2a3a", tickcolor="#1e2a3a",
+                                   tickfont=dict(color="#475569", size=9)),
+                    angularaxis=dict(gridcolor="#1e2a3a",
+                                    tickfont=dict(color="#94a3b8", size=10))
+                ),
+                paper_bgcolor="#080c14",
+                plot_bgcolor="#080c14",
+                margin=dict(l=40, r=40, t=40, b=40),
+                height=300,
+                showlegend=False,
+                title=dict(text="Win Rate por Símbolo", font=dict(size=12, color="#94a3b8"))
+            )
+            st.plotly_chart(fig_radar, use_container_width=True)
+        else:
+            fig_wr = go.Figure(go.Bar(
+                x=sym_g["symbol"], y=sym_g["Win_Rate"],
+                marker_color=BLUE, marker_line_width=0, opacity=0.8,
+                text=[f"{v:.0f}%" for v in sym_g["Win_Rate"]],
+                textposition="outside",
+                textfont=dict(color="#f1f5f9", size=11),
+            ))
+            fig_wr.add_hline(y=50, line_dash="dash", line_color=MUTED, opacity=0.5)
+            fig_wr.update_layout(**LAYOUT, height=300,
+                title=dict(text="Win Rate por Símbolo", font=dict(size=12, color="#94a3b8")))
+            fig_wr.update_yaxes(range=[0, 105], ticksuffix="%")
+            st.plotly_chart(fig_wr, use_container_width=True)
 
     st.dataframe(
         sym_g[["symbol","Ops","Ganadoras","Win_Rate","PnL","Factor","Mejor","Peor"]]
@@ -787,30 +903,62 @@ with tab_hora:
 
     with col_h1:
         fig_hr = go.Figure()
+        # Area for win rate
+        fig_hr.add_trace(go.Scatter(
+            x=hr_g["hour"], y=hr_g["win_rate"],
+            mode="lines", name="Win Rate",
+            line=dict(color=TEAL, width=0),
+            fill="tozeroy",
+            fillcolor="rgba(45,212,191,0.08)",
+            hoverinfo="skip", showlegend=False
+        ))
+        # Bars for PnL
         fig_hr.add_trace(go.Bar(
             x=hr_g["hour"], y=hr_g["pnl"],
             marker_color=[GREEN if v >= 0 else RED for v in hr_g["pnl"]],
-            name="PnL", yaxis="y1",
+            marker_line_width=0, opacity=0.8,
+            name="PnL",
             hovertemplate="Hora %{x}:00<br>PnL: $%{y:+,.2f}<extra></extra>"
         ))
+        # Win rate line
         fig_hr.add_trace(go.Scatter(
             x=hr_g["hour"], y=hr_g["win_rate"],
             mode="lines+markers", name="Win Rate %",
-            line=dict(color=TEAL, width=2),
-            hovertemplate="Win Rate: %{y:.1f}%<extra></extra>"
+            line=dict(color=TEAL, width=1.5),
+            marker=dict(size=4, color=TEAL),
+            hovertemplate="Hora %{x}:00<br>Win Rate: %{y:.1f}%<extra></extra>"
         ))
-        fig_hr.update_layout(**LAYOUT, height=280, title="PnL y Win Rate por Hora")
+        fig_hr.add_hline(y=0, line_color=MUTED, opacity=0.3, line_width=1)
+        fig_hr.update_layout(**LAYOUT, height=300,
+            title=dict(text="PnL + Win Rate por Hora", font=dict(size=12, color="#94a3b8")))
         st.plotly_chart(fig_hr, use_container_width=True)
 
     with col_h2:
+        # Polar/radial chart for weekday
         fig_wd = go.Figure()
-        fig_wd.add_trace(go.Bar(
-            x=wd_g["weekday"], y=wd_g["pnl"],
+        fig_wd.add_trace(go.Barpolar(
+            r=wd_g["pnl"].abs().tolist(),
+            theta=wd_g["weekday"].tolist(),
             marker_color=[GREEN if v >= 0 else RED for v in wd_g["pnl"]],
+            marker_line_width=0,
+            opacity=0.8,
             name="PnL",
-            hovertemplate="%{x}<br>PnL: $%{y:+,.2f}<extra></extra>"
+            hovertemplate="%{theta}<br>PnL: $%{customdata:+,.2f}<extra></extra>",
+            customdata=wd_g["pnl"].tolist()
         ))
-        fig_wd.update_layout(**LAYOUT, height=280, title="PnL por Día de Semana")
+        fig_wd.update_layout(
+            polar=dict(
+                bgcolor="#080c14",
+                radialaxis=dict(visible=True, gridcolor="#1e2a3a",
+                               tickfont=dict(color="#475569", size=8)),
+                angularaxis=dict(gridcolor="#1e2a3a",
+                                tickfont=dict(color="#94a3b8", size=10))
+            ),
+            paper_bgcolor="#080c14",
+            margin=dict(l=40, r=40, t=40, b=40),
+            height=300, showlegend=False,
+            title=dict(text="PnL por Día de Semana", font=dict(size=12, color="#94a3b8"))
+        )
         st.plotly_chart(fig_wd, use_container_width=True)
 
     # Heatmap hora x día
