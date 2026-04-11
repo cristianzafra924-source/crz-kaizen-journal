@@ -88,25 +88,35 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     margin-top: 6px;
 }
 
-/* Nav tabs */
+/* Nav tabs — button style */
 .stTabs [data-baseweb="tab-list"] {
     background: transparent;
     border-bottom: 1px solid #0f1923;
-    gap: 0;
+    gap: 4px;
+    padding: 0 0 0 0;
 }
 .stTabs [data-baseweb="tab"] {
-    color: #334155;
+    color: #475569;
     font-size: 11px;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.08em;
-    padding: 12px 20px;
-    border-radius: 0;
+    padding: 8px 16px;
+    border-radius: 6px 6px 0 0;
     text-transform: uppercase;
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: none;
+    transition: all 0.15s;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: #94a3b8 !important;
+    background: #0d1117 !important;
 }
 .stTabs [aria-selected="true"] {
-    background: transparent !important;
+    background: #0d1117 !important;
     color: #2dd4bf !important;
-    border-bottom: 1px solid #2dd4bf !important;
+    border: 1px solid #1e2a3a !important;
+    border-bottom: 2px solid #2dd4bf !important;
 }
 
 /* Upload zone */
@@ -398,8 +408,8 @@ st.markdown(f"""
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
 tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen = st.tabs([
-    "🔴 ◈ Dashboard", "🔵 ⬚ Calendario", "🟢 ≡ Operaciones",
-    "🟡 ◎ Símbolo", "🌸 ◷ Horario", "⚪ △ Kaizen"
+    "◈ Dashboard", "⬚ Calendario", "≡ Operaciones",
+    "◎ Símbolo", "◷ Horario", "△ Kaizen"
 ])
 
 # ══════════════════════════════════════════════════════════════════════════════
