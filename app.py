@@ -77,7 +77,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 }
 .metric-value {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 28px;
+    font-size: 20px;
     font-weight: 600;
     color: #f1f5f9;
     line-height: 1;
