@@ -143,9 +143,31 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     text-align: center;
 }
 
-hr { border-color: #1e2a3a; }
-p, span, div { color: #e2e8f0; }
-h1, h2, h3 { color: #f1f5f9; }
+/* Selectbox */
+.stSelectbox label { color: #94a3b8 !important; font-size: 11px !important; }
+.stSelectbox div[data-baseweb="select"] { background: #0d1117 !important; border-color: #1e2a3a !important; }
+.stSelectbox div[data-baseweb="select"] * { color: #e2e8f0 !important; }
+.stSelectbox [data-baseweb="popover"] * { color: #e2e8f0 !important; background: #0d1117 !important; }
+
+/* Dataframe text */
+[data-testid="stDataFrame"] { border-radius: 8px; overflow: hidden; }
+[data-testid="stDataFrame"] * { 
+    font-size: 12px !important; 
+    font-family: 'JetBrains Mono', monospace !important;
+    color: #e2e8f0 !important;
+}
+[data-testid="stDataFrame"] th { 
+    color: #94a3b8 !important; 
+    background: #0d1117 !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 10px !important;
+    letter-spacing: 0.08em !important;
+}
+
+/* General text */
+p, span, label { color: #e2e8f0 !important; }
+h4 { color: #f1f5f9 !important; }
 </style>
 """, unsafe_allow_html=True)
 
