@@ -983,7 +983,7 @@ with tab_hora:
     st.plotly_chart(fig_heat, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB KAIZEN SCORE — GAMING STYLE
+# TAB KAIZEN SCORE — FITNESS RINGS STYLE
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_kaizen:
 
@@ -994,163 +994,116 @@ with tab_kaizen:
     rr_score  = min(rr_ratio / 2 * 20, 20)
     dd_score  = max(20 + stats["max_dd"] / 5, 0)
 
-    # Level system
-    if score >= 90:   lvl, lvl_name, lvl_color, lvl_icon = 5, "MASTER TRADER",    "#f59e0b", "👑"
-    elif score >= 75: lvl, lvl_name, lvl_color, lvl_icon = 4, "ELITE TRADER",     "#a78bfa", "💎"
-    elif score >= 60: lvl, lvl_name, lvl_color, lvl_icon = 3, "PRO TRADER",       "#2dd4bf", "⚡"
-    elif score >= 40: lvl, lvl_name, lvl_color, lvl_icon = 2, "TRADER EN RACHA",  "#3b82f6", "📈"
-    else:             lvl, lvl_name, lvl_color, lvl_icon = 1, "TRADER NOVATO",    "#64748b", "🎯"
-
-    xp_current = score
-    xp_next    = min((lvl) * 20, 100)
-    xp_pct     = min(xp_current / xp_next * 100, 100) if xp_next else 100
-
-    # ── Header gaming ────────────────────────────────────────────────────────
-    lc33 = lvl_color + "33"
-    lc44 = lvl_color + "44"
-    lc66 = lvl_color + "66"
-    lc88 = lvl_color + "88"
-    st.markdown(
-        "<div style='background:linear-gradient(135deg,#080c14 0%,#0a1628 50%,#080c14 100%);"
-        f"border:1px solid {lc33};border-radius:12px;padding:24px;margin-bottom:20px;"
-        "position:relative;overflow:hidden;'>"
-        "<div style='position:absolute;top:0;left:0;right:0;height:2px;"
-        f"background:linear-gradient(90deg,transparent,{lvl_color},{lvl_color},transparent);'></div>"
-        "<div style='display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;'>"
-        "<div>"
-        f"<div style='font-size:11px;color:#475569;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;'>Nivel {lvl}</div>"
-        f"<div style='font-size:26px;font-weight:800;color:{lvl_color};letter-spacing:0.05em;'>{lvl_icon} {lvl_name}</div>"
-        "<div style='margin-top:10px;'>"
-        "<div style='display:flex;justify-content:space-between;font-size:10px;color:#475569;margin-bottom:4px;'>"
-        f"<span>XP: {xp_current}</span><span>Siguiente nivel: {xp_next} XP</span>"
-        "</div>"
-        "<div style='background:#1e2a3a;border-radius:20px;height:10px;width:300px;overflow:hidden;'>"
-        f"<div style='background:linear-gradient(90deg,{lc88},{lvl_color});"
-        f"width:{xp_pct:.0f}%;height:100%;border-radius:20px;"
-        f"box-shadow:0 0 8px {lc66};'></div>"
-        "</div></div></div>"
-        "<div style='text-align:center;'>"
-        "<div style='font-size:10px;color:#475569;letter-spacing:0.1em;text-transform:uppercase;'>KAIZEN SCORE</div>"
-        f"<div style='font-family:JetBrains Mono;font-size:64px;font-weight:800;"
-        f"color:{lvl_color};line-height:1;text-shadow:0 0 20px {lc44};'>{score}</div>"
-        "<div style='font-size:11px;color:#475569;'>/100 puntos</div>"
-        "</div></div></div>",
-        unsafe_allow_html=True
-    )
-
-    # ── Stats + XP breakdown ─────────────────────────────────────────────────
-    col_stats, col_badges = st.columns([3, 2])
-
-    with col_stats:
-        st.markdown("<div style='font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;'>⚔️ Estadísticas de Combate</div>", unsafe_allow_html=True)
-
-        stat_items = [
-            ("Win Rate", wr_score, 30, f"{stats['win_rate']:.1f}%", BLUE,
-             "🎯", "Objetivo: >60%", stats["win_rate"] >= 60),
-            ("Factor Beneficio", pf_score, 30, f"{stats['pfactor']:.2f}x", TEAL,
-             "⚖️", "Objetivo: >2.0", stats["pfactor"] >= 2.0),
-            ("Risk/Reward", rr_score, 20, f"{rr_ratio:.2f}x", PURPLE,
-             "📏", "Objetivo: >2.0", rr_ratio >= 2.0),
-            ("Control Drawdown", dd_score, 20, f"{stats['max_dd']:.1f}%", AMBER,
-             "🛡️", "Objetivo: >-10%", stats["max_dd"] > -10),
-        ]
-
-        for name, val, max_val, display, col, icon, objetivo, achieved in stat_items:
-            pct = val / max_val * 100
-            status = f"<span style='color:{GREEN};font-size:10px;'>✓ COMPLETADO</span>" if achieved else f"<span style='color:#475569;font-size:10px;'>{objetivo}</span>"
-            st.markdown(f"""
-<div style='background:#0a0f1a;border:1px solid #1e2a3a;border-radius:8px;
-     padding:14px 16px;margin-bottom:8px;'>
-  <div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;'>
-    <div style='display:flex;align-items:center;gap:8px;'>
-      <span style='font-size:16px;'>{icon}</span>
-      <span style='font-size:12px;font-weight:600;color:#e2e8f0;'>{name}</span>
-    </div>
-    <div style='display:flex;align-items:center;gap:12px;'>
-      {status}
-      <span style='font-family:JetBrains Mono;font-size:14px;font-weight:700;color:{col};'>{display}</span>
-    </div>
-  </div>
-  <div style='background:#1e2a3a;border-radius:20px;height:6px;overflow:hidden;'>
-    <div style='background:linear-gradient(90deg,{col}66,{col});
-         width:{pct}%;height:100%;border-radius:20px;
-         box-shadow:0 0 6px {col}44;'></div>
-  </div>
-  <div style='display:flex;justify-content:space-between;margin-top:4px;'>
-    <span style='font-size:9px;color:#334155;'>0</span>
-    <span style='font-size:9px;color:{col};font-weight:600;'>{val:.0f}/{max_val} XP</span>
-    <span style='font-size:9px;color:#334155;'>{max_val}</span>
-  </div>
-</div>""", unsafe_allow_html=True)
-
-    with col_badges:
-        st.markdown("<div style='font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;'>🏆 Logros Desbloqueados</div>", unsafe_allow_html=True)
-
-        badges = [
-            ("🎯", "Sniper", "Win Rate >50%", stats["win_rate"] >= 50),
-            ("💰", "Rentable", "PnL positivo", stats["pnl_net"] > 0),
-            ("⚡", "Consistente", "Factor >1.5", stats["pfactor"] >= 1.5),
-            ("🛡️", "Gestor de Riesgo", "DD <10%", stats["max_dd"] > -10),
-            ("🔥", "En Racha", "WR >60%", stats["win_rate"] >= 60),
-            ("💎", "Elite", "Factor >2.0", stats["pfactor"] >= 2.0),
-            ("👑", "Master", "Score >80", score >= 80),
-            ("🚀", "Operaciones", ">50 trades", stats["total_ops"] >= 50),
-        ]
-
-        for icon, name, desc, unlocked in badges:
-            if unlocked:
-                st.markdown(f"""
-<div style='background:linear-gradient(135deg,#0d1117,#0a1628);
-     border:1px solid {TEAL}44;border-radius:8px;padding:10px 12px;
-     margin-bottom:6px;display:flex;align-items:center;gap:10px;'>
-  <span style='font-size:22px;'>{icon}</span>
-  <div>
-    <div style='font-size:12px;font-weight:700;color:#f1f5f9;'>{name}</div>
-    <div style='font-size:10px;color:{TEAL};'>{desc}</div>
-  </div>
-  <span style='margin-left:auto;font-size:10px;color:{GREEN};font-weight:600;'>✓</span>
-</div>""", unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-<div style='background:#080c14;border:1px solid #1e2a3a;border-radius:8px;
-     padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;
-     opacity:0.4;filter:grayscale(1);'>
-  <span style='font-size:22px;'>🔒</span>
-  <div>
-    <div style='font-size:12px;font-weight:700;color:#475569;'>{name}</div>
-    <div style='font-size:10px;color:#334155;'>{desc}</div>
-  </div>
-</div>""", unsafe_allow_html=True)
-
-    # ── Misiones activas ──────────────────────────────────────────────────────
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<div style='font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;'>📋 Misiones Activas</div>", unsafe_allow_html=True)
+    if score >= 80:   lvl_name, lvl_color, lvl_emoji = "Excelente", "#10b981", "🏆"
+    elif score >= 60: lvl_name, lvl_color, lvl_emoji = "Bueno",     "#2dd4bf", "⚡"
+    elif score >= 40: lvl_name, lvl_color, lvl_emoji = "En progreso","#f59e0b","📈"
+    else:             lvl_name, lvl_color, lvl_emoji = "Entrena más","#f43f5e","🎯"
 
     best_hour = hr_g.loc[hr_g["pnl"].idxmax(), "hour"] if len(hr_g) else 0
     worst_hour= hr_g.loc[hr_g["pnl"].idxmin(), "hour"] if len(hr_g) else 0
     best_sym  = sym_g.iloc[0]["symbol"] if len(sym_g) else "—"
     worst_sym = sym_g.iloc[-1]["symbol"] if len(sym_g) else "—"
 
-    missions = []
-    if stats["win_rate"] < 60:
-        missions.append(("🎯", f"Sube tu Win Rate al 60%", f"Actual: {stats['win_rate']:.1f}% — Faltan {60-stats['win_rate']:.1f}%", RED, stats["win_rate"]/60*100))
-    if stats["pfactor"] < 2.0:
-        missions.append(("⚖️", f"Alcanza Factor Beneficio 2.0", f"Actual: {stats['pfactor']:.2f} — Deja correr más las ganadoras", AMBER, stats["pfactor"]/2*100))
-    if rr_ratio < 2.0:
-        missions.append(("📏", f"Mejora tu RR Ratio a 2.0", f"Actual: {rr_ratio:.2f} — Busca setups con TP doble que el SL", PURPLE, rr_ratio/2*100))
-    missions.append(("⏰", f"Opera más en tu hora dorada: {best_hour}:00", f"Evita operar a las {worst_hour}:00 — diferencia de rendimiento clave", TEAL, 100))
-    missions.append(("💹", f"Especialízate en {best_sym}", f"Es tu mejor activo. Reduce exposición en {worst_sym}", BLUE, 100))
+    def ring_svg(pct, color, size=120, stroke=12, label="", value=""):
+        r = (size - stroke) / 2
+        circ = 2 * 3.14159 * r
+        dash = circ * min(pct / 100, 1)
+        gap  = circ - dash
+        cx = size / 2
+        return f"""
+<svg width="{size}" height="{size}" viewBox="0 0 {size} {size}">
+  <circle cx="{cx}" cy="{cx}" r="{r}"
+    fill="none" stroke="#1e2a3a" stroke-width="{stroke}"/>
+  <circle cx="{cx}" cy="{cx}" r="{r}"
+    fill="none" stroke="{color}" stroke-width="{stroke}"
+    stroke-dasharray="{dash:.1f} {gap:.1f}"
+    stroke-linecap="round"
+    transform="rotate(-90 {cx} {cx})"
+    style="filter:drop-shadow(0 0 4px {color}88)"/>
+  <text x="{cx}" y="{cx-6}" text-anchor="middle"
+    font-family="JetBrains Mono" font-size="16" font-weight="700"
+    fill="{color}">{value}</text>
+  <text x="{cx}" y="{cx+12}" text-anchor="middle"
+    font-family="Inter" font-size="9" fill="#64748b">{label}</text>
+</svg>"""
 
-    m_cols = st.columns(min(len(missions), 3))
-    for i, (icon, title, desc, col, prog) in enumerate(missions[:3]):
-        with m_cols[i]:
+    # ── Main score ring ───────────────────────────────────────────────────────
+    col_main, col_rings = st.columns([1, 2])
+
+    with col_main:
+        main_ring = ring_svg(score, lvl_color, size=200, stroke=18,
+                             label="KAIZEN SCORE", value=str(score))
+        st.markdown(f"""
+<div style='text-align:center;background:#0a0f1a;border:1px solid #1e2a3a;
+     border-radius:16px;padding:24px;'>
+  {main_ring}
+  <div style='font-size:20px;font-weight:800;color:{lvl_color};margin-top:8px;'>{lvl_emoji} {lvl_name}</div>
+  <div style='font-size:11px;color:#475569;margin-top:4px;letter-spacing:0.1em;'>改善 · 1% mejor cada día</div>
+</div>""", unsafe_allow_html=True)
+
+    with col_rings:
+        st.markdown("<div style='font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;'>Anillos de Actividad</div>", unsafe_allow_html=True)
+
+        rings_data = [
+            (wr_score/30*100,  BLUE,   "Win Rate",    f"{stats['win_rate']:.0f}%",  f"Objetivo >60% · Actual {stats['win_rate']:.1f}%"),
+            (pf_score/30*100,  TEAL,   "Factor",      f"{stats['pfactor']:.1f}x",   f"Objetivo >2.0 · Actual {stats['pfactor']:.2f}"),
+            (rr_score/20*100,  PURPLE, "R/R Ratio",   f"{rr_ratio:.1f}x",           f"Objetivo >2.0 · Actual {rr_ratio:.2f}"),
+            (dd_score/20*100,  AMBER,  "Drawdown",    f"{abs(stats['max_dd']):.0f}%",f"Objetivo <10% · Actual {stats['max_dd']:.1f}%"),
+        ]
+
+        r1, r2 = st.columns(2)
+        for i, (pct, col, label, val, desc) in enumerate(rings_data):
+            ring = ring_svg(pct, col, size=110, stroke=10, label=label, value=val)
+            achieved = pct >= 100
+            badge = f"<span style='font-size:9px;color:#10b981;font-weight:700;'>✓ OK</span>" if achieved else f"<span style='font-size:9px;color:#475569;'>{int(pct):.0f}%</span>"
+            html = f"""
+<div style='background:#0a0f1a;border:1px solid #1e2a3a;border-radius:12px;
+     padding:12px;text-align:center;margin-bottom:8px;'>
+  {ring}
+  <div style='font-size:10px;color:#64748b;margin-top:4px;line-height:1.3;'>{desc}</div>
+  <div style='margin-top:4px;'>{badge}</div>
+</div>"""
+            if i % 2 == 0:
+                r1.markdown(html, unsafe_allow_html=True)
+            else:
+                r2.markdown(html, unsafe_allow_html=True)
+
+    # ── Weekly summary rings ──────────────────────────────────────────────────
+    st.divider()
+    st.markdown("<div style='font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;'>📋 Plan de Mejora Personalizado</div>", unsafe_allow_html=True)
+
+    improvements = []
+    if stats["win_rate"] < 60:
+        improvements.append((BLUE, "🎯", "Win Rate",
+            f"Estás al {stats['win_rate']:.1f}% — necesitas llegar al 60%",
+            "Sé más selectivo en tus entradas. Menos operaciones, más calidad."))
+    if stats["pfactor"] < 2.0:
+        improvements.append((TEAL, "⚖️", "Factor Beneficio",
+            f"Estás en {stats['pfactor']:.2f} — necesitas llegar a 2.0",
+            "Deja correr más las ganadoras. Mueve el stop a breakeven antes."))
+    if rr_ratio < 2.0:
+        improvements.append((PURPLE, "📏", "Risk/Reward",
+            f"Estás en {rr_ratio:.2f} — necesitas llegar a 2.0",
+            f"Por cada 1$ de riesgo busca 2$ de beneficio mínimo."))
+    if stats["max_dd"] < -10:
+        improvements.append((AMBER, "🛡️", "Drawdown",
+            f"Estás en {stats['max_dd']:.1f}% — objetivo por encima de -10%",
+            "Reduce el tamaño de posición. La consistencia es más importante que el profit."))
+    improvements.append((TEAL, "⏰", "Horario Óptimo",
+        f"Tu mejor hora es las {best_hour}:00 — tu peor las {worst_hour}:00",
+        f"Concentra tus operaciones entre las {best_hour}:00 y las {best_hour+2}:00."))
+    improvements.append((BLUE, "💹", "Especialización",
+        f"Tu mejor activo es {best_sym} — evita {worst_sym}",
+        f"El 80% de tu PnL viene de pocos activos. Especialízate en {best_sym}."))
+
+    imp_cols = st.columns(3)
+    for i, (col, icon, title, stat_txt, advice) in enumerate(improvements[:6]):
+        with imp_cols[i % 3]:
             st.markdown(f"""
-<div style='background:#0a0f1a;border:1px solid #1e2a3a;border-top:3px solid {col};
-     border-radius:8px;padding:14px;height:140px;'>
-  <div style='font-size:18px;margin-bottom:6px;'>{icon}</div>
-  <div style='font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:4px;line-height:1.3;'>{title}</div>
-  <div style='font-size:10px;color:#475569;margin-bottom:8px;line-height:1.4;'>{desc}</div>
-  <div style='background:#1e2a3a;border-radius:10px;height:4px;'>
-    <div style='background:{col};width:{min(prog,100):.0f}%;height:100%;border-radius:10px;'></div>
-  </div>
+<div style='background:#0a0f1a;border:1px solid #1e2a3a;border-left:3px solid {col};
+     border-radius:8px;padding:14px;margin-bottom:10px;min-height:130px;'>
+  <div style='font-size:16px;margin-bottom:6px;'>{icon}</div>
+  <div style='font-size:11px;font-weight:700;color:#e2e8f0;margin-bottom:4px;'>{title}</div>
+  <div style='font-size:10px;color:{col};margin-bottom:6px;font-weight:600;'>{stat_txt}</div>
+  <div style='font-size:10px;color:#475569;line-height:1.4;'>{advice}</div>
 </div>""", unsafe_allow_html=True)
