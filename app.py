@@ -456,7 +456,7 @@ function updateMetrics(rent, wins) {{
   const clr = isPos ? '#4ade80' : '#f43f5e';
   document.getElementById('mRent').textContent = (last>=0?'+':'')+last.toFixed(2)+'%';
   document.getElementById('mRent').style.color = clr;
-  document.getElementById('mBal').textContent = '$'+(CAPITAL*(1+last/100)).toLocaleString('es-ES',{{maximumFractionDigits:0}});
+  document.getElementById('mBal').textContent = '$'+(CAPITAL*(1+last/100)).toLocaleString('en-US',{{maximumFractionDigits:0}});
   document.getElementById('badge').textContent = (last>=0?'+':'')+last.toFixed(2)+'%';
   document.getElementById('badge').style.color = clr;
   document.getElementById('badge').style.background = isPos?'rgba(74,222,128,0.12)':'rgba(244,63,94,0.12)';
