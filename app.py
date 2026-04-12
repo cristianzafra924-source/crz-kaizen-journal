@@ -588,7 +588,7 @@ render();
 </script>
 </body>
 </html>"""
-    components.html(html, height=chartH + 220, scrolling=False)
+    components.html(html, height=540, scrolling=False)
 
 
 
