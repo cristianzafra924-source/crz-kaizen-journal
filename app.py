@@ -446,61 +446,136 @@ with tab_dash:
     col_eq, col_daily = st.columns([3, 2])
 
     with col_eq:
-        st.markdown("#### Curva de Equity")
-        peak = df_s["equity"].cummax()
-        # Find max and min points
+        peak    = df_s["equity"].cummax()
         idx_max = df_s["equity"].idxmax()
         idx_min = df_s["equity"].idxmin()
+        dd_pct  = ((df_s["equity"] - peak) / peak.replace(0, np.nan) * 100).fillna(0)
+
+        HUD_LAYOUT = dict(
+            paper_bgcolor="#020408",
+            plot_bgcolor="#020408",
+            font=dict(color="#334155", family="JetBrains Mono", size=10),
+            margin=dict(l=48, r=16, t=36, b=36),
+            xaxis=dict(
+                gridcolor="#0a0f1a", showgrid=True, zeroline=False,
+                linecolor="#0f1923", tickcolor="#0f1923",
+                tickfont=dict(color="#334155", size=9),
+            ),
+            yaxis=dict(
+                gridcolor="#0a0f1a", showgrid=True, zeroline=False,
+                linecolor="#0f1923", tickcolor="#0f1923",
+                tickfont=dict(color="#334155", size=9),
+                tickprefix="$",
+            ),
+            legend=dict(
+                bgcolor="rgba(0,0,0,0)",
+                bordercolor="#0f1923",
+                font=dict(color="#475569", size=9),
+                x=0.01, y=0.99
+            )
+        )
+
         fig_eq = go.Figure()
-        # Drawdown fill area
+
+        # Drawdown fill (peak → equity)
+        fig_eq.add_trace(go.Scatter(
+            x=df_s["close_dt"], y=peak,
+            mode="lines", line=dict(width=0),
+            showlegend=False, hoverinfo="skip"
+        ))
+        fig_eq.add_trace(go.Scatter(
+            x=df_s["close_dt"], y=df_s["equity"],
+            mode="lines", line=dict(width=0),
+            fill="tonexty",
+            fillcolor="rgba(244,63,94,0.07)",
+            showlegend=False, hoverinfo="skip", name="Drawdown"
+        ))
+
+        # Peak dotted line
         fig_eq.add_trace(go.Scatter(
             x=df_s["close_dt"], y=peak,
             mode="lines", name="Peak",
-            line=dict(color="rgba(45,212,191,0)", width=0),
+            line=dict(color="#1e3a2a", width=1, dash="dot"),
+            showlegend=True,
+            hoverinfo="skip"
+        ))
+
+        # Zero line fill
+        fig_eq.add_trace(go.Scatter(
+            x=df_s["close_dt"], y=df_s["equity"],
+            mode="none", fill="tozeroy",
+            fillcolor="rgba(45,212,191,0.03)",
             showlegend=False, hoverinfo="skip"
         ))
+
+        # Main equity line — thin & sharp
         fig_eq.add_trace(go.Scatter(
             x=df_s["close_dt"], y=df_s["equity"],
             mode="lines", name="Equity",
-            line=dict(color="rgba(244,63,94,0)", width=0),
-            fill="tonexty",
-            fillcolor="rgba(244,63,94,0.08)",
-            showlegend=False, hoverinfo="skip"
+            line=dict(color=TEAL, width=1.2),
+            hovertemplate="<b>%{x|%d %b %Y %H:%M}</b><br>Equity: <b>$%{y:+,.2f}</b><extra></extra>"
         ))
-        # Main equity line
-        fig_eq.add_trace(go.Scatter(
-            x=df_s["close_dt"], y=df_s["equity"],
-            mode="lines", name="Equity",
-            line=dict(color=TEAL, width=2, shape="spline", smoothing=0.4),
-            fill="tozeroy",
-            fillcolor="rgba(45,212,191,0.05)",
-            hovertemplate="%{x|%d %b %Y}<br>Equity: $%{y:+,.2f}<extra></extra>"
-        ))
-        # Max point
+
+        # Horizontal grid helper lines
+        eq_range = df_s["equity"]
+        for level in [eq_range.max()*0.75, eq_range.max()*0.5, eq_range.max()*0.25]:
+            if abs(level) > 1:
+                fig_eq.add_hline(
+                    y=level, line_color="#0a0f1a",
+                    line_width=1, opacity=1
+                )
+
+        # Zero line
+        fig_eq.add_hline(y=0, line_color="#1e2a3a", line_width=1, opacity=0.8)
+
+        # Max marker
         fig_eq.add_trace(go.Scatter(
             x=[df_s.loc[idx_max, "close_dt"]],
             y=[df_s.loc[idx_max, "equity"]],
             mode="markers+text",
-            marker=dict(color=GREEN, size=8, symbol="circle"),
-            text=[f"Máx ${df_s.loc[idx_max,'equity']:+,.0f}"],
-            textposition="top center",
-            textfont=dict(size=9, color=GREEN),
+            marker=dict(color=GREEN, size=6, symbol="circle",
+                       line=dict(color="#020408", width=1)),
+            text=[f"▲ ${df_s.loc[idx_max,'equity']:+,.0f}"],
+            textposition="top right",
+            textfont=dict(size=9, color=GREEN, family="JetBrains Mono"),
             showlegend=False, hoverinfo="skip"
         ))
-        # Min point
+
+        # Min marker
         fig_eq.add_trace(go.Scatter(
             x=[df_s.loc[idx_min, "close_dt"]],
             y=[df_s.loc[idx_min, "equity"]],
             mode="markers+text",
-            marker=dict(color=RED, size=8, symbol="circle"),
-            text=[f"Mín ${df_s.loc[idx_min,'equity']:+,.0f}"],
-            textposition="bottom center",
-            textfont=dict(size=9, color=RED),
+            marker=dict(color=RED, size=6, symbol="circle",
+                       line=dict(color="#020408", width=1)),
+            text=[f"▼ ${df_s.loc[idx_min,'equity']:+,.0f}"],
+            textposition="bottom right",
+            textfont=dict(size=9, color=RED, family="JetBrains Mono"),
             showlegend=False, hoverinfo="skip"
         ))
-        fig_eq.add_hline(y=0, line_dash="dash", line_color=MUTED, opacity=0.3)
-        fig_eq.update_layout(**LAYOUT, height=280,
-            title=dict(text="Curva de Equity", font=dict(size=12, color="#94a3b8")))
+
+        # Title annotation HUD style
+        fig_eq.add_annotation(
+            x=0, y=1.06, xref="paper", yref="paper",
+            text="◈ EQUITY CURVE",
+            font=dict(size=10, color="#2dd4bf", family="JetBrains Mono"),
+            showarrow=False, align="left"
+        )
+        fig_eq.add_annotation(
+            x=1, y=1.06, xref="paper", yref="paper",
+            text=f"MAX DD: {dd_pct.min():.1f}%",
+            font=dict(size=10, color="#f43f5e", family="JetBrains Mono"),
+            showarrow=False, align="right"
+        )
+
+        fig_eq.update_layout(**HUD_LAYOUT, height=300,
+            shapes=[dict(
+                type="rect", xref="paper", yref="paper",
+                x0=0, y0=0, x1=1, y1=1,
+                line=dict(color="#0f1923", width=1),
+                fillcolor="rgba(0,0,0,0)"
+            )]
+        )
         st.plotly_chart(fig_eq, use_container_width=True)
 
     with col_daily:
