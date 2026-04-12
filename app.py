@@ -161,46 +161,88 @@ h4 { color: #f1f5f9 !important; }
 # ── Parser MT5 ─────────────────────────────────────────────────────────────────
 def parse_mt5(file) -> dict:
     df_raw = pd.read_excel(file, header=None, dtype=str)
-    rows = df_raw.values.tolist()
+    rows   = df_raw.values.tolist()
+
     meta = {"trader": "", "cuenta": "", "empresa": "", "fecha": ""}
     header_row = -1
-    for i, r in enumerate(rows[:25]):
-        c0 = str(r[0] or "")
-        if "ombre" in c0:  meta["trader"]  = str(r[3] or r[1] or "").strip()
-        if "uenta" in c0:  meta["cuenta"]  = str(r[3] or r[1] or "").strip()
-        if "mpresa" in c0: meta["empresa"] = str(r[3] or r[1] or "").strip()
-        if "echa" in c0 and str(r[3] or "").strip()[:4].isdigit():
-            meta["fecha"] = str(r[3] or "").strip()
-        if "osici" in str(r[1] or "") and "echa" in str(r[0] or ""):
+
+    for i, r in enumerate(rows[:30]):
+        r0 = str(r[0] or "").strip()
+        r1 = str(r[1] or "").strip() if len(r) > 1 else ""
+        r3 = str(r[3] or "").strip() if len(r) > 3 else ""
+
+        if "ombre"  in r0: meta["trader"]  = (r3 or r1).strip()
+        if "uenta"  in r0: meta["cuenta"]  = (r3 or r1).strip()
+        if "mpresa" in r0: meta["empresa"] = (r3 or r1).strip()
+        if "echa"   in r0 and (r3 or r1)[:4].isdigit():
+            meta["fecha"] = (r3 or r1).strip()
+
+        # Detectar cabecera: fila que tiene "Fecha" en col0 y "Posici" en col1
+        c0l = r0.lower(); c1l = r1.lower()
+        if ("fecha" in c0l or "time" in c0l) and ("posic" in c1l or "ticket" in c1l or "order" in c1l):
             header_row = i
+
     if header_row < 0:
-        raise ValueError("No se encontró la sección de Posiciones")
+        raise ValueError("No se encontró la cabecera de Posiciones en el archivo.")
+
+    def n(v):
+        try:   return float(str(v).replace(",", ".").replace(" ", ""))
+        except: return 0.0
+
     trades = []
     for r in rows[header_row + 1:]:
-        c0 = str(r[0] or "")
-        if any(x in c0 for x in ["rdene", "ransacc", "Balance:", "Resultado"]):
+        # Parar en secciones secundarias (Órdenes, Resultados, etc.)
+        c0 = str(r[0] or "").strip()
+        if c0 and not c0[0].isdigit():
             break
+
+        # Necesitamos al menos 13 columnas y col0 debe ser fecha
+        if len(r) < 13:
+            continue
         try:
-            float(str(r[1]).replace(",", "."))
-            profit = float(str(r[12]).replace(",", "."))
+            # col0=open_dt, col1=ticket, col2=symbol, col3=type
+            # col4=volume, col5=p_in, col6=SL, col7=TP (o puede ser close_dt)
+            # Detectar si col7 es TP numérico o fecha de cierre
+            # En este archivo: open, ticket, symbol, type, vol, p_in, SL, TP, close_dt, p_out, comm, swap, profit
+            pd.to_datetime(str(r[0]).strip(), format="%Y.%m.%d %H:%M:%S")
+            profit = n(r[12])
         except:
             continue
-        def n(v):
-            try: return float(str(v).replace(",", "."))
-            except: return 0.0
+
+        # Detectar columna de fecha de cierre (puede ser col7 o col8)
+        close_col = 8
+        try:
+            pd.to_datetime(str(r[8]).strip(), format="%Y.%m.%d %H:%M:%S")
+        except:
+            try:
+                pd.to_datetime(str(r[7]).strip(), format="%Y.%m.%d %H:%M:%S")
+                close_col = 7
+            except:
+                close_col = 8
+
         trades.append({
-            "open": str(r[0]), "symbol": str(r[2]).strip(),
-            "type": str(r[3]).strip().lower(), "volume": n(r[4]),
-            "p_in": n(r[5]), "sl": n(r[6]), "tp": n(r[7]),
-            "close": str(r[8]), "p_out": n(r[9]),
-            "comm": n(r[10]), "swap": n(r[11]),
-            "profit": profit, "pnl_net": profit + n(r[10]) + n(r[11]),
+            "open":    str(r[0]).strip(),
+            "symbol":  str(r[2]).strip(),
+            "type":    str(r[3]).strip().lower(),
+            "volume":  n(r[4]),
+            "p_in":    n(r[5]),
+            "sl":      n(r[6]),
+            "tp":      n(r[7]) if close_col == 8 else 0.0,
+            "close":   str(r[close_col]).strip(),
+            "p_out":   n(r[close_col + 1]),
+            "comm":    n(r[10]),
+            "swap":    n(r[11]),
+            "profit":  profit,
+            "pnl_net": profit + n(r[10]) + n(r[11]),
         })
+
     if not trades:
-        raise ValueError("No se encontraron operaciones")
+        raise ValueError("No se encontraron operaciones válidas.")
+
     df = pd.DataFrame(trades)
     df["open_dt"]    = pd.to_datetime(df["open"],  format="%Y.%m.%d %H:%M:%S", errors="coerce")
     df["close_dt"]   = pd.to_datetime(df["close"], format="%Y.%m.%d %H:%M:%S", errors="coerce")
+    df               = df.dropna(subset=["open_dt","close_dt"]).reset_index(drop=True)
     df["close_date"] = df["close_dt"].dt.date
     df["month"]      = df["close_dt"].dt.to_period("M").astype(str)
     df["hour"]       = df["close_dt"].dt.hour
@@ -209,23 +251,23 @@ def parse_mt5(file) -> dict:
     df["duration"]   = (df["close_dt"] - df["open_dt"]).dt.total_seconds() / 3600
 
     stats = {}
-    stats["total_ops"]   = len(df)
-    stats["winners"]     = int(df["win"].sum())
-    stats["losers"]      = stats["total_ops"] - stats["winners"]
-    stats["win_rate"]    = stats["winners"] / stats["total_ops"] * 100 if stats["total_ops"] else 0
-    stats["pnl_net"]     = df["pnl_net"].sum()
-    stats["gross_win"]   = df[df.profit > 0]["profit"].sum()
-    stats["gross_loss"]  = df[df.profit < 0]["profit"].sum()
-    stats["pfactor"]     = stats["gross_win"] / abs(stats["gross_loss"]) if stats["gross_loss"] else 0
-    stats["avg_win"]     = df[df.win]["profit"].mean() if df["win"].any() else 0
-    stats["avg_loss"]    = df[~df["win"]]["profit"].mean() if (~df["win"]).any() else 0
-    stats["best"]        = df["profit"].max()
-    stats["worst"]       = df["profit"].min()
-    stats["avg_duration"]= df["duration"].mean()
+    stats["total_ops"]    = len(df)
+    stats["winners"]      = int(df["win"].sum())
+    stats["losers"]       = stats["total_ops"] - stats["winners"]
+    stats["win_rate"]     = stats["winners"] / stats["total_ops"] * 100 if stats["total_ops"] else 0
+    stats["pnl_net"]      = df["pnl_net"].sum()
+    stats["gross_win"]    = df[df.profit > 0]["profit"].sum()
+    stats["gross_loss"]   = df[df.profit < 0]["profit"].sum()
+    stats["pfactor"]      = stats["gross_win"] / abs(stats["gross_loss"]) if stats["gross_loss"] else 0
+    stats["avg_win"]      = df[df.win]["profit"].mean()  if df["win"].any()  else 0
+    stats["avg_loss"]     = df[~df["win"]]["profit"].mean() if (~df["win"]).any() else 0
+    stats["best"]         = df["profit"].max()
+    stats["worst"]        = df["profit"].min()
+    stats["avg_duration"] = df["duration"].mean()
 
     df_sorted = df.sort_values("close_dt").reset_index(drop=True)
-    df_sorted["equity"]       = df_sorted["pnl_net"].cumsum()
-    df_sorted["equity_peak"]  = df_sorted["equity"].cummax()
+    df_sorted["equity"]      = df_sorted["pnl_net"].cumsum()
+    df_sorted["equity_peak"] = df_sorted["equity"].cummax()
 
     CAPITAL = st.session_state.get("capital_manual", 10_000)
     df_sorted["balance"]      = CAPITAL + df_sorted["equity"]
@@ -233,15 +275,15 @@ def parse_mt5(file) -> dict:
 
     peak = df_sorted["equity"].cummax()
     dd   = (df_sorted["equity"] - peak) / peak.replace(0, np.nan) * 100
-    stats["max_dd"]     = dd.min() if not dd.isna().all() else 0
-    stats["df_sorted"]  = df_sorted
-    stats["capital"]    = CAPITAL
+    stats["max_dd"]    = dd.min() if not dd.isna().all() else 0
+    stats["df_sorted"] = df_sorted
+    stats["capital"]   = CAPITAL
 
-    wr_score  = min(stats["win_rate"] / 60 * 30, 30)
-    pf_score  = min(stats["pfactor"] / 2 * 30, 30)
-    rr_ratio  = abs(stats["avg_win"] / stats["avg_loss"]) if stats["avg_loss"] else 0
-    rr_score  = min(rr_ratio / 2 * 20, 20)
-    dd_score  = max(20 + stats["max_dd"] / 5, 0)
+    wr_score = min(stats["win_rate"] / 60 * 30, 30)
+    pf_score = min(stats["pfactor"] / 2  * 30, 30)
+    rr_ratio = abs(stats["avg_win"] / stats["avg_loss"]) if stats["avg_loss"] else 0
+    rr_score = min(rr_ratio / 2 * 20, 20)
+    dd_score = max(20 + stats["max_dd"] / 5, 0)
     stats["kaizen_score"] = int(wr_score + pf_score + rr_score + dd_score)
 
     return {"meta": meta, "df": df, "stats": stats}
