@@ -176,9 +176,20 @@ def parse_mt5(file) -> dict:
     if header_row < 0:
         raise ValueError("No se encontró la sección de Posiciones")
     trades = []
+    balance_inicial = None
     for r in rows[header_row + 1:]:
         c0 = str(r[0] or "")
-        if any(x in c0 for x in ["rdene", "ransacc", "Balance:", "Resultado"]):
+        # Intentar capturar el balance inicial (primera fila de balance antes de trades)
+        if "alance" in c0 and balance_inicial is None:
+            for cell in r[1:]:
+                try:
+                    v = float(str(cell).replace(",", ".").replace(" ", ""))
+                    if v > 100:
+                        balance_inicial = v
+                        break
+                except:
+                    continue
+        if any(x in c0 for x in ["rdene", "ransacc", "Resultado"]):
             break
         try:
             float(str(r[1]).replace(",", "."))
@@ -226,10 +237,13 @@ def parse_mt5(file) -> dict:
     df_sorted = df.sort_values("close_dt").reset_index(drop=True)
     df_sorted["equity"]       = df_sorted["pnl_net"].cumsum()
     df_sorted["equity_peak"]  = df_sorted["equity"].cummax()
-    # Rentabilidad % acumulada por operación (relativa al capital inicial = balance mínimo probable)
-    # Usamos equity como variación absoluta sobre 0 (sin capital inicial conocido)
-    # Si quieres añadir capital inicial, cámbialo aquí:
-    CAPITAL = 10_000
+
+    # Capital inicial: del archivo MT5 si lo encontró, si no del session_state
+    if balance_inicial and balance_inicial > 0:
+        CAPITAL = balance_inicial
+    else:
+        CAPITAL = st.session_state.get("capital_manual", 10_000)
+
     df_sorted["balance"]      = CAPITAL + df_sorted["equity"]
     df_sorted["rentabilidad"] = df_sorted["equity"] / CAPITAL * 100
 
@@ -643,12 +657,30 @@ if light_mode:
     hr { border-color: #e2e8f0 !important; }
     </style>""", unsafe_allow_html=True)
 
+# ── Capital inicial manual (por si el MT5 no lo incluye) ──────────────────────
+if "capital_manual" not in st.session_state:
+    st.session_state.capital_manual = 10_000
+
 # ── Upload ─────────────────────────────────────────────────────────────────────
 uploaded = st.file_uploader(
     "Sube tu historial MT5",
     type=["xlsx", "xls"],
     label_visibility="collapsed"
 )
+
+# Input capital manual — visible siempre por si el MT5 no lo detecta
+_col_up, _col_cap = st.columns([4, 1])
+with _col_cap:
+    capital_input = st.number_input(
+        "Capital inicial ($)",
+        min_value=100,
+        max_value=10_000_000,
+        value=st.session_state.capital_manual,
+        step=1000,
+        help="Se usa si el archivo MT5 no incluye el balance inicial. Cámbialo si el % no cuadra.",
+        key="capital_input_widget",
+    )
+    st.session_state.capital_manual = capital_input
 
 if not uploaded:
     _lm = st.session_state.light_mode
