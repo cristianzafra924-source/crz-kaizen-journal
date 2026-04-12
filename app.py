@@ -779,6 +779,8 @@ with tab_dash:
         .rename(columns={"fecha_str": "fecha", "pnl_net": "pnl"})
     )
     daily_pnl["ma7"] = daily_pnl["pnl"].rolling(7, min_periods=1).mean()
+    daily_pnl["rent"] = daily_pnl["pnl"] / stats["capital"] * 100
+    daily_pnl["ma7_rent"] = daily_pnl["rent"].rolling(7, min_periods=1).mean()
 
     # PnL mensual agrupado
     monthly_pnl = (
@@ -792,9 +794,11 @@ with tab_dash:
     pnl_total_rent = stats["pnl_net"] / stats["capital"] * 100
 
     daily_json   = json.dumps({
-        "dates": daily_pnl["fecha"].tolist(),
-        "pnl":   [round(v, 2) for v in daily_pnl["pnl"].tolist()],
-        "ma7":   [round(v, 2) for v in daily_pnl["ma7"].tolist()],
+        "dates":    daily_pnl["fecha"].tolist(),
+        "pnl":      [round(v, 2) for v in daily_pnl["pnl"].tolist()],
+        "ma7":      [round(v, 2) for v in daily_pnl["ma7"].tolist()],
+        "rent":     [round(v, 4) for v in daily_pnl["rent"].tolist()],
+        "ma7_rent": [round(v, 4) for v in daily_pnl["ma7_rent"].tolist()],
     })
     monthly_json = json.dumps([
         {"year": int(r.year), "month": int(r.month), "pnl": round(r.pnl, 2), "rent": round(r.rent, 2)}
@@ -908,7 +912,7 @@ function renderBar() {{
 
   if(view==='month') {{
     const labels = MONTHLY.map(r=>MONTHS[r.month-1]+' '+r.year);
-    const data   = MONTHLY.map(r=>r.pnl);
+    const data   = MONTHLY.map(r=>r.rent);
     barInst = new Chart(ctx, {{
       type:'bar',
       data:{{
@@ -920,24 +924,24 @@ function renderBar() {{
           borderWidth:1, borderRadius:3
         }}]
       }},
-      options:barOpts('PnL Mensual ($)', d=>
-        (d>=0?'+':'')+d.toLocaleString('es-ES',{{minimumFractionDigits:0,maximumFractionDigits:0}})+'$'
+      options:barOpts('Rentabilidad Mensual (%)', d=>
+        (d>=0?'+':'')+d.toFixed(2)+'%'
       )
     }});
   }} else {{
     const selY = document.getElementById('yearSel').value;
     const selM = document.getElementById('monthSel').value;
-    let dates = DAILY.dates;
-    let pnl   = DAILY.pnl;
-    let ma7   = DAILY.ma7;
+    let dates   = DAILY.dates;
+    let rent    = DAILY.rent;
+    let ma7r    = DAILY.ma7_rent;
     if(selY!=='ALL') {{
       const idx = dates.map((_,i)=>i).filter(i=>dates[i].startsWith(selY));
-      dates=idx.map(i=>dates[i]); pnl=idx.map(i=>pnl[i]); ma7=idx.map(i=>ma7[i]);
+      dates=idx.map(i=>dates[i]); rent=idx.map(i=>rent[i]); ma7r=idx.map(i=>ma7r[i]);
     }}
     if(selM!=='ALL') {{
       const mm=String(selM).padStart(2,'0');
       const idx=dates.map((_,i)=>i).filter(i=>dates[i].slice(5,7)===mm);
-      dates=idx.map(i=>dates[i]); pnl=idx.map(i=>pnl[i]); ma7=idx.map(i=>ma7[i]);
+      dates=idx.map(i=>dates[i]); rent=idx.map(i=>rent[i]); ma7r=idx.map(i=>ma7r[i]);
     }}
     const labels = dates.map(d=>{{
       const dt=new Date(d); return dt.toLocaleDateString('es-ES',{{day:'2-digit',month:'short'}});
@@ -948,23 +952,23 @@ function renderBar() {{
         labels,
         datasets:[
           {{
-            type:'bar', label:'PnL',
-            data:pnl,
-            backgroundColor: pnl.map(v=>v>=0?'rgba(74,222,128,0.75)':'rgba(244,63,94,0.75)'),
-            borderColor:     pnl.map(v=>v>=0?'#4ade80':'#f43f5e'),
+            type:'bar', label:'Rent. %',
+            data:rent,
+            backgroundColor: rent.map(v=>v>=0?'rgba(74,222,128,0.75)':'rgba(244,63,94,0.75)'),
+            borderColor:     rent.map(v=>v>=0?'#4ade80':'#f43f5e'),
             borderWidth:1, borderRadius:3, order:2
           }},
           {{
             type:'line', label:'Media 7d',
-            data:ma7,
+            data:ma7r,
             borderColor:'#f59e0b', borderWidth:1.5,
             borderDash:[4,3], pointRadius:0,
             tension:0.3, order:1
           }}
         ]
       }},
-      options:barOpts('PnL Diario ($)', d=>
-        (d>=0?'+':'')+d.toLocaleString('es-ES',{{minimumFractionDigits:0,maximumFractionDigits:0}})+'$'
+      options:barOpts('Rentabilidad Diaria (%)', d=>
+        (d>=0?'+':'')+d.toFixed(2)+'%'
       )
     }});
   }}
