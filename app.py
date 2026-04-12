@@ -268,271 +268,330 @@ PURPLE = "#a78bfa"
 MUTED  = "#334155"
 
 
-# ── Equity curve Darwinex ──────────────────────────────────────────────────────
-def filter_equity(df_s: pd.DataFrame, periodo: str) -> pd.DataFrame:
-    hoy = df_s["close_dt"].max()
-    limites = {
-        "1M":  hoy - timedelta(days=30),
-        "3M":  hoy - timedelta(days=90),
-        "6M":  hoy - timedelta(days=180),
-        "YTD": pd.Timestamp(hoy.year, 1, 1),
-    }
-    if periodo in limites:
-        return df_s[df_s["close_dt"] >= limites[periodo]].copy()
-    return df_s.copy()
-
-
-def build_equity_area(df_f: pd.DataFrame, capital: float) -> go.Figure:
-    """Vista ÁREA — réplica Darwinex: gradiente verde con SVG fill, zona roja, línea neón."""
-    equity_f  = df_f["pnl_net"].cumsum()
-    rent_f    = equity_f / capital * 100
-    x_vals    = df_f["close_dt"].tolist()
-    r_vals    = rent_f.tolist()
-    rent_final = r_vals[-1]
-    last_green = rent_final >= 0
-
-    fig = go.Figure()
-
-    # ── Zona ROJA (drawdown bajo cero) ───────────────────────────────────────
-    r_neg = [v if v < 0 else 0 for v in r_vals]
-    fig.add_trace(go.Scatter(
-        x=x_vals, y=r_neg, mode="none",
-        fill="tozeroy", fillcolor="rgba(220,38,38,0.55)",
-        showlegend=False, hoverinfo="skip", name="_red"
-    ))
-
-    # ── Área VERDE positiva con gradiente simulado (3 capas de opacidad) ─────
-    r_pos = [v if v >= 0 else 0 for v in r_vals]
-    # Capa base — relleno principal sólido
-    fig.add_trace(go.Scatter(
-        x=x_vals, y=r_pos, mode="none",
-        fill="tozeroy", fillcolor="rgba(34,197,94,0.55)",
-        showlegend=False, hoverinfo="skip", name="_green_base"
-    ))
-    # Capa media — más transparente hacia arriba
-    fig.add_trace(go.Scatter(
-        x=x_vals, y=r_pos, mode="none",
-        fill="tozeroy", fillcolor="rgba(34,197,94,0.20)",
-        showlegend=False, hoverinfo="skip", name="_green_mid"
-    ))
-    # Capa superior — casi transparente (efecto degradado)
-    r_top = [v * 0.6 if v >= 0 else 0 for v in r_vals]
-    fig.add_trace(go.Scatter(
-        x=x_vals, y=r_top, mode="none",
-        fill="tozeroy", fillcolor="rgba(34,197,94,0.08)",
-        showlegend=False, hoverinfo="skip", name="_green_top"
-    ))
-
-    # ── Línea neón principal ──────────────────────────────────────────────────
-    line_color = "#4ade80" if last_green else "#f43f5e"
-    fig.add_trace(go.Scatter(
-        x=x_vals, y=r_vals,
-        mode="lines",
-        name="Rentabilidad %",
-        line=dict(color=line_color, width=2.0),
-        hovertemplate="<b>%{x|%d %b %y}</b><br>Rent: <b>%{y:.2f}%</b><extra></extra>",
-    ))
-
-    # Línea base 0
-    fig.add_hline(y=0, line_color="rgba(255,255,255,0.12)", line_width=1)
-
-    # Anotación esquina superior derecha — estilo Darwinex
-    fig.add_annotation(
-        x=1, y=1, xref="paper", yref="paper",
-        text=f"<b>Rentabilidad:<br>{rent_final:+.2f}%</b>",
-        font=dict(size=12, color=line_color, family="Inter"),
-        bgcolor="rgba(10,15,26,0.75)",
-        bordercolor=line_color, borderwidth=1, borderpad=6,
-        showarrow=False, align="right", xanchor="right", yanchor="top",
-    )
-
-    fig.update_layout(
-        paper_bgcolor="#0d1220",
-        plot_bgcolor="#0d1220",
-        font=dict(color="#64748b", family="Inter, sans-serif", size=11),
-        margin=dict(l=52, r=20, t=24, b=40),
-        hovermode="x unified",
-        hoverlabel=dict(
-            bgcolor="rgba(10,15,26,0.95)",
-            bordercolor="rgba(255,255,255,0.1)",
-            font=dict(color="#ffffff", size=11),
-        ),
-        showlegend=False,
-        height=340,
-    )
-    fig.update_yaxes(
-        ticksuffix="%", gridcolor="rgba(255,255,255,0.04)",
-        tickfont=dict(color="#6b7280", size=10),
-        zerolinecolor="rgba(255,255,255,0.08)", showline=False,
-    )
-    fig.update_xaxes(
-        gridcolor="rgba(255,255,255,0.03)",
-        tickfont=dict(color="#6b7280", size=10), showline=False,
-    )
-    return fig
-
-
-def build_equity_candles(df_f: pd.DataFrame, capital: float) -> go.Figure:
-    """Vista VELAS — agrupa por día y muestra candlestick de rentabilidad %."""
-    df_c = df_f.copy()
-    df_c["close_date"] = df_c["close_dt"].dt.date
-    df_c["equity_cum"] = df_c["pnl_net"].cumsum() / capital * 100
-
-    # OHLC diario de rentabilidad acumulada
-    ohlc = df_c.groupby("close_date")["equity_cum"].agg(
-        open="first", high="max", low="min", close="last"
-    ).reset_index()
-
-    fig = go.Figure(go.Candlestick(
-        x=ohlc["close_date"],
-        open=ohlc["open"], high=ohlc["high"],
-        low=ohlc["low"],   close=ohlc["close"],
-        increasing=dict(line=dict(color="#4ade80", width=1), fillcolor="rgba(74,222,128,0.7)"),
-        decreasing=dict(line=dict(color="#f43f5e", width=1), fillcolor="rgba(244,63,94,0.7)"),
-        name="Rent. diaria %",
-        hovertemplate=(
-            "<b>%{x}</b><br>"
-            "Apertura: %{open:.2f}%<br>"
-            "Máximo: %{high:.2f}%<br>"
-            "Mínimo: %{low:.2f}%<br>"
-            "Cierre: %{close:.2f}%<extra></extra>"
-        )
-    ))
-
-    fig.add_hline(y=0, line_color="rgba(255,255,255,0.12)", line_width=1)
-
-    rent_final = ohlc["close"].iloc[-1]
-    line_color = "#4ade80" if rent_final >= 0 else "#f43f5e"
-    fig.add_annotation(
-        x=1, y=1, xref="paper", yref="paper",
-        text=f"<b>Rentabilidad:<br>{rent_final:+.2f}%</b>",
-        font=dict(size=12, color=line_color, family="Inter"),
-        bgcolor="rgba(10,15,26,0.75)",
-        bordercolor=line_color, borderwidth=1, borderpad=6,
-        showarrow=False, align="right", xanchor="right", yanchor="top",
-    )
-
-    fig.update_layout(
-        paper_bgcolor="#0d1220", plot_bgcolor="#0d1220",
-        font=dict(color="#64748b", family="Inter, sans-serif", size=11),
-        margin=dict(l=52, r=20, t=24, b=40),
-        hovermode="x",
-        hoverlabel=dict(bgcolor="rgba(10,15,26,0.95)", font=dict(color="#fff", size=11)),
-        showlegend=False, height=340,
-        xaxis_rangeslider_visible=False,
-    )
-    fig.update_yaxes(
-        ticksuffix="%", gridcolor="rgba(255,255,255,0.04)",
-        tickfont=dict(color="#6b7280", size=10),
-        zerolinecolor="rgba(255,255,255,0.08)", showline=False,
-    )
-    fig.update_xaxes(
-        gridcolor="rgba(255,255,255,0.03)",
-        tickfont=dict(color="#6b7280", size=10), showline=False,
-    )
-    return fig
-
+# ── Equity curve Darwinex — componente HTML puro con Chart.js ─────────────────
+import streamlit.components.v1 as components
+import json
 
 def show_equity_darwinex(df_s: pd.DataFrame, capital: float):
-    """Bloque completo: header Darwinex + toggle vista + pills periodo + métricas + gráfica."""
+    """
+    Renderiza la equity curve con Chart.js dentro de un iframe Streamlit.
+    Gradiente real, toggle Área/Velas, slider de altura, pills de periodo.
+    """
+    # Preparar datos completos serializados para JS
+    df_sorted = df_s.sort_values("close_dt").reset_index(drop=True)
+    equity_cum = df_sorted["pnl_net"].cumsum()
+    rent_series = (equity_cum / capital * 100).round(4).tolist()
+    dates_series = df_sorted["close_dt"].dt.strftime("%Y-%m-%dT%H:%M:%S").tolist()
+    wins_series  = df_sorted["win"].astype(int).tolist()
 
-    # Session state
-    if "eq_periodo" not in st.session_state:
-        st.session_state.eq_periodo = "TOTAL"
-    if "eq_vista" not in st.session_state:
-        st.session_state.eq_vista = "area"
+    ultima = df_sorted["close_dt"].max().strftime("%d/%m/%Y %H:%M")
+    rent_final = rent_series[-1]
+    bal_final  = capital + equity_cum.iloc[-1]
+    peak_s = equity_cum.cummax()
+    dd_s   = (equity_cum - peak_s) / peak_s.replace(0, np.nan) * 100
+    max_dd = round(dd_s.min(), 2) if not dd_s.isna().all() else 0
+    win_rate_total = round(df_sorted["win"].mean() * 100, 1)
 
-    # ── Header estilo Darwinex ────────────────────────────────────────────────
-    _lm = st.session_state.get("light_mode", False)
-    _card_bg     = "#ffffff" if _lm else "#0a0f1a"
-    _card_border = "#e2e8f0" if _lm else "#1e2a3a"
+    data_json = json.dumps({
+        "dates": dates_series,
+        "rent":  rent_series,
+        "wins":  wins_series,
+        "capital": capital,
+        "ultima": ultima,
+        "rent_final": round(rent_final, 2),
+        "bal_final":  round(bal_final, 2),
+        "max_dd":     max_dd,
+        "win_rate":   win_rate_total,
+    })
 
-    col_title, col_toggle_vista = st.columns([3, 1])
-    with col_title:
-        st.markdown("""
-<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px;">
-  <span style="font-size:22px;font-weight:700;color:#f1f5f9;">Rentabilidad</span>
-</div>""", unsafe_allow_html=True)
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* {{ box-sizing: border-box; margin: 0; padding: 0; }}
+body {{ background: #0d1117; font-family: Inter, sans-serif; padding: 0; }}
+.wrap {{ background: #131a24; border-radius: 10px; padding: 14px 18px; }}
+.top-row {{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }}
+.title {{ font-size:20px; font-weight:700; color:#f1f5f9; }}
+.subtitle {{ font-size:10px; color:#475569; margin-top:2px; }}
+.badge {{ font-size:12px; font-weight:700; padding:4px 10px; border-radius:6px; border:1px solid; margin-bottom:6px; display:inline-block; }}
+.toggle-btn {{ display:flex; border:1px solid #1e2a3a; border-radius:6px; overflow:hidden; }}
+.tbtn {{ font-size:10px; font-weight:700; padding:5px 12px; cursor:pointer; border:none; color:#475569; background:transparent; letter-spacing:.06em; transition:all .15s; }}
+.tbtn.active {{ background:#1e2a3a; color:#f1f5f9; }}
+.pills {{ display:flex; gap:4px; margin-bottom:10px; }}
+.pill {{ font-size:10px; font-weight:700; letter-spacing:.08em; padding:4px 11px; border-radius:5px; cursor:pointer; border:1px solid #1e2a3a; color:#475569; background:transparent; text-transform:uppercase; transition:all .15s; }}
+.pill.active {{ background:rgba(74,222,128,.12); color:#4ade80; border-color:rgba(74,222,128,.3); }}
+.metrics {{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }}
+.mc {{ background:#0d1117; border:1px solid #1a2332; border-radius:7px; padding:9px 13px; }}
+.mc-label {{ font-size:9px; color:#475569; text-transform:uppercase; letter-spacing:.1em; font-weight:600; margin-bottom:3px; }}
+.mc-val {{ font-family:'Courier New',monospace; font-size:16px; font-weight:700; }}
+.chart-wrap {{ background:#0d1117; border-radius:8px; overflow:hidden; position:relative; }}
+.slider-row {{ display:flex; align-items:center; gap:10px; margin-top:8px; }}
+.slider-lbl {{ font-size:10px; color:#475569; white-space:nowrap; }}
+input[type=range] {{ flex:1; accent-color:#4ade80; cursor:pointer; }}
+.slider-val {{ font-size:10px; color:#4ade80; font-weight:700; min-width:48px; text-align:right; }}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-row">
+    <div>
+      <div class="title">Rentabilidad</div>
+      <div class="subtitle" id="ts">última actualización: —</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+      <span class="badge" id="badge">—</span>
+      <div class="toggle-btn">
+        <button class="tbtn active" id="btnArea" onclick="setVista('area')">Área</button>
+        <button class="tbtn" id="btnVelas" onclick="setVista('velas')">Velas</button>
+      </div>
+    </div>
+  </div>
 
-    with col_toggle_vista:
-        # Botones toggle: área / velas
-        b1, b2 = st.columns(2)
-        with b1:
-            area_active = st.session_state.eq_vista == "area"
-            if st.button(
-                "📈 Área",
-                key="btn_area",
-                help="Vista de área (línea + gradiente)",
-                type="primary" if area_active else "secondary",
-            ):
-                st.session_state.eq_vista = "area"
-                st.rerun()
-        with b2:
-            candle_active = st.session_state.eq_vista == "velas"
-            if st.button(
-                "🕯 Velas",
-                key="btn_velas",
-                help="Vista de velas japonesas por día",
-                type="primary" if candle_active else "secondary",
-            ):
-                st.session_state.eq_vista = "velas"
-                st.rerun()
+  <div class="pills" id="pills">
+    <button class="pill" onclick="setPeriod(this,'1M')">1M</button>
+    <button class="pill" onclick="setPeriod(this,'3M')">3M</button>
+    <button class="pill" onclick="setPeriod(this,'6M')">6M</button>
+    <button class="pill" onclick="setPeriod(this,'YTD')">YTD</button>
+    <button class="pill active" onclick="setPeriod(this,'ALL')">Total</button>
+  </div>
 
-    # ── Pills de periodo ──────────────────────────────────────────────────────
-    periodos = ["1M", "3M", "6M", "YTD", "TOTAL"]
-    periodo = st.radio(
-        "", periodos,
-        index=periodos.index(st.session_state.eq_periodo),
-        horizontal=True,
-        key="eq_radio",
-        label_visibility="collapsed",
-    )
-    st.session_state.eq_periodo = periodo
+  <div class="metrics">
+    <div class="mc"><div class="mc-label">Rentabilidad</div><div class="mc-val" id="mRent">—</div></div>
+    <div class="mc"><div class="mc-label">Balance</div><div class="mc-val" style="color:#3b82f6" id="mBal">—</div></div>
+    <div class="mc"><div class="mc-label">Max Drawdown</div><div class="mc-val" style="color:#f43f5e" id="mDD">—</div></div>
+    <div class="mc"><div class="mc-label">Win Rate</div><div class="mc-val" style="color:#2dd4bf" id="mWR">—</div></div>
+  </div>
 
-    df_f = filter_equity(df_s, periodo)
+  <div class="chart-wrap" id="chartWrap">
+    <canvas id="cv" role="img" aria-label="Curva de rentabilidad acumulada"></canvas>
+  </div>
 
-    # ── Métricas resumen ──────────────────────────────────────────────────────
-    equity_f   = df_f["pnl_net"].cumsum()
-    rent_f     = equity_f / capital * 100
-    balance_f  = capital + equity_f
-    rent_val   = rent_f.iloc[-1] if len(rent_f) else 0
-    bal_val    = balance_f.iloc[-1] if len(balance_f) else capital
-    peak_f     = equity_f.cummax()
-    dd_f       = (equity_f - peak_f) / peak_f.replace(0, np.nan) * 100
-    max_dd     = dd_f.min() if not dd_f.isna().all() else 0
-    win_rate_f = df_f["win"].mean() * 100 if len(df_f) else 0
-    rent_color = "#4ade80" if rent_val >= 0 else "#f43f5e"
+  <div class="slider-row">
+    <span class="slider-lbl">Altura</span>
+    <input type="range" min="160" max="480" step="10" value="260" id="hSlider" oninput="resizeChart(this.value)">
+    <span class="slider-val" id="hVal">260 px</span>
+  </div>
+</div>
 
-    m1, m2, m3, m4 = st.columns(4)
-    for col, label, value, color in [
-        (m1, "Rentabilidad acum.", f"{rent_val:+.2f}%",  rent_color),
-        (m2, "Balance",            f"${bal_val:,.0f}",    "#3b82f6"),
-        (m3, "Max Drawdown",       f"{max_dd:.1f}%",      "#f43f5e"),
-        (m4, "Win Rate período",   f"{win_rate_f:.1f}%",  TEAL),
-    ]:
-        col.markdown(f"""
-<div style="background:{_card_bg};border:1px solid {_card_border};border-radius:8px;
-     padding:12px 16px;margin-bottom:10px;">
-  <div style="font-size:9px;color:#475569;text-transform:uppercase;
-       letter-spacing:0.12em;font-weight:600;margin-bottom:4px;">{label}</div>
-  <div style="font-family:'JetBrains Mono',monospace;font-size:18px;
-       font-weight:700;color:{color};">{value}</div>
-</div>""", unsafe_allow_html=True)
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const RAW = {data_json};
+const CAPITAL = RAW.capital;
+let vista = 'area';
+let period = 'ALL';
+let chartH = 260;
+let inst = null;
 
-    # ── Gráfica según vista activa ────────────────────────────────────────────
-    if st.session_state.eq_vista == "area":
-        fig = build_equity_area(df_f, capital)
-    else:
-        fig = build_equity_candles(df_f, capital)
+// Parsear fechas
+const allDates = RAW.dates.map(s => new Date(s));
+const allRent  = RAW.rent;
+const allWins  = RAW.wins;
 
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+function sliceData(p) {{
+  const n = allDates.length;
+  const now = allDates[n-1];
+  let from = 0;
+  if (p === '1M') {{ const d=new Date(now); d.setDate(d.getDate()-30); from=allDates.findIndex(x=>x>=d); }}
+  else if (p === '3M') {{ const d=new Date(now); d.setDate(d.getDate()-90); from=allDates.findIndex(x=>x>=d); }}
+  else if (p === '6M') {{ const d=new Date(now); d.setDate(d.getDate()-180); from=allDates.findIndex(x=>x>=d); }}
+  else if (p === 'YTD') {{ const d=new Date(now.getFullYear(),0,1); from=allDates.findIndex(x=>x>=d); }}
+  if (from < 0) from = 0;
+  const dates = allDates.slice(from);
+  const rentRaw = allRent.slice(from);
+  const offset = from > 0 ? allRent[from-1] : 0;
+  const rent = rentRaw.map(v => parseFloat((v - offset).toFixed(2)));
+  const wins = allWins.slice(from);
+  return {{ dates, rent, wins }};
+}}
 
-    # Timestamp
-    ultima = df_f["close_dt"].max()
-    st.caption(
-        f"última actualización: {ultima.strftime('%d/%m/%Y %H:%M')} UTC  ·  "
-        f"{len(df_f)} operaciones en el periodo"
-    )
+function fmtDate(d) {{
+  return d.toLocaleDateString('es-ES', {{day:'2-digit', month:'short', year:'2-digit'}});
+}}
+
+function updateMetrics(rent, wins) {{
+  const last = rent[rent.length-1];
+  const isPos = last >= 0;
+  const clr = isPos ? '#4ade80' : '#f43f5e';
+  document.getElementById('mRent').textContent = (last>=0?'+':'')+last.toFixed(2)+'%';
+  document.getElementById('mRent').style.color = clr;
+  document.getElementById('mBal').textContent = '$'+(CAPITAL*(1+last/100)).toLocaleString('es-ES',{{maximumFractionDigits:0}});
+  document.getElementById('badge').textContent = (last>=0?'+':'')+last.toFixed(2)+'%';
+  document.getElementById('badge').style.color = clr;
+  document.getElementById('badge').style.background = isPos?'rgba(74,222,128,0.12)':'rgba(244,63,94,0.12)';
+  document.getElementById('badge').style.borderColor = isPos?'rgba(74,222,128,0.3)':'rgba(244,63,94,0.3)';
+  let peak=0, dd=0;
+  rent.forEach(v=>{{ if(v>peak) peak=v; const d=v-peak; if(d<dd) dd=d; }});
+  document.getElementById('mDD').textContent = dd.toFixed(1)+'%';
+  const wr = wins.length ? (wins.reduce((a,b)=>a+b,0)/wins.length*100).toFixed(1) : '—';
+  document.getElementById('mWR').textContent = wr+'%';
+  document.getElementById('ts').textContent = 'última actualización: '+RAW.ultima+' UTC';
+}}
+
+function buildArea(dates, rent, ctx) {{
+  const last = rent[rent.length-1];
+  const isPos = last >= 0;
+  const lineClr = isPos ? '#4ade80' : '#f43f5e';
+  const h = chartH;
+  const grad = ctx.createLinearGradient(0,0,0,h);
+  if (isPos) {{
+    grad.addColorStop(0,   'rgba(74,222,128,0.55)');
+    grad.addColorStop(0.45,'rgba(74,222,128,0.22)');
+    grad.addColorStop(0.78,'rgba(74,222,128,0.07)');
+    grad.addColorStop(1,   'rgba(74,222,128,0.00)');
+  }} else {{
+    grad.addColorStop(0,'rgba(244,63,94,0.00)');
+    grad.addColorStop(1,'rgba(244,63,94,0.50)');
+  }}
+  const gradNeg = ctx.createLinearGradient(0,0,0,h);
+  gradNeg.addColorStop(0,'rgba(244,63,94,0.00)');
+  gradNeg.addColorStop(1,'rgba(244,63,94,0.55)');
+
+  return new Chart(ctx, {{
+    type: 'line',
+    data: {{
+      labels: dates,
+      datasets: [{{
+        data: rent,
+        borderColor: lineClr,
+        borderWidth: 1.8,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: lineClr,
+        tension: 0.3,
+        fill: true,
+        backgroundColor: grad,
+        segment: {{
+          backgroundColor: c => rent[c.p0DataIndex] < 0 ? gradNeg : grad,
+          borderColor:     c => rent[c.p0DataIndex] < 0 ? '#f43f5e' : lineClr,
+        }}
+      }}]
+    }},
+    options: {{
+      responsive: true, maintainAspectRatio: false,
+      interaction: {{mode:'index', intersect:false}},
+      plugins: {{
+        legend: {{display:false}},
+        tooltip: {{
+          backgroundColor:'rgba(10,15,26,0.95)',
+          borderColor:'rgba(255,255,255,0.08)',
+          borderWidth:1,
+          titleColor:'#94a3b8',
+          bodyColor:'#fff',
+          padding:10,
+          callbacks: {{
+            title: items => fmtDate(dates[items[0].dataIndex]),
+            label: item => ' Rentabilidad: '+(item.raw>=0?'+':'')+item.raw.toFixed(2)+'%'
+          }}
+        }}
+      }},
+      scales: {{
+        x: {{
+          grid: {{color:'rgba(255,255,255,0.03)'}},
+          ticks: {{color:'#4b5563', font:{{size:10}}, maxTicksLimit:8, maxRotation:0,
+                   callback: (v,i) => fmtDate(dates[i]) }},
+          border: {{display:false}}
+        }},
+        y: {{
+          grid: {{color:'rgba(255,255,255,0.05)'}},
+          ticks: {{color:'#4b5563', font:{{size:10}}, callback: v=>v.toFixed(1)+'%'}},
+          border: {{display:false}}
+        }}
+      }}
+    }}
+  }});
+}}
+
+function buildVelas(dates, rent, ctx) {{
+  // Agrupar en velas diarias
+  const dayMap = {{}};
+  dates.forEach((d,i) => {{
+    const key = d.toISOString().slice(0,10);
+    if (!dayMap[key]) dayMap[key] = [];
+    dayMap[key].push(rent[i]);
+  }});
+  const ohlc = Object.entries(dayMap).map(([k,vals]) => ({{
+    x: k,
+    o: parseFloat(vals[0].toFixed(2)),
+    h: parseFloat(Math.max(...vals).toFixed(2)),
+    l: parseFloat(Math.min(...vals).toFixed(2)),
+    c: parseFloat(vals[vals.length-1].toFixed(2))
+  }}));
+
+  return new Chart(ctx, {{
+    type: 'bar',
+    data: {{
+      datasets: [{{
+        label: 'High-Low',
+        data: ohlc.map(d => ({{x:d.x, y:[d.l,d.h]}})),
+        backgroundColor: ohlc.map(d => d.c>=d.o?'rgba(74,222,128,0.5)':'rgba(244,63,94,0.5)'),
+        borderColor:     ohlc.map(d => d.c>=d.o?'#4ade80':'#f43f5e'),
+        borderWidth: 1,
+        barPercentage: 0.3,
+      }},{{
+        label: 'Open-Close',
+        data: ohlc.map(d => ({{x:d.x, y:[d.o,d.c]}})),
+        backgroundColor: ohlc.map(d => d.c>=d.o?'rgba(74,222,128,0.85)':'rgba(244,63,94,0.85)'),
+        borderColor:     ohlc.map(d => d.c>=d.o?'#4ade80':'#f43f5e'),
+        borderWidth: 1,
+        barPercentage: 0.8,
+      }}]
+    }},
+    options: {{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{{legend:{{display:false}},tooltip:{{
+        backgroundColor:'rgba(10,15,26,0.95)',
+        borderColor:'rgba(255,255,255,0.08)', borderWidth:1,
+        titleColor:'#94a3b8', bodyColor:'#fff', padding:10
+      }}}},
+      scales:{{
+        x:{{ type:'category', grid:{{color:'rgba(255,255,255,0.03)'}},
+             ticks:{{color:'#4b5563',font:{{size:10}},maxTicksLimit:10}}, border:{{display:false}} }},
+        y:{{ grid:{{color:'rgba(255,255,255,0.05)'}},
+             ticks:{{color:'#4b5563',font:{{size:10}},callback:v=>v.toFixed(1)+'%'}},
+             border:{{display:false}} }}
+      }}
+    }}
+  }});
+}}
+
+function render() {{
+  const wrap = document.getElementById('chartWrap');
+  wrap.style.height = chartH+'px';
+  const cv = document.getElementById('cv');
+  if (inst) {{ inst.destroy(); inst=null; }}
+  const {{dates, rent, wins}} = sliceData(period);
+  updateMetrics(rent, wins);
+  const ctx = cv.getContext('2d');
+  inst = vista==='area' ? buildArea(dates,rent,ctx) : buildVelas(dates,rent,ctx);
+}}
+
+function setPeriod(el, p) {{
+  document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  period=p; render();
+}}
+function setVista(v) {{
+  vista=v;
+  document.getElementById('btnArea').classList.toggle('active', v==='area');
+  document.getElementById('btnVelas').classList.toggle('active', v==='velas');
+  render();
+}}
+function resizeChart(h) {{
+  chartH=parseInt(h);
+  document.getElementById('hVal').textContent=h+' px';
+  render();
+}}
+
+render();
+</script>
+</body>
+</html>"""
+    components.html(html, height=chartH + 220, scrolling=False)
+
+
+
 
 
 # ── Global theme toggle ────────────────────────────────────────────────────────
