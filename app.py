@@ -311,6 +311,7 @@ MUTED  = "#334155"
 # ── Equity curve Darwinex — componente HTML puro con Chart.js ─────────────────
 import streamlit.components.v1 as components
 import json
+from mt5_live_tab import show_live_tab
 
 def show_equity_darwinex(df_s: pd.DataFrame, capital: float):
     """
@@ -786,9 +787,9 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
-tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen = st.tabs([
+tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen, tab_live = st.tabs([
     "◈ Dashboard", "⬚ Calendario", "≡ Operaciones",
-    "◎ Símbolo", "◷ Horario", "△ Kaizen"
+    "◎ Símbolo", "◷ Horario", "△ Kaizen", "⚡ Live MT5"
 ])
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1540,3 +1541,10 @@ with tab_kaizen:
   <div style="font-family:'JetBrains Mono';font-size:11px;color:#e2e8f0;min-width:140px;">{stat_txt}</div>
   <div style="font-size:10px;color:#475569;">▸ {advice}</div>
 </div>""", unsafe_allow_html=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TAB LIVE MT5
+# ══════════════════════════════════════════════════════════════════════════════
+with tab_live:
+    show_live_tab()
+
