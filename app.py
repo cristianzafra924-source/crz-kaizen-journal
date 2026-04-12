@@ -763,30 +763,250 @@ with tab_dash:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── PnL Diario ────────────────────────────────────────────────────────────
+    # ── PnL Mensual + Diario (componente HTML) ────────────────────────────────
     st.markdown("<br>", unsafe_allow_html=True)
-    daily = df_s.groupby("close_date")["pnl_net"].sum().reset_index()
-    daily.columns = ["fecha", "pnl"]
-    daily["ma7"] = daily["pnl"].rolling(7, min_periods=1).mean()
-    colors_bar = [GREEN if v >= 0 else RED for v in daily["pnl"]]
 
-    fig_daily = go.Figure()
-    fig_daily.add_trace(go.Bar(
-        x=daily["fecha"], y=daily["pnl"],
-        marker_color=colors_bar, marker_line_width=0, opacity=0.7,
-        name="PnL",
-        hovertemplate="%{x}<br>PnL: $%{y:+,.2f}<extra></extra>"
-    ))
-    fig_daily.add_trace(go.Scatter(
-        x=daily["fecha"], y=daily["ma7"],
-        mode="lines", name="Media 7d",
-        line=dict(color=AMBER, width=1.5, dash="dot"),
-        hovertemplate="Media 7d: $%{y:+,.2f}<extra></extra>"
-    ))
-    fig_daily.add_hline(y=0, line_color=MUTED, opacity=0.3, line_width=1)
-    fig_daily.update_layout(**LAYOUT, height=240,
-        title=dict(text="PnL Diario + Media 7d", font=dict(size=12, color="#94a3b8")))
-    st.plotly_chart(fig_daily, use_container_width=True)
+    # Preparar datos para el componente
+    daily_df = df_s.copy()
+    daily_df["fecha_str"] = daily_df["close_dt"].dt.strftime("%Y-%m-%d")
+    daily_df["year"]  = daily_df["close_dt"].dt.year
+    daily_df["month"] = daily_df["close_dt"].dt.month
+
+    # PnL diario agrupado
+    daily_pnl = (
+        daily_df.groupby("fecha_str")["pnl_net"].sum()
+        .reset_index()
+        .rename(columns={"fecha_str": "fecha", "pnl_net": "pnl"})
+    )
+    daily_pnl["ma7"] = daily_pnl["pnl"].rolling(7, min_periods=1).mean()
+
+    # PnL mensual agrupado
+    monthly_pnl = (
+        daily_df.groupby(["year", "month"])["pnl_net"].sum()
+        .reset_index()
+        .rename(columns={"pnl_net": "pnl"})
+    )
+
+    # Rentabilidad mensual %
+    monthly_pnl["rent"] = monthly_pnl["pnl"] / stats["capital"] * 100
+    pnl_total_rent = stats["pnl_net"] / stats["capital"] * 100
+
+    daily_json   = json.dumps({
+        "dates": daily_pnl["fecha"].tolist(),
+        "pnl":   [round(v, 2) for v in daily_pnl["pnl"].tolist()],
+        "ma7":   [round(v, 2) for v in daily_pnl["ma7"].tolist()],
+    })
+    monthly_json = json.dumps([
+        {"year": int(r.year), "month": int(r.month), "pnl": round(r.pnl, 2), "rent": round(r.rent, 2)}
+        for r in monthly_pnl.itertuples()
+    ])
+    total_rent_json = round(pnl_total_rent, 2)
+
+    MONTH_NAMES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+
+    html_pnl = f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+*{{box-sizing:border-box;margin:0;padding:0;}}
+body{{background:#0d1117;font-family:Inter,sans-serif;color:#e2e8f0;}}
+.wrap{{background:#131a24;border-radius:10px;padding:16px 18px;}}
+.section-title{{font-size:10px;font-weight:700;color:#2dd4bf;letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;}}
+
+/* ── Tabla mensual ── */
+.month-table{{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px;}}
+.month-table th{{color:#475569;font-weight:600;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:6px 8px;text-align:right;border-bottom:1px solid #1e2a3a;}}
+.month-table th:first-child{{text-align:left;}}
+.month-table td{{padding:7px 8px;text-align:right;border-bottom:1px solid #0f1923;font-family:'Courier New',monospace;font-size:12px;}}
+.month-table td:first-child{{text-align:left;color:#94a3b8;font-family:Inter,sans-serif;font-size:11px;font-weight:600;}}
+.month-table tr:last-child td{{border-bottom:none;}}
+.pos{{color:#4ade80;font-weight:700;}}
+.neg{{color:#f43f5e;font-weight:700;}}
+.neu{{color:#475569;}}
+.total-row{{font-size:13px;font-weight:700;color:#f59e0b;text-align:right;padding:10px 8px 4px;}}
+
+/* ── Filtros barra diaria ── */
+.filters{{display:flex;align-items:center;gap:8px;margin:14px 0 8px;flex-wrap:wrap;}}
+.filter-label{{font-size:10px;color:#475569;font-weight:600;text-transform:uppercase;letter-spacing:.08em;}}
+.pill{{font-size:10px;font-weight:700;padding:3px 10px;border-radius:4px;cursor:pointer;
+  border:1px solid #1e2a3a;color:#475569;background:transparent;text-transform:uppercase;transition:all .15s;}}
+.pill.active{{background:rgba(45,212,191,.12);color:#2dd4bf;border-color:rgba(45,212,191,.3);}}
+select{{background:#0d1117;border:1px solid #1e2a3a;color:#e2e8f0;font-size:11px;
+  padding:4px 8px;border-radius:5px;cursor:pointer;outline:none;}}
+</style>
+</head><body>
+<div class="wrap">
+  <div class="section-title">◈ Rentabilidad por mes</div>
+
+  <table class="month-table" id="monthTable"></table>
+  <div class="total-row" id="totalRow"></div>
+
+  <div class="filters">
+    <span class="filter-label">Ver:</span>
+    <button class="pill active" onclick="setView(this,'month')">Por Mes</button>
+    <button class="pill" onclick="setView(this,'day')">Por Día</button>
+    <span class="filter-label" id="dayFilterLabel" style="display:none;margin-left:8px;">Año:</span>
+    <select id="yearSel" style="display:none;" onchange="renderBar()"></select>
+    <select id="monthSel" style="display:none;" onchange="renderBar()"></select>
+  </div>
+
+  <div style="position:relative;height:200px;background:#0d1117;border-radius:8px;overflow:hidden;">
+    <canvas id="barChart" role="img" aria-label="PnL diario o mensual por periodo"></canvas>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const DAILY   = {daily_json};
+const MONTHLY = {monthly_json};
+const TOTAL_RENT = {total_rent_json};
+const MONTHS  = {json.dumps(MONTH_NAMES)};
+let view = 'month';
+let barInst = null;
+
+// ── Tabla mensual ─────────────────────────────────────────────────────────────
+function buildTable() {{
+  const years = [...new Set(MONTHLY.map(r=>r.year))].sort();
+  let html = '<thead><tr><th>Año</th>';
+  MONTHS.forEach(m => html += `<th>${{m}}</th>`);
+  html += '</tr></thead><tbody>';
+  years.forEach(y => {{
+    html += `<tr><td>${{y}}</td>`;
+    for(let m=1;m<=12;m++) {{
+      const rec = MONTHLY.find(r=>r.year===y&&r.month===m);
+      if(rec) {{
+        const cls = rec.rent>=0?'pos':'neg';
+        html += `<td class="${{cls}}">${{rec.rent>=0?'+':''}}${{rec.rent.toFixed(2)}}%</td>`;
+      }} else {{
+        html += `<td class="neu">---</td>`;
+      }}
+    }}
+    html += '</tr>';
+  }});
+  html += '</tbody>';
+  document.getElementById('monthTable').innerHTML = html;
+  const cls = TOTAL_RENT>=0?'pos':'neg';
+  document.getElementById('totalRow').innerHTML =
+    `Rentabilidad total: <span class="${{cls}}" style="font-size:18px;">${{TOTAL_RENT>=0?'+':''}}${{TOTAL_RENT.toFixed(2)}}%</span>`;
+}}
+
+// ── Poblar selects ────────────────────────────────────────────────────────────
+function populateSelects() {{
+  const years = [...new Set(DAILY.dates.map(d=>d.slice(0,4)))].sort();
+  const ySel = document.getElementById('yearSel');
+  ySel.innerHTML = '<option value="ALL">Todos los años</option>' +
+    years.map(y=>`<option value="${{y}}">${{y}}</option>`).join('');
+  const mSel = document.getElementById('monthSel');
+  mSel.innerHTML = '<option value="ALL">Todos los meses</option>' +
+    MONTHS.map((m,i)=>`<option value="${{i+1}}">${{m}}</option>`).join('');
+}}
+
+// ── Renderizar barra ──────────────────────────────────────────────────────────
+function renderBar() {{
+  if(barInst){{ barInst.destroy(); barInst=null; }}
+  const ctx = document.getElementById('barChart').getContext('2d');
+
+  if(view==='month') {{
+    const labels = MONTHLY.map(r=>MONTHS[r.month-1]+' '+r.year);
+    const data   = MONTHLY.map(r=>r.pnl);
+    barInst = new Chart(ctx, {{
+      type:'bar',
+      data:{{
+        labels,
+        datasets:[{{
+          data,
+          backgroundColor: data.map(v=>v>=0?'rgba(74,222,128,0.75)':'rgba(244,63,94,0.75)'),
+          borderColor:     data.map(v=>v>=0?'#4ade80':'#f43f5e'),
+          borderWidth:1, borderRadius:3
+        }}]
+      }},
+      options:barOpts('PnL Mensual ($)', d=>
+        (d>=0?'+':'')+d.toLocaleString('es-ES',{{minimumFractionDigits:0,maximumFractionDigits:0}})+'$'
+      )
+    }});
+  }} else {{
+    const selY = document.getElementById('yearSel').value;
+    const selM = document.getElementById('monthSel').value;
+    let dates = DAILY.dates;
+    let pnl   = DAILY.pnl;
+    let ma7   = DAILY.ma7;
+    if(selY!=='ALL') {{
+      const idx = dates.map((_,i)=>i).filter(i=>dates[i].startsWith(selY));
+      dates=idx.map(i=>dates[i]); pnl=idx.map(i=>pnl[i]); ma7=idx.map(i=>ma7[i]);
+    }}
+    if(selM!=='ALL') {{
+      const mm=String(selM).padStart(2,'0');
+      const idx=dates.map((_,i)=>i).filter(i=>dates[i].slice(5,7)===mm);
+      dates=idx.map(i=>dates[i]); pnl=idx.map(i=>pnl[i]); ma7=idx.map(i=>ma7[i]);
+    }}
+    const labels = dates.map(d=>{{
+      const dt=new Date(d); return dt.toLocaleDateString('es-ES',{{day:'2-digit',month:'short'}});
+    }});
+    barInst = new Chart(ctx, {{
+      type:'bar',
+      data:{{
+        labels,
+        datasets:[
+          {{
+            type:'bar', label:'PnL',
+            data:pnl,
+            backgroundColor: pnl.map(v=>v>=0?'rgba(74,222,128,0.75)':'rgba(244,63,94,0.75)'),
+            borderColor:     pnl.map(v=>v>=0?'#4ade80':'#f43f5e'),
+            borderWidth:1, borderRadius:3, order:2
+          }},
+          {{
+            type:'line', label:'Media 7d',
+            data:ma7,
+            borderColor:'#f59e0b', borderWidth:1.5,
+            borderDash:[4,3], pointRadius:0,
+            tension:0.3, order:1
+          }}
+        ]
+      }},
+      options:barOpts('PnL Diario ($)', d=>
+        (d>=0?'+':'')+d.toLocaleString('es-ES',{{minimumFractionDigits:0,maximumFractionDigits:0}})+'$'
+      )
+    }});
+  }}
+}}
+
+function barOpts(title, fmtFn) {{
+  return {{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{{
+      legend:{{display:false}},
+      tooltip:{{
+        backgroundColor:'rgba(10,15,26,0.95)',
+        borderColor:'rgba(255,255,255,0.08)', borderWidth:1,
+        titleColor:'#94a3b8', bodyColor:'#fff', padding:10,
+        callbacks:{{ label: item => ' '+fmtFn(item.raw) }}
+      }}
+    }},
+    scales:{{
+      x:{{ grid:{{color:'rgba(255,255,255,0.03)'}}, ticks:{{color:'#4b5563',font:{{size:10}},maxTicksLimit:12,maxRotation:45}}, border:{{display:false}} }},
+      y:{{ grid:{{color:'rgba(255,255,255,0.05)'}}, ticks:{{color:'#4b5563',font:{{size:10}},callback:v=>fmtFn(v)}}, border:{{display:false}} }}
+    }}
+  }};
+}}
+
+function setView(el, v) {{
+  document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  view=v;
+  const isDayView=v==='day';
+  document.getElementById('dayFilterLabel').style.display=isDayView?'':'none';
+  document.getElementById('yearSel').style.display=isDayView?'':'none';
+  document.getElementById('monthSel').style.display=isDayView?'':'none';
+  renderBar();
+}}
+
+buildTable();
+populateSelects();
+renderBar();
+</script>
+</body></html>"""
+
+    components.html(html_pnl, height=560, scrolling=False)
 
     # Win/Loss distribution + RR ratio
     col_wl, col_rr = st.columns(2)
