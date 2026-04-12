@@ -282,136 +282,204 @@ def filter_equity(df_s: pd.DataFrame, periodo: str) -> pd.DataFrame:
     return df_s.copy()
 
 
-def build_equity_darwinex(df_f: pd.DataFrame, capital: float) -> go.Figure:
-    """Equity curve doble eje: Rentabilidad % (área verde/roja) + Balance $ (línea azul punteada)."""
+def build_equity_area(df_f: pd.DataFrame, capital: float) -> go.Figure:
+    """Vista ÁREA — réplica Darwinex: gradiente verde con SVG fill, zona roja, línea neón."""
+    equity_f  = df_f["pnl_net"].cumsum()
+    rent_f    = equity_f / capital * 100
+    x_vals    = df_f["close_dt"].tolist()
+    r_vals    = rent_f.tolist()
+    rent_final = r_vals[-1]
+    last_green = rent_final >= 0
 
-    # Recalcular rentabilidad y balance sobre el slice filtrado
-    equity_f     = df_f["pnl_net"].cumsum()
-    balance_f    = capital + equity_f
-    rent_f       = equity_f / capital * 100
+    fig = go.Figure()
 
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-    # ── Área rentabilidad: positiva verde, negativa roja ──────────────────────
-    # Separar segmentos por signo para colorear área correctamente
-    x_vals  = df_f["close_dt"].tolist()
-    r_vals  = rent_f.tolist()
-
-    # Área verde (valores >= 0)
-    r_pos = [v if v >= 0 else 0 for v in r_vals]
-    fig.add_trace(go.Scatter(
-        x=x_vals, y=r_pos,
-        mode="none", fill="tozeroy",
-        fillcolor="rgba(34,197,94,0.18)",
-        showlegend=False, hoverinfo="skip",
-        name="_pos_fill"
-    ), secondary_y=False)
-
-    # Área roja (valores < 0)
+    # ── Zona ROJA (drawdown bajo cero) ───────────────────────────────────────
     r_neg = [v if v < 0 else 0 for v in r_vals]
     fig.add_trace(go.Scatter(
-        x=x_vals, y=r_neg,
-        mode="none", fill="tozeroy",
-        fillcolor="rgba(244,63,94,0.18)",
-        showlegend=False, hoverinfo="skip",
-        name="_neg_fill"
-    ), secondary_y=False)
+        x=x_vals, y=r_neg, mode="none",
+        fill="tozeroy", fillcolor="rgba(220,38,38,0.55)",
+        showlegend=False, hoverinfo="skip", name="_red"
+    ))
 
-    # Línea rentabilidad principal (color según último valor)
-    last_color = "#22c55e" if r_vals[-1] >= 0 else "#f43f5e"
+    # ── Área VERDE positiva con gradiente simulado (3 capas de opacidad) ─────
+    r_pos = [v if v >= 0 else 0 for v in r_vals]
+    # Capa base — relleno principal sólido
+    fig.add_trace(go.Scatter(
+        x=x_vals, y=r_pos, mode="none",
+        fill="tozeroy", fillcolor="rgba(34,197,94,0.55)",
+        showlegend=False, hoverinfo="skip", name="_green_base"
+    ))
+    # Capa media — más transparente hacia arriba
+    fig.add_trace(go.Scatter(
+        x=x_vals, y=r_pos, mode="none",
+        fill="tozeroy", fillcolor="rgba(34,197,94,0.20)",
+        showlegend=False, hoverinfo="skip", name="_green_mid"
+    ))
+    # Capa superior — casi transparente (efecto degradado)
+    r_top = [v * 0.6 if v >= 0 else 0 for v in r_vals]
+    fig.add_trace(go.Scatter(
+        x=x_vals, y=r_top, mode="none",
+        fill="tozeroy", fillcolor="rgba(34,197,94,0.08)",
+        showlegend=False, hoverinfo="skip", name="_green_top"
+    ))
+
+    # ── Línea neón principal ──────────────────────────────────────────────────
+    line_color = "#4ade80" if last_green else "#f43f5e"
     fig.add_trace(go.Scatter(
         x=x_vals, y=r_vals,
         mode="lines",
         name="Rentabilidad %",
-        line=dict(color=last_color, width=1.8),
-        hovertemplate="<b>%{x|%d %b %y}</b><br>Rent: %{y:.2f}%<extra></extra>",
-    ), secondary_y=False)
+        line=dict(color=line_color, width=2.0),
+        hovertemplate="<b>%{x|%d %b %y}</b><br>Rent: <b>%{y:.2f}%</b><extra></extra>",
+    ))
 
-    # ── Curva Balance $ punteada ──────────────────────────────────────────────
-    fig.add_trace(go.Scatter(
-        x=x_vals, y=balance_f.tolist(),
-        mode="lines",
-        name="Balance $",
-        line=dict(color="#3b82f6", width=1.5, dash="dot"),
-        hovertemplate="<b>%{x|%d %b %y}</b><br>Balance: $%{y:,.0f}<extra></extra>",
-    ), secondary_y=True)
+    # Línea base 0
+    fig.add_hline(y=0, line_color="rgba(255,255,255,0.12)", line_width=1)
 
-    # Línea base 0%
-    fig.add_hline(y=0, line_color="rgba(255,255,255,0.08)", line_width=1, secondary_y=False)
-
-    # ── Anotación rentabilidad final ──────────────────────────────────────────
-    rent_final = r_vals[-1]
+    # Anotación esquina superior derecha — estilo Darwinex
     fig.add_annotation(
-        x=1, y=1.06, xref="paper", yref="paper",
-        text=f"Rentabilidad: {rent_final:+.2f}%",
-        font=dict(size=11, color=last_color, family="JetBrains Mono"),
-        showarrow=False, align="right"
+        x=1, y=1, xref="paper", yref="paper",
+        text=f"<b>Rentabilidad:<br>{rent_final:+.2f}%</b>",
+        font=dict(size=12, color=line_color, family="Inter"),
+        bgcolor="rgba(10,15,26,0.75)",
+        bordercolor=line_color, borderwidth=1, borderpad=6,
+        showarrow=False, align="right", xanchor="right", yanchor="top",
     )
 
     fig.update_layout(
-        paper_bgcolor="#0a0f1a",
-        plot_bgcolor="#0a0f1a",
+        paper_bgcolor="#0d1220",
+        plot_bgcolor="#0d1220",
         font=dict(color="#64748b", family="Inter, sans-serif", size=11),
-        margin=dict(l=10, r=60, t=40, b=36),
+        margin=dict(l=52, r=20, t=24, b=40),
         hovermode="x unified",
         hoverlabel=dict(
             bgcolor="rgba(10,15,26,0.95)",
-            bordercolor="rgba(255,255,255,0.08)",
+            bordercolor="rgba(255,255,255,0.1)",
             font=dict(color="#ffffff", size=11),
         ),
-        legend=dict(
-            orientation="h", yanchor="bottom", y=1.02,
-            xanchor="left", x=0,
-            font=dict(size=10, color="#64748b"),
-            bgcolor="rgba(0,0,0,0)",
-        ),
-        height=320,
-        shapes=[dict(
-            type="rect", xref="paper", yref="paper",
-            x0=0, y0=0, x1=1, y1=1,
-            line=dict(color="#0f1923", width=1),
-            fillcolor="rgba(0,0,0,0)"
-        )],
+        showlegend=False,
+        height=340,
     )
-
-    # Eje Y izquierdo — rentabilidad %
     fig.update_yaxes(
-        secondary_y=False,
-        ticksuffix="%",
-        gridcolor="rgba(255,255,255,0.04)",
-        tickcolor="#334155",
-        tickfont=dict(color="#22c55e", size=10),
-        zerolinecolor="rgba(255,255,255,0.06)",
-        showline=False,
-    )
-    # Eje Y derecho — balance $
-    fig.update_yaxes(
-        secondary_y=True,
-        tickprefix="$",
-        gridcolor="rgba(0,0,0,0)",
-        tickcolor="#3b82f6",
-        tickfont=dict(color="#3b82f6", size=10),
-        showline=False,
+        ticksuffix="%", gridcolor="rgba(255,255,255,0.04)",
+        tickfont=dict(color="#6b7280", size=10),
+        zerolinecolor="rgba(255,255,255,0.08)", showline=False,
     )
     fig.update_xaxes(
-        gridcolor="rgba(255,255,255,0.04)",
-        tickcolor="#334155",
-        tickfont=dict(color="#475569", size=10),
-        showline=False,
+        gridcolor="rgba(255,255,255,0.03)",
+        tickfont=dict(color="#6b7280", size=10), showline=False,
+    )
+    return fig
+
+
+def build_equity_candles(df_f: pd.DataFrame, capital: float) -> go.Figure:
+    """Vista VELAS — agrupa por día y muestra candlestick de rentabilidad %."""
+    df_c = df_f.copy()
+    df_c["close_date"] = df_c["close_dt"].dt.date
+    df_c["equity_cum"] = df_c["pnl_net"].cumsum() / capital * 100
+
+    # OHLC diario de rentabilidad acumulada
+    ohlc = df_c.groupby("close_date")["equity_cum"].agg(
+        open="first", high="max", low="min", close="last"
+    ).reset_index()
+
+    fig = go.Figure(go.Candlestick(
+        x=ohlc["close_date"],
+        open=ohlc["open"], high=ohlc["high"],
+        low=ohlc["low"],   close=ohlc["close"],
+        increasing=dict(line=dict(color="#4ade80", width=1), fillcolor="rgba(74,222,128,0.7)"),
+        decreasing=dict(line=dict(color="#f43f5e", width=1), fillcolor="rgba(244,63,94,0.7)"),
+        name="Rent. diaria %",
+        hovertemplate=(
+            "<b>%{x}</b><br>"
+            "Apertura: %{open:.2f}%<br>"
+            "Máximo: %{high:.2f}%<br>"
+            "Mínimo: %{low:.2f}%<br>"
+            "Cierre: %{close:.2f}%<extra></extra>"
+        )
+    ))
+
+    fig.add_hline(y=0, line_color="rgba(255,255,255,0.12)", line_width=1)
+
+    rent_final = ohlc["close"].iloc[-1]
+    line_color = "#4ade80" if rent_final >= 0 else "#f43f5e"
+    fig.add_annotation(
+        x=1, y=1, xref="paper", yref="paper",
+        text=f"<b>Rentabilidad:<br>{rent_final:+.2f}%</b>",
+        font=dict(size=12, color=line_color, family="Inter"),
+        bgcolor="rgba(10,15,26,0.75)",
+        bordercolor=line_color, borderwidth=1, borderpad=6,
+        showarrow=False, align="right", xanchor="right", yanchor="top",
+    )
+
+    fig.update_layout(
+        paper_bgcolor="#0d1220", plot_bgcolor="#0d1220",
+        font=dict(color="#64748b", family="Inter, sans-serif", size=11),
+        margin=dict(l=52, r=20, t=24, b=40),
+        hovermode="x",
+        hoverlabel=dict(bgcolor="rgba(10,15,26,0.95)", font=dict(color="#fff", size=11)),
+        showlegend=False, height=340,
+        xaxis_rangeslider_visible=False,
+    )
+    fig.update_yaxes(
+        ticksuffix="%", gridcolor="rgba(255,255,255,0.04)",
+        tickfont=dict(color="#6b7280", size=10),
+        zerolinecolor="rgba(255,255,255,0.08)", showline=False,
+    )
+    fig.update_xaxes(
+        gridcolor="rgba(255,255,255,0.03)",
+        tickfont=dict(color="#6b7280", size=10), showline=False,
     )
     return fig
 
 
 def show_equity_darwinex(df_s: pd.DataFrame, capital: float):
-    """Bloque completo: pills de periodo + métricas + gráfica."""
+    """Bloque completo: header Darwinex + toggle vista + pills periodo + métricas + gráfica."""
 
-    # Session state para el periodo
+    # Session state
     if "eq_periodo" not in st.session_state:
         st.session_state.eq_periodo = "TOTAL"
+    if "eq_vista" not in st.session_state:
+        st.session_state.eq_vista = "area"
 
+    # ── Header estilo Darwinex ────────────────────────────────────────────────
+    _lm = st.session_state.get("light_mode", False)
+    _card_bg     = "#ffffff" if _lm else "#0a0f1a"
+    _card_border = "#e2e8f0" if _lm else "#1e2a3a"
+
+    col_title, col_toggle_vista = st.columns([3, 1])
+    with col_title:
+        st.markdown("""
+<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px;">
+  <span style="font-size:22px;font-weight:700;color:#f1f5f9;">Rentabilidad</span>
+</div>""", unsafe_allow_html=True)
+
+    with col_toggle_vista:
+        # Botones toggle: área / velas
+        b1, b2 = st.columns(2)
+        with b1:
+            area_active = st.session_state.eq_vista == "area"
+            if st.button(
+                "📈 Área",
+                key="btn_area",
+                help="Vista de área (línea + gradiente)",
+                type="primary" if area_active else "secondary",
+            ):
+                st.session_state.eq_vista = "area"
+                st.rerun()
+        with b2:
+            candle_active = st.session_state.eq_vista == "velas"
+            if st.button(
+                "🕯 Velas",
+                key="btn_velas",
+                help="Vista de velas japonesas por día",
+                type="primary" if candle_active else "secondary",
+            ):
+                st.session_state.eq_vista = "velas"
+                st.rerun()
+
+    # ── Pills de periodo ──────────────────────────────────────────────────────
     periodos = ["1M", "3M", "6M", "YTD", "TOTAL"]
-
-    # Pills de periodo con st.radio estilizado
     periodo = st.radio(
         "", periodos,
         index=periodos.index(st.session_state.eq_periodo),
@@ -424,47 +492,47 @@ def show_equity_darwinex(df_s: pd.DataFrame, capital: float):
     df_f = filter_equity(df_s, periodo)
 
     # ── Métricas resumen ──────────────────────────────────────────────────────
-    equity_f  = df_f["pnl_net"].cumsum()
-    rent_f    = equity_f / capital * 100
-    balance_f = capital + equity_f
-    rent_val  = rent_f.iloc[-1] if len(rent_f) else 0
-    bal_val   = balance_f.iloc[-1] if len(balance_f) else capital
-
-    # Max drawdown del periodo
-    peak_f = equity_f.cummax()
-    dd_f   = (equity_f - peak_f) / peak_f.replace(0, np.nan) * 100
-    max_dd = dd_f.min() if not dd_f.isna().all() else 0
-
+    equity_f   = df_f["pnl_net"].cumsum()
+    rent_f     = equity_f / capital * 100
+    balance_f  = capital + equity_f
+    rent_val   = rent_f.iloc[-1] if len(rent_f) else 0
+    bal_val    = balance_f.iloc[-1] if len(balance_f) else capital
+    peak_f     = equity_f.cummax()
+    dd_f       = (equity_f - peak_f) / peak_f.replace(0, np.nan) * 100
+    max_dd     = dd_f.min() if not dd_f.isna().all() else 0
     win_rate_f = df_f["win"].mean() * 100 if len(df_f) else 0
-
-    rent_color = "#22c55e" if rent_val >= 0 else "#f43f5e"
-    _lm = st.session_state.get("light_mode", False)
-    _card_bg = "#ffffff" if _lm else "#0a0f1a"
-    _card_border = "#e2e8f0" if _lm else "#1e2a3a"
+    rent_color = "#4ade80" if rent_val >= 0 else "#f43f5e"
 
     m1, m2, m3, m4 = st.columns(4)
     for col, label, value, color in [
-        (m1, "Rentabilidad acum.", f"{rent_val:+.2f}%",       rent_color),
-        (m2, "Balance",            f"${bal_val:,.0f}",         "#3b82f6"),
-        (m3, "Max Drawdown",       f"{max_dd:.1f}%",           "#f43f5e"),
-        (m4, "Win Rate período",   f"{win_rate_f:.1f}%",       TEAL),
+        (m1, "Rentabilidad acum.", f"{rent_val:+.2f}%",  rent_color),
+        (m2, "Balance",            f"${bal_val:,.0f}",    "#3b82f6"),
+        (m3, "Max Drawdown",       f"{max_dd:.1f}%",      "#f43f5e"),
+        (m4, "Win Rate período",   f"{win_rate_f:.1f}%",  TEAL),
     ]:
         col.markdown(f"""
 <div style="background:{_card_bg};border:1px solid {_card_border};border-radius:8px;
-     padding:12px 16px;margin-bottom:8px;">
+     padding:12px 16px;margin-bottom:10px;">
   <div style="font-size:9px;color:#475569;text-transform:uppercase;
        letter-spacing:0.12em;font-weight:600;margin-bottom:4px;">{label}</div>
   <div style="font-family:'JetBrains Mono',monospace;font-size:18px;
        font-weight:700;color:{color};">{value}</div>
 </div>""", unsafe_allow_html=True)
 
-    # ── Gráfica ───────────────────────────────────────────────────────────────
-    fig = build_equity_darwinex(df_f, capital)
+    # ── Gráfica según vista activa ────────────────────────────────────────────
+    if st.session_state.eq_vista == "area":
+        fig = build_equity_area(df_f, capital)
+    else:
+        fig = build_equity_candles(df_f, capital)
+
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     # Timestamp
     ultima = df_f["close_dt"].max()
-    st.caption(f"Última actualización: {ultima.strftime('%d/%m/%Y %H:%M')} UTC · {len(df_f)} operaciones en el periodo")
+    st.caption(
+        f"última actualización: {ultima.strftime('%d/%m/%Y %H:%M')} UTC  ·  "
+        f"{len(df_f)} operaciones en el periodo"
+    )
 
 
 # ── Global theme toggle ────────────────────────────────────────────────────────
