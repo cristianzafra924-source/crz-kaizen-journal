@@ -268,16 +268,16 @@ def parse_mt5(file) -> dict:
     df_sorted = df.sort_values("close_dt").reset_index(drop=True)
     df_sorted["equity"]      = df_sorted["pnl_net"].cumsum()
     df_sorted["equity_peak"] = df_sorted["equity"].cummax()
-
-    CAPITAL = st.session_state.get("capital_manual", 10_000)
-    df_sorted["balance"]      = CAPITAL + df_sorted["equity"]
-    df_sorted["rentabilidad"] = df_sorted["equity"] / CAPITAL * 100
+    # capital, balance y rentabilidad se calculan FUERA del parser
+    # para que cambiar el input no requiera re-parsear el archivo
+    df_sorted["balance"]      = 0.0
+    df_sorted["rentabilidad"] = 0.0
 
     peak = df_sorted["equity"].cummax()
     dd   = (df_sorted["equity"] - peak) / peak.replace(0, np.nan) * 100
     stats["max_dd"]    = dd.min() if not dd.isna().all() else 0
     stats["df_sorted"] = df_sorted
-    stats["capital"]   = CAPITAL
+    stats["capital"]   = 10_000  # placeholder, se sobreescribe fuera
 
     wr_score = min(stats["win_rate"] / 60 * 30, 30)
     pf_score = min(stats["pfactor"] / 2  * 30, 30)
@@ -736,7 +736,18 @@ with st.spinner("Analizando tu historial..."):
 df    = data["df"]
 stats = data["stats"]
 meta  = data["meta"]
-df_s  = stats["df_sorted"]
+df_s  = stats["df_sorted"].copy()
+
+# ── Recalcular capital y % siempre en tiempo real (no dentro del parser) ───────
+CAPITAL = st.session_state.capital_manual
+df_s["balance"]      = CAPITAL + df_s["equity"]
+df_s["rentabilidad"] = df_s["equity"] / CAPITAL * 100
+stats["capital"]     = CAPITAL
+
+# Recalcular max_dd con capital correcto
+peak_r = df_s["equity"].cummax()
+dd_r   = (df_s["equity"] - peak_r) / peak_r.replace(0, np.nan) * 100
+stats["max_dd"] = float(dd_r.min()) if not dd_r.isna().all() else 0
 
 # ── Trader bar ─────────────────────────────────────────────────────────────────
 pnl_color = GREEN if stats["pnl_net"] >= 0 else RED
