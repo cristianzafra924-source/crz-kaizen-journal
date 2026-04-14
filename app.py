@@ -1499,7 +1499,7 @@ with tab_kaizen:
   <text x="{cx}" y="{cx+10}" text-anchor="middle" font-family="Inter"
     font-size="{int(size*0.075)}" font-weight="500" fill="#475569" letter-spacing="1">{label.upper()}</text>
   <text x="{cx}" y="{cx+22}" text-anchor="middle" font-family="JetBrains Mono"
-    font-size="{int(size*0.07)}" fill="#334155">{pct:.0f}%</text>
+    font-size="{int(size*0.07)}" fill="#64748b">{pct:.0f}%</text>
 </svg>"""
 
     st.markdown("""
@@ -1509,9 +1509,9 @@ with tab_kaizen:
   border:1px solid #0f1923; border-radius:16px; padding:28px; position:relative; overflow:hidden; }
 .hud-container::before { content:''; position:absolute; top:0;left:0;right:0; height:1px;
   background:linear-gradient(90deg,transparent,#2dd4bf44,#2dd4bf,#2dd4bf44,transparent); }
-.hud-stat { background:#0a0f1a; border:1px solid #1e2a3a; border-radius:8px;
+.hud-stat { background:#0d1117; border:1px solid #1e2a3a; border-radius:8px;
   padding:12px 16px; display:flex; justify-content:space-between; align-items:center; }
-.hud-label { font-size:9px; color:#334155; text-transform:uppercase; letter-spacing:0.12em; font-weight:600; }
+.hud-label { font-size:9px; color:#64748b; text-transform:uppercase; letter-spacing:0.12em; font-weight:600; }
 .hud-val { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; }
 .hud-online { display:inline-block; width:6px; height:6px; background:#10b981;
   border-radius:50%; animation:blink 2s infinite; margin-right:6px; }
@@ -1521,11 +1521,11 @@ with tab_kaizen:
 <div class="hud-container">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <div>
-      <div style="font-size:9px;color:#334155;letter-spacing:0.2em;text-transform:uppercase;">CRZ KAIZEN JOURNAL · PERFORMANCE HUD</div>
+      <div style="font-size:9px;color:#475569;letter-spacing:0.2em;text-transform:uppercase;">CRZ KAIZEN JOURNAL · PERFORMANCE HUD</div>
       <div style="font-size:14px;font-weight:700;color:#e2e8f0;margin-top:2px;">{meta['trader'] or 'Mi Cuenta'}</div>
     </div>
     <div style="text-align:right;">
-      <div style="font-size:9px;color:#334155;"><span class="hud-online"></span>SISTEMA ACTIVO</div>
+      <div style="font-size:9px;color:#64748b;"><span class="hud-online"></span>SISTEMA ACTIVO</div>
       <div style="font-size:11px;color:{lvl_color};font-weight:700;margin-top:2px;">{lvl_emoji} NIVEL {lvl_name}</div>
     </div>
   </div>
