@@ -83,7 +83,7 @@ def show_live_tab():
     Bridge MT5 no activo</div>
   <div style="font-size:13px;color:#64748b;margin-bottom:16px;">
     El archivo <code>mt5_live.json</code> no existe todavía.</div>
-  <div style="font-size:12px;color:#334155;text-align:left;
+  <div style="font-size:12px;color:#64748b;text-align:left;
        background:#050810;border-radius:8px;padding:16px;font-family:monospace;">
     1. Instala la librería:<br>
     &nbsp;&nbsp;<span style="color:#4ade80;">pip install MetaTrader5</span><br><br>
@@ -121,11 +121,11 @@ def show_live_tab():
   <div>
     <div style="font-size:15px;font-weight:700;color:#f1f5f9;">
       ⚡ {cuenta.get('nombre','—')} 
-      <span style="font-size:11px;color:#475569;font-weight:400;">
+      <span style="font-size:11px;color:#94a3b8;font-weight:400;">
         #{cuenta.get('login','')} · {cuenta.get('servidor','')}
       </span>
     </div>
-    <div style="font-size:10px;color:#334155;margin-top:2px;">
+    <div style="font-size:10px;color:#64748b;margin-top:2px;">
       Última actualización: {time_ago(ts)} · 
       Apalancamiento 1:{cuenta.get('apalancamiento','')} · 
       {cuenta.get('divisa','')}
@@ -155,7 +155,7 @@ def show_live_tab():
     for col, label, val, color in kpis:
         col.markdown(f"""
 <div style="background:#0d1117;border:1px solid #1e2a3a;border-radius:8px;padding:14px 16px;">
-  <div style="font-size:9px;color:#475569;text-transform:uppercase;
+  <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;
        letter-spacing:.12em;font-weight:600;margin-bottom:4px;">{label}</div>
   <div style="font-family:'JetBrains Mono',monospace;font-size:17px;
        font-weight:700;color:{color};">{val}</div>
@@ -169,7 +169,7 @@ def show_live_tab():
     with col_pos:
         st.markdown("#### Posiciones abiertas")
         if not posiciones:
-            st.markdown("<div style='color:#475569;font-size:13px;padding:16px 0;'>Sin posiciones abiertas</div>", unsafe_allow_html=True)
+            st.markdown("<div style='color:#94a3b8;font-size:13px;padding:16px 0;'>Sin posiciones abiertas</div>", unsafe_allow_html=True)
         else:
             for p in posiciones:
                 pnl_c = "#4ade80" if p["pnl_net"] >= 0 else "#f43f5e"
@@ -182,12 +182,12 @@ def show_live_tab():
     <span style="font-size:13px;font-weight:700;color:#f1f5f9;">{p['symbol']}</span>
     <span style="font-size:10px;color:{tipo_c};font-weight:700;
          margin-left:8px;text-transform:uppercase;">{p['type']}</span>
-    <span style="font-size:10px;color:#475569;margin-left:8px;">{p['volume']} lots</span>
+    <span style="font-size:10px;color:#94a3b8;margin-left:8px;">{p['volume']} lots</span>
   </div>
   <div style="text-align:right;">
     <div style="font-family:'JetBrains Mono';font-size:14px;
          font-weight:700;color:{pnl_c};">${p['pnl_net']:+,.2f}</div>
-    <div style="font-size:9px;color:#475569;">
+    <div style="font-size:9px;color:#94a3b8;">
       {p['price_open']} → {p['price_current']}
     </div>
   </div>
@@ -221,12 +221,12 @@ def show_live_tab():
             fig.update_xaxes(tickfont=dict(color="#6b7280", size=10))
             st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
         else:
-            st.markdown("<div style='color:#475569;font-size:13px;padding:32px 0;text-align:center;'>Sin historial disponible</div>", unsafe_allow_html=True)
+            st.markdown("<div style='color:#94a3b8;font-size:13px;padding:32px 0;text-align:center;'>Sin historial disponible</div>", unsafe_allow_html=True)
 
     # ── Deals del día ─────────────────────────────────────────────────────────
     st.markdown("#### Operaciones de hoy")
     if not deals_hoy:
-        st.markdown("<div style='color:#475569;font-size:13px;padding:12px 0;'>Sin operaciones hoy</div>", unsafe_allow_html=True)
+        st.markdown("<div style='color:#94a3b8;font-size:13px;padding:12px 0;'>Sin operaciones hoy</div>", unsafe_allow_html=True)
     else:
         df_deals = pd.DataFrame(deals_hoy)
         df_deals = df_deals[["time","symbol","type","volume","price","profit","commission","swap","pnl_net"]]
@@ -250,16 +250,16 @@ def show_live_tab():
         wins_h = sum(1 for d in deals_hoy if d["profit"] > 0)
         st.markdown(f"""
 <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">
-  <span style="font-size:11px;color:#475569;">
+  <span style="font-size:11px;color:#94a3b8;">
     Operaciones hoy: <b style="color:#f1f5f9;">{len(deals_hoy)}</b>
   </span>
-  <span style="font-size:11px;color:#475569;">
+  <span style="font-size:11px;color:#94a3b8;">
     Ganadoras: <b style="color:#4ade80;">{wins_h}</b>
   </span>
-  <span style="font-size:11px;color:#475569;">
+  <span style="font-size:11px;color:#94a3b8;">
     Perdedoras: <b style="color:#f43f5e;">{len(deals_hoy)-wins_h}</b>
   </span>
-  <span style="font-size:11px;color:#475569;">
+  <span style="font-size:11px;color:#94a3b8;">
     PnL total hoy: <b style="color:{'#4ade80' if pnl_dia>=0 else '#f43f5e'};">${pnl_dia:+,.2f}</b>
   </span>
 </div>""", unsafe_allow_html=True)
