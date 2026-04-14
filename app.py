@@ -180,14 +180,9 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 p, span, label { color: #e2e8f0 !important; }
 h4 { color: #f1f5f9 !important; }
 
-/* Fix markdown text inside st.markdown HTML blocks */
+/* Fix markdown text */
 div[data-testid="stMarkdownContainer"] p { color: #e2e8f0 !important; }
 div[data-testid="stMarkdownContainer"] span { color: #e2e8f0 !important; }
-div[data-testid="stMarkdownContainer"] div { color: #e2e8f0 !important; }
-
-/* Fix iframe content — hud stats, kaizen, live */
-.hud-label { color: #94a3b8 !important; }
-.hud-val { color: #e2e8f0 !important; }
 
 /* Metric number_input */
 [data-testid="stNumberInput"] label { color: #94a3b8 !important; }
@@ -202,6 +197,11 @@ div[data-testid="stMarkdownContainer"] div { color: #e2e8f0 !important; }
 
 /* Markdown headers */
 h1, h2, h3 { color: #f1f5f9 !important; }
+
+/* Buttons — dark mode */
+[data-testid="stButton"] button { color: #e2e8f0 !important; background: #1e2a3a !important; border-color: #334155 !important; }
+[data-testid="stButton"] button p { color: #e2e8f0 !important; }
+[data-testid="stButton"] button:hover { background: #2d3748 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1222,7 +1222,8 @@ with tab_cal:
     y, m = int(sel_month[:4]), int(sel_month[5:7])
     month_names = {1:"Enero",2:"Febrero",3:"Marzo",4:"Abril",5:"Mayo",6:"Junio",
                    7:"Julio",8:"Agosto",9:"Septiembre",10:"Octubre",11:"Noviembre",12:"Diciembre"}
-    st.markdown(f"<div style='text-align:center;font-size:16px;font-weight:700;color:#f1f5f9;margin:8px 0;'>{month_names[m]} {y}</div>", unsafe_allow_html=True)
+    title_color = "#1a1a2e" if light_mode else "#f1f5f9"
+    st.markdown(f"<div style='text-align:center;font-size:16px;font-weight:700;color:{title_color};margin:8px 0;'>{month_names[m]} {y}</div>", unsafe_allow_html=True)
 
     month_data = daily_cal[daily_cal["close_date"].dt.to_period("M") == sel_month]
     day_map = {row["close_date"].day: row for _, row in month_data.iterrows()}
