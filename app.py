@@ -1505,14 +1505,14 @@ with tab_kaizen:
     st.markdown("""
 <style>
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.hud-container { background:radial-gradient(ellipse at center,#050810 0%,#020408 100%);
-  border:1px solid #0f1923; border-radius:16px; padding:28px; position:relative; overflow:hidden; }
+.hud-container { background:#0a0f1a;
+  border:1px solid #1e2a3a; border-radius:16px; padding:28px; position:relative; overflow:hidden; }
 .hud-container::before { content:''; position:absolute; top:0;left:0;right:0; height:1px;
   background:linear-gradient(90deg,transparent,#2dd4bf44,#2dd4bf,#2dd4bf44,transparent); }
-.hud-stat { background:#0d1117; border:1px solid #1e2a3a; border-radius:8px;
+.hud-stat { background:#0f1923; border:1px solid #1e2a3a; border-radius:8px;
   padding:12px 16px; display:flex; justify-content:space-between; align-items:center; }
-.hud-label { font-size:9px; color:#64748b; text-transform:uppercase; letter-spacing:0.12em; font-weight:600; }
-.hud-val { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; }
+.hud-label { font-size:10px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.1em; font-weight:600; }
+.hud-val { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:#e2e8f0; }
 .hud-online { display:inline-block; width:6px; height:6px; background:#10b981;
   border-radius:50%; animation:blink 2s infinite; margin-right:6px; }
 </style>""", unsafe_allow_html=True)
