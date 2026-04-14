@@ -115,7 +115,7 @@ def show_live_tab():
     # ── Header live ───────────────────────────────────────────────────────────
     estado_color = "#4ade80" if equity >= balance else "#f43f5e"
     st.markdown(f"""
-<div style="background:#0d1117;border:1px solid #1e2a3a;border-left:4px solid #4ade80;
+<div style="background:#111827;border:1px solid #2d3748;border-left:4px solid #4ade80;
      border-radius:8px;padding:12px 20px;margin-bottom:20px;
      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
   <div>
@@ -154,7 +154,7 @@ def show_live_tab():
     ]
     for col, label, val, color in kpis:
         col.markdown(f"""
-<div style="background:#0d1117;border:1px solid #1e2a3a;border-radius:8px;padding:14px 16px;">
+<div style="background:#111827;border:1px solid #2d3748;border-radius:8px;padding:14px 16px;">
   <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;
        letter-spacing:.12em;font-weight:600;margin-bottom:4px;">{label}</div>
   <div style="font-family:'JetBrains Mono',monospace;font-size:17px;
@@ -175,7 +175,7 @@ def show_live_tab():
                 pnl_c = "#4ade80" if p["pnl_net"] >= 0 else "#f43f5e"
                 tipo_c = "#3b82f6" if p["type"] == "buy" else "#f59e0b"
                 st.markdown(f"""
-<div style="background:#0d1117;border:1px solid #1e2a3a;border-radius:7px;
+<div style="background:#111827;border:1px solid #2d3748;border-radius:7px;
      padding:10px 14px;margin-bottom:6px;display:flex;
      justify-content:space-between;align-items:center;">
   <div>
