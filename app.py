@@ -119,6 +119,30 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     border: 1px solid #1e2a3a !important;
     border-bottom: 2px solid #2dd4bf !important;
 }
+.stTabs [aria-selected="true"] p,
+.stTabs [aria-selected="true"] span,
+.stTabs [aria-selected="true"] div {
+    color: #2dd4bf !important;
+}
+
+/* File uploader */
+[data-testid="stFileUploader"] {
+    background: #0d1117 !important;
+    border: 1px solid #1e2a3a !important;
+    border-radius: 8px !important;
+}
+[data-testid="stFileUploader"] * {
+    color: #94a3b8 !important;
+}
+[data-testid="stFileUploader"] button {
+    background: #1e2a3a !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+[data-testid="stFileUploaderDropzone"] {
+    background: #0d1117 !important;
+    border-color: #1e2a3a !important;
+}
 
 /* Equity period pills */
 .eq-pills { display: flex; gap: 4px; margin-bottom: 12px; }
