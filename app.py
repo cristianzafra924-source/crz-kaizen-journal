@@ -713,10 +713,15 @@ if light_mode:
     .metric-card { background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important; }
     .metric-value { color: #0f172a !important; }
     .metric-sub { color: #64748b !important; }
-    .stTabs [data-baseweb="tab-list"] { border-color: #e2e8f0 !important; }
-    .stTabs [data-baseweb="tab"] { color: #64748b !important; }
-    .stTabs [aria-selected="true"] { color: #0f172a !important; border-color: #2dd4bf !important; }
-    p, span, div, label, h1, h2, h3, h4 { color: #0f172a !important; }
+    .stTabs [data-baseweb="tab-list"] { border-color: #e2e8f0 !important; background: #ffffff !important; }
+    .stTabs [data-baseweb="tab"] { color: #475569 !important; background: #ffffff !important; }
+    .stTabs [aria-selected="true"] { color: #0f172a !important; border-color: #2dd4bf !important; background: #f8fafc !important; }
+    .stTabs [aria-selected="true"] p { color: #0f172a !important; }
+    [data-testid="stMarkdownContainer"] p { color: #0f172a !important; }
+    [data-testid="stMarkdownContainer"] h1,
+    [data-testid="stMarkdownContainer"] h2,
+    [data-testid="stMarkdownContainer"] h3,
+    [data-testid="stMarkdownContainer"] h4 { color: #0f172a !important; }
     [data-testid="stDataFrame"] * { color: #0f172a !important; }
     [data-testid="stDataFrame"] th { color: #0f172a !important; background: #f1f5f9 !important; }
     [data-testid="stDataFrame"] td { color: #0f172a !important; background: #ffffff !important; }
@@ -729,6 +734,11 @@ if light_mode:
     [role="option"] { color: #0f172a !important; background: #ffffff !important; }
     [role="option"]:hover { background: #f1f5f9 !important; }
     hr { border-color: #e2e8f0 !important; }
+    label { color: #475569 !important; }
+    [data-testid="stNumberInput"] label { color: #475569 !important; }
+    [data-testid="stRadio"] label { color: #475569 !important; }
+    [data-testid="stRadio"] p { color: #475569 !important; }
+    [data-testid="stCaptionContainer"] p { color: #94a3b8 !important; }
     </style>""", unsafe_allow_html=True)
 
 # ── Capital inicial ────────────────────────────────────────────────────────────
