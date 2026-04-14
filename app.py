@@ -844,9 +844,9 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
-tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen, tab_live = st.tabs([
+tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen, tab_live, tab_ai = st.tabs([
     "◈ Dashboard", "⬚ Calendario", "≡ Operaciones",
-    "◎ Símbolo", "◷ Horario", "△ Kaizen", "⚡ Live MT5"
+    "◎ Símbolo", "◷ Horario", "△ Kaizen", "⚡ Live MT5", "🤖 Kaizen AI"
 ])
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1632,6 +1632,191 @@ with tab_kaizen:
   <div style="font-family:'JetBrains Mono';font-size:11px;color:#e2e8f0;min-width:140px;">{stat_txt}</div>
   <div style="font-size:10px;color:#475569;">▸ {advice}</div>
 </div>""", unsafe_allow_html=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TAB KAIZEN AI
+# ══════════════════════════════════════════════════════════════════════════════
+with tab_ai:
+    import streamlit.components.v1 as _components
+
+    # Construir resumen de datos reales para el contexto del AI
+    rr_ratio_ai = abs(stats["avg_win"] / stats["avg_loss"]) if stats["avg_loss"] else 0
+
+    # Top símbolos
+    sym_summary = df.groupby("symbol").agg(
+        ops=("profit","count"),
+        pnl=("pnl_net","sum"),
+        wr=("win","mean")
+    ).sort_values("pnl", ascending=False).reset_index()
+    sym_lines = "\n".join([
+        f"  - {r['symbol']}: {r['ops']} ops, PnL ${r['pnl']:+,.2f}, WR {r['wr']*100:.1f}%"
+        for _, r in sym_summary.head(5).iterrows()
+    ])
+
+    # Horas con más PnL
+    hr_summary = df.groupby("hour")["pnl_net"].sum().sort_values(ascending=False)
+    best_hours  = ", ".join([f"{h}:00" for h in hr_summary.head(3).index])
+    worst_hours = ", ".join([f"{h}:00" for h in hr_summary.tail(3).index])
+
+    # Días con más PnL
+    wd_summary = df.groupby("weekday")["pnl_net"].sum().sort_values(ascending=False)
+    best_days  = ", ".join(list(wd_summary.head(2).index))
+    worst_days = ", ".join(list(wd_summary.tail(2).index))
+
+    TRADING_CONTEXT = f"""Eres el asistente de trading del CRZ Kaizen Journal. 
+Tienes acceso a los datos REALES de trading de {meta['trader'] or 'el trader'}.
+Responde siempre en español, de forma concisa y práctica. 
+Cuando des consejos, basalos SIEMPRE en los datos reales del trader.
+
+=== DATOS REALES DE LA CUENTA ===
+Trader: {meta['trader'] or 'Sin nombre'}
+Cuenta: {meta['cuenta']} | Empresa: {meta['empresa']}
+Capital inicial: ${CAPITAL:,.0f}
+PnL Total: ${stats['pnl_net']:+,.2f} ({stats['pnl_net']/CAPITAL*100:+.2f}%)
+Balance actual: ${CAPITAL + stats['pnl_net']:,.2f}
+
+=== MÉTRICAS DE RENDIMIENTO ===
+Total operaciones: {stats['total_ops']}
+Ganadoras: {stats['winners']} | Perdedoras: {stats['losers']}
+Win Rate: {stats['win_rate']:.1f}%
+Factor de Beneficio: {stats['pfactor']:.2f}
+Ratio R/R: {rr_ratio_ai:.2f}
+Max Drawdown: {stats['max_dd']:.1f}%
+Ganancia media: ${stats['avg_win']:,.2f}
+Pérdida media: ${stats['avg_loss']:,.2f}
+Mejor trade: ${stats['best']:+,.2f}
+Peor trade: ${stats['worst']:+,.2f}
+Duración media: {stats['avg_duration']:.1f}h
+Kaizen Score: {stats['kaizen_score']}/100
+
+=== ANÁLISIS POR SÍMBOLO (top 5) ===
+{sym_lines}
+
+=== ANÁLISIS POR HORARIO ===
+Mejores horas: {best_hours}
+Peores horas: {worst_hours}
+
+=== ANÁLISIS POR DÍA ===
+Mejores días: {best_days}
+Peores días: {worst_days}
+
+Usa estos datos para dar respuestas personalizadas y accionables.
+Sé directo, usa números reales del trader, y da consejos específicos.
+Responde en formato markdown cuando sea útil (listas, negrita)."""
+
+    # Sugerencias rápidas
+    SUGERENCIAS = [
+        "¿Cuál es mi mayor área de mejora?",
+        "Analiza mis horas de trading",
+        "¿Qué símbolo debería evitar?",
+        "Dame un plan de mejora semanal",
+        "Explícame mi drawdown",
+        "¿Cómo mejorar mi win rate?",
+    ]
+
+    st.markdown(f"""
+<div style="background:#0d1117;border:1px solid #1e2a3a;border-left:4px solid #2dd4bf;
+     border-radius:8px;padding:14px 20px;margin-bottom:20px;
+     display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+  <div>
+    <div style="font-size:15px;font-weight:700;color:#f1f5f9;">🤖 Kaizen AI</div>
+    <div style="font-size:11px;color:#475569;margin-top:2px;">
+      Analizando datos de <b style="color:#2dd4bf;">{meta['trader'] or 'tu cuenta'}</b> · 
+      {stats['total_ops']} operaciones · Kaizen Score {stats['kaizen_score']}/100
+    </div>
+  </div>
+  <div style="font-size:11px;color:#4ade80;font-weight:600;">● Contexto cargado</div>
+</div>
+""", unsafe_allow_html=True)
+
+    # Inicializar historial de chat
+    if "ai_messages" not in st.session_state:
+        st.session_state.ai_messages = []
+
+    # Sugerencias rápidas
+    st.markdown("<div style='font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;'>Preguntas rápidas</div>", unsafe_allow_html=True)
+    cols_sug = st.columns(3)
+    for i, sug in enumerate(SUGERENCIAS):
+        with cols_sug[i % 3]:
+            if st.button(sug, key=f"sug_{i}"):
+                st.session_state.ai_messages.append({"role": "user", "content": sug})
+                st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Mostrar historial
+    for msg in st.session_state.ai_messages:
+        is_user = msg["role"] == "user"
+        bg    = "#1e2a3a" if is_user else "#0d1117"
+        border = "#334155" if is_user else "#1e2a3a"
+        align  = "flex-end" if is_user else "flex-start"
+        label  = "Tú" if is_user else "🤖 Kaizen AI"
+        label_color = "#94a3b8" if is_user else "#2dd4bf"
+        st.markdown(f"""
+<div style="display:flex;justify-content:{align};margin-bottom:12px;">
+  <div style="max-width:85%;background:{bg};border:1px solid {border};
+       border-radius:12px;padding:12px 16px;">
+    <div style="font-size:10px;color:{label_color};font-weight:700;
+         margin-bottom:6px;text-transform:uppercase;">{label}</div>
+    <div style="font-size:13px;color:#e2e8f0;line-height:1.6;">{msg['content']}</div>
+  </div>
+</div>""", unsafe_allow_html=True)
+
+    # Si último mensaje es del user → llamar a Claude API
+    if st.session_state.ai_messages and st.session_state.ai_messages[-1]["role"] == "user":
+        with st.spinner("Analizando tus datos..."):
+            try:
+                import requests as _req
+                messages_api = [
+                    {"role": m["role"], "content": m["content"]}
+                    for m in st.session_state.ai_messages
+                ]
+                resp = _req.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "Content-Type": "application/json",
+                        "anthropic-version": "2023-06-01",
+                    },
+                    json={
+                        "model": "claude-sonnet-4-20250514",
+                        "max_tokens": 1000,
+                        "system": TRADING_CONTEXT,
+                        "messages": messages_api,
+                    },
+                    timeout=30
+                )
+                if resp.status_code == 200:
+                    answer = resp.json()["content"][0]["text"]
+                else:
+                    answer = f"Error {resp.status_code}: {resp.text[:200]}"
+            except Exception as e:
+                answer = f"Error conectando con la IA: {e}"
+
+        st.session_state.ai_messages.append({"role": "assistant", "content": answer})
+        st.rerun()
+
+    # Input del usuario
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_inp, col_btn = st.columns([5, 1])
+    with col_inp:
+        user_input = st.text_input(
+            "",
+            placeholder="Pregúntame sobre tus operaciones, estrategia, mejoras...",
+            key="ai_input",
+            label_visibility="collapsed"
+        )
+    with col_btn:
+        send = st.button("Enviar →", type="primary", key="ai_send")
+
+    if send and user_input.strip():
+        st.session_state.ai_messages.append({"role": "user", "content": user_input.strip()})
+        st.rerun()
+
+    # Botón limpiar chat
+    if st.session_state.ai_messages:
+        if st.button("🗑️ Limpiar conversación", key="ai_clear"):
+            st.session_state.ai_messages = []
+            st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB LIVE MT5
