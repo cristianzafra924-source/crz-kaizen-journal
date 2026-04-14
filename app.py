@@ -179,6 +179,29 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 /* General text */
 p, span, label { color: #e2e8f0 !important; }
 h4 { color: #f1f5f9 !important; }
+
+/* Fix markdown text inside st.markdown HTML blocks */
+div[data-testid="stMarkdownContainer"] p { color: #e2e8f0 !important; }
+div[data-testid="stMarkdownContainer"] span { color: #e2e8f0 !important; }
+div[data-testid="stMarkdownContainer"] div { color: #e2e8f0 !important; }
+
+/* Fix iframe content — hud stats, kaizen, live */
+.hud-label { color: #94a3b8 !important; }
+.hud-val { color: #e2e8f0 !important; }
+
+/* Metric number_input */
+[data-testid="stNumberInput"] label { color: #94a3b8 !important; }
+[data-testid="stNumberInput"] input { color: #e2e8f0 !important; background: #0d1117 !important; border-color: #1e2a3a !important; }
+
+/* Radio buttons */
+[data-testid="stRadio"] label { color: #94a3b8 !important; }
+[data-testid="stRadio"] p { color: #94a3b8 !important; }
+
+/* Caption */
+[data-testid="stCaptionContainer"] p { color: #64748b !important; }
+
+/* Markdown headers */
+h1, h2, h3 { color: #f1f5f9 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1505,14 +1528,14 @@ with tab_kaizen:
     st.markdown("""
 <style>
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.hud-container { background:#0a0f1a;
-  border:1px solid #1e2a3a; border-radius:16px; padding:28px; position:relative; overflow:hidden; }
+.hud-container { background:#0d1117;
+  border:1px solid #2d3748; border-radius:16px; padding:28px; position:relative; overflow:hidden; }
 .hud-container::before { content:''; position:absolute; top:0;left:0;right:0; height:1px;
   background:linear-gradient(90deg,transparent,#2dd4bf44,#2dd4bf,#2dd4bf44,transparent); }
-.hud-stat { background:#0f1923; border:1px solid #1e2a3a; border-radius:8px;
+.hud-stat { background:#111827; border:1px solid #2d3748; border-radius:8px;
   padding:12px 16px; display:flex; justify-content:space-between; align-items:center; }
 .hud-label { font-size:10px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.1em; font-weight:600; }
-.hud-val { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:#e2e8f0; }
+.hud-val { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:#f1f5f9; }
 .hud-online { display:inline-block; width:6px; height:6px; background:#10b981;
   border-radius:50%; animation:blink 2s infinite; margin-right:6px; }
 </style>""", unsafe_allow_html=True)
