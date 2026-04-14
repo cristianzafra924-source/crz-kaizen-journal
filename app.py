@@ -1771,24 +1771,30 @@ Responde en formato markdown cuando sea útil (listas, negrita)."""
                     {"role": m["role"], "content": m["content"]}
                     for m in st.session_state.ai_messages
                 ]
-                resp = _req.post(
-                    "https://api.anthropic.com/v1/messages",
-                    headers={
-                        "Content-Type": "application/json",
-                        "anthropic-version": "2023-06-01",
-                    },
-                    json={
-                        "model": "claude-sonnet-4-20250514",
-                        "max_tokens": 1000,
-                        "system": TRADING_CONTEXT,
-                        "messages": messages_api,
-                    },
-                    timeout=30
-                )
-                if resp.status_code == 200:
-                    answer = resp.json()["content"][0]["text"]
+                api_key = st.secrets.get("OPENAI_API_KEY", "")
+                if not api_key:
+                    answer = "⚠️ Falta la API key de OpenAI. Añádela en Settings → Secrets de Streamlit Cloud como `OPENAI_API_KEY`."
                 else:
-                    answer = f"Error {resp.status_code}: {resp.text[:200]}"
+                    resp = _req.post(
+                        "https://api.openai.com/v1/chat/completions",
+                        headers={
+                            "Content-Type": "application/json",
+                            "Authorization": f"Bearer {api_key}",
+                        },
+                        json={
+                            "model": "gpt-4o-mini",
+                            "max_tokens": 1000,
+                            "messages": [
+                                {"role": "system", "content": TRADING_CONTEXT},
+                                *messages_api
+                            ],
+                        },
+                        timeout=30
+                    )
+                    if resp.status_code == 200:
+                        answer = resp.json()["choices"][0]["message"]["content"]
+                    else:
+                        answer = f"Error {resp.status_code}: {resp.text[:200]}"
             except Exception as e:
                 answer = f"Error conectando con la IA: {e}"
 
@@ -1823,4 +1829,5 @@ Responde en formato markdown cuando sea útil (listas, negrita)."""
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_live:
     show_live_tab()
+
 
