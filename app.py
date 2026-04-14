@@ -1423,7 +1423,9 @@ with tab_hora:
         ygap=2,
     ))
     fig_heat.update_layout(
-        **LAYOUT, height=300,
+        paper_bgcolor="#080c14", plot_bgcolor="#080c14",
+        font=dict(color="#64748b", family="Inter, sans-serif", size=11),
+        height=300,
         margin=dict(l=80, r=80, t=20, b=40),
     )
     fig_heat.update_xaxes(
