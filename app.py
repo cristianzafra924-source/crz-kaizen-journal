@@ -1397,12 +1397,43 @@ with tab_hora:
     day_order_es = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
     heat_pivot = heat_pivot.reindex([d for d in day_order_es if d in heat_pivot.index])
     fig_heat = go.Figure(go.Heatmap(
-        z=heat_pivot.values, x=[f"{h}:00" for h in heat_pivot.columns],
+        z=heat_pivot.values,
+        x=[f"{h}:00" for h in heat_pivot.columns],
         y=heat_pivot.index.tolist(),
-        colorscale=[[0,"#7f1d1d"],[0.5,"#0d1117"],[1,"#14532d"]], zmid=0,
-        hovertemplate="Hora: %{x}<br>Día: %{y}<br>PnL: $%{z:+,.2f}<extra></extra>"
+        colorscale=[
+            [0.0,  "#b91c1c"],   # rojo fuerte — pérdidas grandes
+            [0.25, "#ef4444"],   # rojo medio
+            [0.45, "#450a0a"],   # rojo oscuro cerca de 0
+            [0.5,  "#0f172a"],   # neutro (cero)
+            [0.55, "#052e16"],   # verde oscuro cerca de 0
+            [0.75, "#22c55e"],   # verde medio
+            [1.0,  "#4ade80"],   # verde brillante — ganancias grandes
+        ],
+        zmid=0,
+        colorbar=dict(
+            thickness=12,
+            len=0.8,
+            tickfont=dict(color="#64748b", size=10),
+            tickformat="+,.0f",
+            outlinewidth=0,
+            bgcolor="rgba(0,0,0,0)",
+        ),
+        hovertemplate="<b>%{y} %{x}</b><br>PnL: $%{z:+,.2f}<extra></extra>",
+        xgap=2,
+        ygap=2,
     ))
-    fig_heat.update_layout(**LAYOUT, height=280)
+    fig_heat.update_layout(
+        **LAYOUT, height=300,
+        margin=dict(l=80, r=80, t=20, b=40),
+    )
+    fig_heat.update_xaxes(
+        tickfont=dict(color="#475569", size=10),
+        gridcolor="rgba(0,0,0,0)",
+    )
+    fig_heat.update_yaxes(
+        tickfont=dict(color="#94a3b8", size=11),
+        gridcolor="rgba(0,0,0,0)",
+    )
     st.plotly_chart(fig_heat, use_container_width=True)
 
 
