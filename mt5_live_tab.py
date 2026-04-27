@@ -45,11 +45,13 @@ LAYOUT = dict(
 
 
 def load_live_data() -> dict | None:
-    """Intenta GitHub API primero (datos frescos), fallback a archivo local."""
+    """Lee data/{account}.json desde GitHub API para la cuenta en sesión."""
+    account_id = st.session_state.get("cuenta_mt5", "").strip()
     try:
         token = st.secrets.get("GITHUB_TOKEN", "")
-        if token:
-            url = "https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/mt5_live.json"
+        if token and account_id:
+            filename = f"data/{account_id}.json"
+            url = f"https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/{filename}"
             hdrs = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
             r = _req_live.get(url, headers=hdrs, params={"ref": "main"}, timeout=8)
             if r.status_code == 200:
@@ -57,7 +59,7 @@ def load_live_data() -> dict | None:
                 return json.loads(raw)
     except Exception:
         pass
-    # Fallback: archivo local (cuando se ejecuta localmente)
+    # Fallback: archivo local (ejecución local / desarrollo)
     try:
         p = Path(LIVE_FILE)
         if p.exists():
