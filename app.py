@@ -1008,6 +1008,26 @@ with st.sidebar:
         help="Para análisis histórico desde Excel. Sin archivo, se usan datos live.",
     )
 
+    # ── Navegación ──────────────────────────────────────────────────
+    if "nav_tab" not in st.session_state:
+        st.session_state.nav_tab = "live"
+    st.markdown("---")
+    st.markdown("<div class='nav-section'>Navegación</div>", unsafe_allow_html=True)
+    _nav_items = [
+        ("⚡", "Live MT5",    "live"),
+        ("◆",  "Dashboard",   "dash"),
+        ("☰",  "Calendario",  "cal"),
+        ("≡",  "Operaciones", "ops"),
+        ("⊙",  "Símbolo",     "sym"),
+        ("⊕",  "Horario",     "hora"),
+        ("△",  "Kaizen",      "kaizen"),
+        ("◎",  "Kaizen AI",   "ai"),
+    ]
+    for _icon, _label, _key in _nav_items:
+        if st.button(f"{_icon}  {_label}", key=f"nav_{_key}", use_container_width=True):
+            st.session_state.nav_tab = _key
+            st.rerun()
+
 # ── Cargar datos: archivo histórico o datos live ───────────────────────────────
 CAPITAL      = st.session_state.capital_manual
 _cuenta_id   = st.session_state.get("cuenta_mt5", "").strip()
@@ -1102,10 +1122,7 @@ with _btn_col:
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-if "nav_tab" not in st.session_state:
-    st.session_state.nav_tab = "live"
-
-_nav = st.session_state.nav_tab
+_nav = st.session_state.get("nav_tab", "live")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
