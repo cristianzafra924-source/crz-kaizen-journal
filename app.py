@@ -835,9 +835,12 @@ col_hd, col_toggle = st.columns([5, 1])
 with col_hd:
     st.markdown("""
 <div class="crz-header">
-  <div>
-    <div class="crz-logo">CRZ <span>Kaizen</span> Journal</div>
-    <div class="crz-tagline">Mejora continua · Trading consciente</div>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <img src="https://raw.githubusercontent.com/cristianzafra924-source/crz-kaizen-journal/main/logo_crz.jpg" style="height:48px;width:48px;border-radius:8px;object-fit:cover;">
+    <div>
+      <div class="crz-logo">CRZ <span>Kaizen</span> Journal</div>
+      <div class="crz-tagline">Mejora continua · Trading consciente</div>
+    </div>
   </div>
   <div style="font-size:11px;color:#475569;">改善 · 1% mejor cada día</div>
 </div>
