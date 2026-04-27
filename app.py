@@ -43,7 +43,7 @@ st.markdown("""
 
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
-.stApp { background: #080c14; }
+.stApp { background: #060a10; }
 
 /* Hide streamlit elements */
 #MainMenu, footer, header { visibility: hidden; }
@@ -62,20 +62,22 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .crz-logo {
     font-size: 20px;
     font-weight: 700;
-    color: #f1f5f9;
-    letter-spacing: 0.05em;
+    color: #ffffff;
+    letter-spacing: 0.04em;
+    font-weight: 800;
 }
-.crz-logo span { color: #2dd4bf; }
-.crz-tagline { font-size: 11px; color: #475569; letter-spacing: 0.1em; text-transform: uppercase; }
+.crz-logo span { color: #2dd4bf; text-shadow: 0 0 12px rgba(45,212,191,0.4); }
+.crz-tagline { font-size: 11px; color: #64748b; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 2px; }
 
 /* Metric cards */
 .metric-card {
-    background: #0d1117;
-    border: 1px solid #1e2a3a;
-    border-radius: 8px;
+    background: #0d1320;
+    border: 1px solid #1a2540;
+    border-radius: 10px;
     padding: 20px;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
 }
 .metric-card::before {
     content: '';
@@ -83,32 +85,35 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     top: 0; left: 0; right: 0;
     height: 3px;
 }
-.metric-card.green::before  { background: #22c55e; }
-.metric-card.red::before    { background: #ef4444; }
-.metric-card.blue::before   { background: #3b82f6; }
-.metric-card.teal::before   { background: #2dd4bf; }
-.metric-card.amber::before  { background: #f59e0b; }
-.metric-card.purple::before { background: #8b5cf6; }
+.metric-card.green::before  { background: linear-gradient(90deg,#16a34a,#22c55e); }
+.metric-card.red::before    { background: linear-gradient(90deg,#dc2626,#ef4444); }
+.metric-card.blue::before   { background: linear-gradient(90deg,#2563eb,#3b82f6); }
+.metric-card.teal::before   { background: linear-gradient(90deg,#0d9488,#2dd4bf); }
+.metric-card.amber::before  { background: linear-gradient(90deg,#d97706,#f59e0b); }
+.metric-card.purple::before { background: linear-gradient(90deg,#7c3aed,#a855f7); }
 
 .metric-label {
     font-size: 10px;
     font-weight: 600;
-    color: #475569;
+    color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 8px;
+    letter-spacing: 0.14em;
+    margin-bottom: 10px;
+    font-weight: 700;
 }
 .metric-value {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 20px;
-    font-weight: 600;
-    color: #f1f5f9;
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
     line-height: 1;
+    letter-spacing: -0.02em;
 }
 .metric-sub {
     font-size: 11px;
-    color: #64748b;
-    margin-top: 6px;
+    color: #475569;
+    margin-top: 7px;
+    font-weight: 500;
 }
 
 /* Nav tabs */
@@ -119,9 +124,9 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     padding: 0;
 }
 .stTabs [data-baseweb="tab"] {
-    color: #475569;
+    color: #64748b;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.08em;
     padding: 8px 16px;
     border-radius: 6px 6px 0 0;
@@ -132,13 +137,13 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     transition: all 0.15s;
 }
 .stTabs [data-baseweb="tab"]:hover {
-    color: #94a3b8 !important;
-    background: #0d1117 !important;
+    color: #cbd5e1 !important;
+    background: #0d1320 !important;
 }
 .stTabs [aria-selected="true"] {
-    background: #0d1117 !important;
+    background: #0d1320 !important;
     color: #2dd4bf !important;
-    border: 1px solid #1e2a3a !important;
+    border: 1px solid #1a2540 !important;
     border-bottom: 2px solid #2dd4bf !important;
 }
 .stTabs [aria-selected="true"] p,
@@ -190,8 +195,8 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     color: #e2e8f0 !important;
 }
 [data-testid="stDataFrame"] th {
-    color: #94a3b8 !important;
-    background: #0d1117 !important;
+    color: #cbd5e1 !important;
+    background: #0d1320 !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
     font-size: 10px !important;
@@ -199,12 +204,12 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 }
 
 /* General text */
-p, span, label { color: #e2e8f0 !important; }
-h4 { color: #f1f5f9 !important; }
+p, span, label { color: #e8edf5 !important; }
+h4 { color: #ffffff !important; font-weight: 700 !important; }
 
 /* Fix markdown text */
-div[data-testid="stMarkdownContainer"] p { color: #e2e8f0 !important; }
-div[data-testid="stMarkdownContainer"] span { color: #e2e8f0 !important; }
+div[data-testid="stMarkdownContainer"] p { color: #e8edf5 !important; }
+div[data-testid="stMarkdownContainer"] span { color: #e8edf5 !important; }
 
 /* Metric number_input */
 [data-testid="stNumberInput"] label { color: #94a3b8 !important; }
@@ -218,7 +223,7 @@ div[data-testid="stMarkdownContainer"] span { color: #e2e8f0 !important; }
 [data-testid="stCaptionContainer"] p { color: #64748b !important; }
 
 /* Markdown headers */
-h1, h2, h3 { color: #f1f5f9 !important; }
+h1, h2, h3 { color: #ffffff !important; font-weight: 800 !important; }
 
 /* Buttons — dark mode */
 [data-testid="stButton"] button { color: #e2e8f0 !important; background: #1e2a3a !important; border-color: #334155 !important; }
