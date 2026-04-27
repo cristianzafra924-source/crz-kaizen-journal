@@ -215,8 +215,8 @@ def show_live_tab():
                 hovertemplate="<b>%{x|%d %b %H:%M}</b><br>%{y:.2f}%<extra></extra>"
             ))
             fig.add_hline(y=0, line_color="rgba(255,255,255,0.08)", line_width=1)
-            fig.update_layout(**LAYOUT, height=240, showlegend=False,
-                margin=dict(l=40, r=16, t=16, b=32))
+            fig.update_layout(**{**LAYOUT, 'height': 240, 'showlegend': False,
+                'margin': dict(l=40, r=16, t=16, b=32)})
             fig.update_yaxes(ticksuffix="%", tickfont=dict(color="#6b7280", size=10))
             fig.update_xaxes(tickfont=dict(color="#6b7280", size=10))
             st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
