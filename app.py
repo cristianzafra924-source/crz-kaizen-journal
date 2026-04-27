@@ -44,7 +44,7 @@ st.markdown("""
 html, body, [class*="css"] { font-family: 'Space Grotesk', 'Inter', sans-serif; }
 
 /* ── Base ─────────────────────────────────────────────────────────────── */
-.stApp { background: #080b12; }
+.stApp { background: #0a2020; }  /* TEST_DEPLOY_OK */
 #MainMenu, footer, header { visibility: hidden; }
 /* Sidebar toggle — make it visible and styled */
 [data-testid="stSidebarCollapseButton"] button,
