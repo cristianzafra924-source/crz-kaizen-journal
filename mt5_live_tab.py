@@ -45,25 +45,21 @@ LAYOUT = dict(
 
 
 def load_live_data() -> dict | None:
-    """Lee data/{account}.json desde GitHub API para la cuenta en sesión."""
+    """Lee data/{account}.json desde GitHub API sin cache."""
     account_id = st.session_state.get("cuenta_mt5", "").strip()
+    if not account_id:
+        return None
+    filename = f"data/{account_id}.json"
+    api_url = f"https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/{filename}"
     try:
         token = st.secrets.get("GITHUB_TOKEN", "")
-        if token and account_id:
-            filename = f"data/{account_id}.json"
-            url = f"https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/{filename}"
-            hdrs = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-            r = _req_live.get(url, headers=hdrs, params={"ref": "main"}, timeout=8)
-            if r.status_code == 200:
-                raw = base64.b64decode(r.json()["content"]).decode("utf-8")
-                return json.loads(raw)
-    except Exception:
-        pass
-    # Fallback: archivo local (ejecución local / desarrollo)
-    try:
-        p = Path(LIVE_FILE)
-        if p.exists():
-            return json.loads(p.read_text(encoding="utf-8"))
+        hdrs = {"Accept": "application/vnd.github.v3+json", "User-Agent": "CRZ-Live"}
+        if token:
+            hdrs["Authorization"] = f"token {token}"
+        r = _req_live.get(api_url, headers=hdrs, params={"ref": "main"}, timeout=8)
+        if r.status_code == 200:
+            raw = base64.b64decode(r.json()["content"]).decode("utf-8")
+            return json.loads(raw)
     except Exception:
         pass
     return None
