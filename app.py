@@ -46,10 +46,15 @@ html, body, [class*="css"] { font-family: 'Space Grotesk', 'Inter', sans-serif; 
 /* ── Base ─────────────────────────────────────────────────────────────── */
 .stApp { background: #080b12; }
 #MainMenu, footer, header { visibility: hidden; }
-/* Lock sidebar open — hide both collapse/expand toggle buttons */
-[data-testid="stSidebarCollapseButton"] { display: none !important; }
-[data-testid="stSidebarCollapsedControl"] { display: none !important; }
-section[data-testid="stSidebarCollapsedControl"] { display: none !important; }
+/* Sidebar toggle — make it visible and styled */
+[data-testid="stSidebarCollapseButton"] button,
+[data-testid="stSidebarCollapsedControl"] button {
+    background: #2dd4bf !important;
+    border-radius: 50% !important;
+    color: #0a0f1a !important;
+    border: none !important;
+    box-shadow: 0 0 12px rgba(45,212,191,0.4) !important;
+}
 .block-container { padding: 1rem 2rem 3rem; max-width: 100%; }
 
 /* Header */
