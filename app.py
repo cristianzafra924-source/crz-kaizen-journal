@@ -440,80 +440,143 @@ def _show_welcome(not_found: bool = False):
     _bord = "#e2e8f0" if _lm else "#1e2a3a"
     _tit  = "#0f172a" if _lm else "#f1f5f9"
     _sub  = "#64748b"
-    _card = "#f8fafc" if _lm else "#050810"
+    _card = "#f8fafc" if _lm else "#0a0f1a"
 
     if not_found:
         st.markdown(
-            "<div style='background:#1a0a0a;border:1.5px solid #7f1d1d;border-radius:10px;"
-            "padding:14px 24px;text-align:center;margin:12px auto;max-width:520px;'>"
-            "<span style='font-size:13px;color:#fca5a5;'>Cuenta no encontrada. "
-            "Asegurate de que bridge.py este corriendo en tu PC con MT5 abierto.</span>"
-            "</div>",
+            "<div style='background:#1a0a0a;border:1px solid #7f1d1d;border-radius:10px;"
+            "padding:12px 24px;text-align:center;margin:8px auto;max-width:560px;'>"
+            "<span style='font-size:13px;color:#fca5a5;'>&#9888; Cuenta no encontrada &mdash; "
+            "asegurate de que el EA este activo en MT5.</span></div>",
             unsafe_allow_html=True)
 
+    # ── Titulo ────────────────────────────────────────────────────────────────
+    st.markdown(f"""
+<div style='text-align:center;padding:32px 0 8px;'>
+  <div style='font-size:42px;margin-bottom:10px;'>&#9889;</div>
+  <div style='font-size:24px;font-weight:700;color:{_tit};margin-bottom:6px;'>
+    CRZ Kaizen Journal
+  </div>
+  <div style='font-size:14px;color:{_sub};'>
+    Conecta tu cuenta MT5 en segundos &mdash; sin Python, sin terminal
+  </div>
+</div>""", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Input de cuenta ───────────────────────────────────────────────────────
     _, col_c, _ = st.columns([1, 2, 1])
     with col_c:
         st.markdown(
-            f"<div style='text-align:center;padding:32px 0 8px;'>"
-            f"<div style='font-size:40px;margin-bottom:10px;'>&#9889;</div>"
-            f"<div style='font-size:20px;font-weight:700;color:{_tit};margin-bottom:6px;'>Conecta tu cuenta MT5</div>"
-            f"<div style='font-size:13px;color:{_sub};margin-bottom:20px;'>Introduce tu numero de cuenta MT5</div>"
-            "</div>",
+            f"<div style='font-size:12px;color:{_sub};text-align:center;"
+            "margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase;'>"
+            "Numero de cuenta MT5</div>",
             unsafe_allow_html=True)
         cuenta_val = st.text_input(
-            "Cuenta",
-            value=st.session_state.get("cuenta_mt5", ""),
-            placeholder="Ej: 504062347",
-            label_visibility="collapsed",
-            key="cuenta_input_main",
-        )
-        if st.button("Conectar", use_container_width=True, type="primary"):
+            "Cuenta", value=st.session_state.get("cuenta_mt5",""),
+            placeholder="Ej: 504062347", label_visibility="collapsed",
+            key="cuenta_input_main")
+        if st.button("&#9889;  Conectar", use_container_width=True, type="primary"):
             val = st.session_state.get("cuenta_input_main", cuenta_val).strip()
             if val:
                 st.session_state.cuenta_mt5 = val
                 st.rerun()
 
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    # ── Pasos de instalacion del EA ───────────────────────────────────────────
+    st.markdown(f"""
+<div style='max-width:780px;margin:0 auto;'>
+  <div style='font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.15em;
+       text-transform:uppercase;text-align:center;margin-bottom:20px;'>
+    Como conectar tu cuenta &mdash; instala el EA una sola vez
+  </div>
+  <div style='display:grid;grid-template-columns:1fr 1fr;gap:14px;'>
+
+    <div style='background:{_card};border:1px solid {_bord};border-radius:12px;padding:20px;'>
+      <div style='display:flex;align-items:center;gap:10px;margin-bottom:10px;'>
+        <div style='width:26px;height:26px;border-radius:50%;background:#2dd4bf22;
+             border:1px solid #2dd4bf55;display:flex;align-items:center;justify-content:center;
+             font-size:12px;color:#2dd4bf;font-weight:700;'>1</div>
+        <div style='font-size:12px;font-weight:700;color:{_tit};'>Descarga el EA</div>
+      </div>
+      <div style='font-size:12px;color:{_sub};line-height:1.6;'>
+        Descarga el archivo <b style='color:{_tit};'>CRZ_Kaizen_Bridge.mq5</b>
+        y copialo en:<br>
+        <span style='font-family:monospace;font-size:11px;color:#94a3b8;'>
+        MT5 &rarr; Archivo &rarr; Abrir carpeta de datos<br>
+        &rarr; MQL5 &rarr; Experts</span>
+      </div>
+    </div>
+
+    <div style='background:{_card};border:1px solid {_bord};border-radius:12px;padding:20px;'>
+      <div style='display:flex;align-items:center;gap:10px;margin-bottom:10px;'>
+        <div style='width:26px;height:26px;border-radius:50%;background:#2dd4bf22;
+             border:1px solid #2dd4bf55;display:flex;align-items:center;justify-content:center;
+             font-size:12px;color:#2dd4bf;font-weight:700;'>2</div>
+        <div style='font-size:12px;font-weight:700;color:{_tit};'>Activa WebRequest en MT5</div>
+      </div>
+      <div style='font-size:12px;color:{_sub};line-height:1.6;'>
+        <span style='font-family:monospace;font-size:11px;color:#94a3b8;'>
+        Herramientas &rarr; Opciones &rarr;<br>
+        Asesores Expertos</span><br>
+        &#10003; Permitir WebRequest<br>
+        Añade: <span style='font-family:monospace;color:#4ade80;font-size:11px;'>
+        https://api.github.com</span>
+      </div>
+    </div>
+
+    <div style='background:{_card};border:1px solid {_bord};border-radius:12px;padding:20px;'>
+      <div style='display:flex;align-items:center;gap:10px;margin-bottom:10px;'>
+        <div style='width:26px;height:26px;border-radius:50%;background:#2dd4bf22;
+             border:1px solid #2dd4bf55;display:flex;align-items:center;justify-content:center;
+             font-size:12px;color:#2dd4bf;font-weight:700;'>3</div>
+        <div style='font-size:12px;font-weight:700;color:{_tit};'>Arrastra el EA al grafico</div>
+      </div>
+      <div style='font-size:12px;color:{_sub};line-height:1.6;'>
+        En el Navigator de MT5 busca<br>
+        <b style='color:{_tit};'>CRZ_Kaizen_Bridge</b><br>
+        y arrastralo a cualquier grafico.<br>
+        En los parametros pon tu<br>
+        <span style='font-family:monospace;color:#f59e0b;font-size:11px;'>GITHUB_TOKEN</span>
+        y acepta.
+      </div>
+    </div>
+
+    <div style='background:{_card};border:1px solid {_bord};border-radius:12px;padding:20px;'>
+      <div style='display:flex;align-items:center;gap:10px;margin-bottom:10px;'>
+        <div style='width:26px;height:26px;border-radius:50%;background:#2dd4bf22;
+             border:1px solid #2dd4bf55;display:flex;align-items:center;justify-content:center;
+             font-size:12px;color:#2dd4bf;font-weight:700;'>4</div>
+        <div style='font-size:12px;font-weight:700;color:{_tit};'>Conecta aqui arriba</div>
+      </div>
+      <div style='font-size:12px;color:{_sub};line-height:1.6;'>
+        El EA detecta tu numero de cuenta<br>
+        automaticamente y sube los datos.<br>
+        Escribe tu numero de cuenta<br>
+        en el campo de arriba y pulsa<br>
+        <b style='color:#2dd4bf;'>Conectar</b> &mdash; listo &#9889;
+      </div>
+    </div>
+
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    # ── Boton de descarga del EA ──────────────────────────────────────────────
     st.markdown("<br>", unsafe_allow_html=True)
-    _, col2, _ = st.columns([1, 4, 1])
-    with col2:
-        p1 = (f"<div style='background:{_card};border:1px solid {_bord};border-radius:10px;padding:16px;'>"
-              "<div style='font-size:10px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:6px;'>PASO 1 - INSTALAR</div>"
-              "<div style='font-family:monospace;font-size:12px;color:#94a3b8;'>pip install MetaTrader5 python-dotenv requests</div></div>")
-        p2 = (f"<div style='background:{_card};border:1px solid {_bord};border-radius:10px;padding:16px;'>"
-              "<div style='font-size:10px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:6px;'>PASO 2 - CONFIGURAR</div>"
-              "<div style='font-family:monospace;font-size:12px;color:#94a3b8;'>Crea .env: GITHUB_TOKEN=tu_token</div></div>")
-        p3 = (f"<div style='background:{_card};border:1px solid {_bord};border-radius:10px;padding:16px;'>"
-              "<div style='font-size:10px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:6px;'>PASO 3 - EJECUTAR</div>"
-              "<div style='font-family:monospace;font-size:12px;color:#4ade80;'>Abre MT5 &rarr; python bridge.py</div></div>")
-        p4 = (f"<div style='background:{_card};border:1px solid {_bord};border-radius:10px;padding:16px;'>"
-              "<div style='font-size:10px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:6px;'>PASO 4 - CONECTAR</div>"
-              f"<div style='font-size:12px;color:{_sub};'>Escribe tu numero de cuenta arriba y pulsa Conectar</div></div>")
+    _, col_dl, _ = st.columns([1, 2, 1])
+    with col_dl:
         st.markdown(
-            f"<div style='display:grid;grid-template-columns:1fr 1fr;gap:12px;'>{p1}{p2}{p3}{p4}</div>",
+            f"<div style='text-align:center;'>"
+            f"<a href='https://raw.githubusercontent.com/cristianzafra924-source/"
+            f"crz-kaizen-journal/main/CRZ_Kaizen_Bridge.mq5' download="
+            f"'CRZ_Kaizen_Bridge.mq5' "
+            f"style='display:inline-block;background:#2dd4bf;color:#000;font-weight:700;"
+            f"font-size:13px;padding:12px 28px;border-radius:8px;text-decoration:none;"
+            f"letter-spacing:.04em;'>&#11015; Descargar CRZ_Kaizen_Bridge.mq5</a>"
+            f"</div>",
             unsafe_allow_html=True)
-
-
-# ── Chart theme base ───────────────────────────────────────────────────────────
-import streamlit.components.v1 as components
-import json
-from mt5_live_tab import show_live_tab
-
-LAYOUT = dict(
-    paper_bgcolor="#080c14", plot_bgcolor="#080c14",
-    font=dict(color="#64748b", family="Inter, sans-serif", size=11),
-    margin=dict(l=16, r=16, t=32, b=16),
-    xaxis=dict(gridcolor="#0f1923", showgrid=True, zeroline=False,
-               linecolor="#1e2a3a", tickcolor="#1e2a3a"),
-    yaxis=dict(gridcolor="#0f1923", showgrid=True, zeroline=False,
-               linecolor="#1e2a3a", tickcolor="#1e2a3a"),
-)
-GREEN  = "#10b981"
-RED    = "#f43f5e"
-TEAL   = "#2dd4bf"
-BLUE   = "#6366f1"
-AMBER  = "#f59e0b"
-PURPLE = "#a78bfa"
-MUTED  = "#334155"
 
 def show_equity_darwinex(df_s: pd.DataFrame, capital: float):
     """
