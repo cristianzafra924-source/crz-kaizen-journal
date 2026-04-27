@@ -362,29 +362,19 @@ def parse_mt5(file) -> dict:
 
 # ── Live data helpers ──────────────────────────────────────────────────────────
 def _load_live_raw(account_id: str = "") -> dict | None:
-    """Lee data/{account_id}.json desde GitHub API (sin cache)."""
+    """Lee data/{account_id}.json desde GitHub API sin cache."""
     if not account_id:
         return None
     filename = f"data/{account_id}.json"
     api_url = f"https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/{filename}"
-    # Intento 1: GitHub API con token (sin cache, siempre fresco)
     try:
         token = st.secrets.get("GITHUB_TOKEN", "")
+        hdrs = {"Accept": "application/vnd.github.v3+json", "User-Agent": "CRZ-App"}
         if token:
-            hdrs = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-            r = _req_app.get(api_url, headers=hdrs, params={"ref": "main"}, timeout=8)
-            if r.status_code == 200:
-                return json.loads(base64.b64decode(r.json()["content"]).decode())
-            elif r.status_code == 404:
-                return {"_not_found": True}
-    except Exception:
-        pass
-    # Intento 2: URL raw publica (puede tener cache pero funciona sin token)
-    try:
-        raw = f"https://raw.githubusercontent.com/cristianzafra924-source/crz-kaizen-journal/main/{filename}"
-        r = _req_app.get(raw, timeout=8, headers={"Cache-Control": "no-cache", "Pragma": "no-cache"})
+            hdrs["Authorization"] = f"token {token}"
+        r = _req_app.get(api_url, headers=hdrs, params={"ref": "main"}, timeout=8)
         if r.status_code == 200:
-            return r.json()
+            return json.loads(base64.b64decode(r.json()["content"]).decode())
         elif r.status_code == 404:
             return {"_not_found": True}
     except Exception:
