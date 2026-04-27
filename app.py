@@ -6,6 +6,8 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 from datetime import datetime, timedelta
 import calendar
+import json, base64, requests as _req_app
+from pathlib import Path
 
 st.set_page_config(
     page_title="CRZ Kaizen Journal",
@@ -335,6 +337,112 @@ def parse_mt5(file) -> dict:
 
     return {"meta": meta, "df": df, "stats": stats}
 
+
+
+
+# ── Live data helpers ──────────────────────────────────────────────────────────
+def _load_live_raw() -> dict | None:
+    """Lee mt5_live.json desde GitHub API (siempre fresco) o fallback local."""
+    try:
+        token = st.secrets.get("GITHUB_TOKEN", "")
+        if token:
+            url = "https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/mt5_live.json"
+            hdrs = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+            r = _req_app.get(url, headers=hdrs, params={"ref": "main"}, timeout=8)
+            if r.status_code == 200:
+                return json.loads(base64.b64decode(r.json()["content"]).decode())
+    except Exception:
+        pass
+    try:
+        p = Path("mt5_live.json")
+        if p.exists():
+            return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+    return None
+
+
+def live_to_df(live: dict, capital: float) -> dict | None:
+    """Convierte historial de mt5_live.json al mismo formato que parse_mt5."""
+    hist = live.get("historial", [])
+    if not hist:
+        return None
+    df = pd.DataFrame(hist)
+    df["close_dt"]   = pd.to_datetime(df["time"], format="%Y-%m-%d %H:%M:%S", errors="coerce")
+    df["open_dt"]    = df["close_dt"]
+    df["close_date"] = df["close_dt"].dt.date
+    df["month"]      = df["close_dt"].dt.to_period("M").astype(str)
+    df["hour"]       = df["close_dt"].dt.hour
+    df["weekday"]    = df["close_dt"].dt.day_name()
+    df["comm"]       = df["commission"] if "commission" in df.columns else 0.0
+    df["p_in"]       = df["price"] if "price" in df.columns else 0.0
+    df["p_out"]      = df["price"] if "price" in df.columns else 0.0
+    df["sl"]         = 0.0
+    df["tp"]         = 0.0
+    df["duration"]   = 0.0
+    df["win"]        = df["profit"] > 0
+    df = df.dropna(subset=["close_dt"]).sort_values("close_dt").reset_index(drop=True)
+    df["equity"]       = df["pnl_net"].cumsum()
+    df["equity_peak"]  = df["equity"].cummax()
+    df["balance"]      = capital + df["equity"]
+    df["rentabilidad"] = df["equity"] / capital * 100
+
+    s = {}
+    s["total_ops"]    = len(df)
+    s["winners"]      = int((df["profit"] > 0).sum())
+    s["losers"]       = s["total_ops"] - s["winners"]
+    s["win_rate"]     = s["winners"] / s["total_ops"] * 100 if s["total_ops"] else 0
+    s["pnl_net"]      = float(df["pnl_net"].sum())
+    s["gross_win"]    = float(df[df.profit > 0]["profit"].sum())
+    s["gross_loss"]   = float(df[df.profit < 0]["profit"].sum())
+    s["pfactor"]      = s["gross_win"] / abs(s["gross_loss"]) if s["gross_loss"] else 0
+    s["avg_win"]      = float(df[df.win]["profit"].mean()) if df["win"].any() else 0
+    s["avg_loss"]     = float(df[~df["win"]]["profit"].mean()) if (~df["win"]).any() else 0
+    s["best"]         = float(df["profit"].max())
+    s["worst"]        = float(df["profit"].min())
+    s["avg_duration"] = 0.0
+    s["df_sorted"]    = df
+    s["capital"]      = capital
+    pk = df["equity"].cummax()
+    dd = (df["equity"] - pk) / pk.replace(0, np.nan) * 100
+    s["max_dd"]       = float(dd.min()) if not dd.isna().all() else 0
+    wr_sc = min(s["win_rate"] / 60 * 30, 30)
+    pf_sc = min(s["pfactor"] / 2 * 30, 30)
+    rr    = abs(s["avg_win"] / s["avg_loss"]) if s["avg_loss"] else 0
+    s["kaizen_score"] = int(wr_sc + pf_sc + min(rr / 2 * 20, 20) + max(20 + s["max_dd"] / 5, 0))
+
+    cuenta = live.get("cuenta", {})
+    meta = {
+        "trader":  cuenta.get("nombre", "Live MT5"),
+        "cuenta":  str(cuenta.get("login", "")),
+        "empresa": cuenta.get("empresa", ""),
+        "fecha":   live.get("timestamp", "")[:10],
+    }
+    return {"meta": meta, "df": df, "stats": s}
+
+
+def _show_welcome():
+    _lm = st.session_state.get("light_mode", False)
+    _bg = "#ffffff" if _lm else "#0d1117"
+    _border = "#e2e8f0" if _lm else "#1e2a3a"
+    _title = "#0f172a" if _lm else "#f1f5f9"
+    _sub = "#64748b"
+    st.markdown(f"""
+<div style="background:{_bg};border:1.5px dashed {_border};border-radius:12px;
+     padding:60px 40px;text-align:center;margin:40px auto;max-width:640px;">
+  <div style="font-size:48px;margin-bottom:16px;">⚡</div>
+  <div style="font-size:20px;font-weight:600;color:{_title};margin-bottom:8px;">
+    Conecta tu MT5
+  </div>
+  <div style="font-size:14px;color:{_sub};margin-bottom:16px;">
+    Ejecuta bridge.py en tu PC con MT5 abierto — la app se actualiza sola.
+  </div>
+  <div style="font-size:12px;color:{_sub};text-align:left;
+       background:#050810;border-radius:8px;padding:16px;font-family:monospace;">
+    pip install MetaTrader5 python-dotenv<br><br>
+    python bridge.py
+  </div>
+</div>""", unsafe_allow_html=True)
 
 # ── Chart theme base ───────────────────────────────────────────────────────────
 LAYOUT = dict(
@@ -745,15 +853,21 @@ if light_mode:
 if "capital_manual" not in st.session_state:
     st.session_state.capital_manual = 10_000
 
-# ── Upload + Capital (siempre visible, antes del parse) ────────────────────────
-_col_up, _col_cap = st.columns([4, 1])
-with _col_up:
-    uploaded = st.file_uploader(
-        "Sube tu historial MT5",
-        type=["xlsx", "xls"],
-        label_visibility="collapsed"
+# ── Sidebar: cuenta MT5 + capital + archivo opcional ──────────────────────────
+with st.sidebar:
+    st.markdown("### ⚡ MT5 Live")
+    _cuenta_default = st.session_state.get("cuenta_mt5", "")
+    cuenta_input = st.text_input(
+        "Número de cuenta MT5",
+        value=_cuenta_default,
+        placeholder="ej. 504062347",
+        help="Tu número de cuenta MT5. Sirve para verificar qué cuenta está conectada.",
     )
-with _col_cap:
+    if cuenta_input:
+        st.session_state.cuenta_mt5 = cuenta_input
+
+    st.markdown("---")
+    st.markdown("### 📊 Historial")
     capital_input = st.number_input(
         "Capital inicial ($)",
         min_value=100,
@@ -765,39 +879,42 @@ with _col_cap:
     )
     st.session_state.capital_manual = int(capital_input)
 
-if not uploaded:
-    _lm = st.session_state.light_mode
-    _bg = "#ffffff" if _lm else "#0d1117"
-    _border = "#e2e8f0" if _lm else "#1e2a3a"
-    _title = "#0f172a" if _lm else "#f1f5f9"
-    _sub = "#64748b"
-    _sub2 = "#94a3b8" if _lm else "#334155"
-    st.markdown(f"""
-<div style="background:{_bg};border:1.5px dashed {_border};border-radius:12px;
-     padding:60px 40px;text-align:center;margin:40px auto;max-width:600px;">
-  <div style="font-size:48px;margin-bottom:16px;">📊</div>
-  <div style="font-size:20px;font-weight:600;color:{_title};margin-bottom:8px;">Analiza tu trading</div>
-  <div style="font-size:14px;color:{_sub};margin-bottom:4px;">Sube tu historial exportado desde MetaTrader 5</div>
-  <div style="font-size:12px;color:{_sub2};">MT5 → Historial → Click derecho → Guardar como informe (.xlsx)</div>
-</div>
-""", unsafe_allow_html=True)
+    uploaded = st.file_uploader(
+        "Historial MT5 (.xlsx) — opcional",
+        type=["xlsx", "xls"],
+        help="Sube para análisis histórico completo. Sin archivo, se usan los datos live del bridge.",
+    )
+
+# ── Cargar datos: archivo histórico o datos live ───────────────────────────────
+CAPITAL = st.session_state.capital_manual
+_live_raw = _load_live_raw()
+
+if uploaded:
+    with st.spinner("Analizando historial..."):
+        try:
+            data = parse_mt5(uploaded)
+        except Exception as e:
+            st.error(f"❌ Error al leer el archivo: {e}")
+            st.stop()
+    df    = data["df"]
+    stats = data["stats"]
+    meta  = data["meta"]
+    df_s  = stats["df_sorted"].copy()
+elif _live_raw and _live_raw.get("historial"):
+    data = live_to_df(_live_raw, CAPITAL)
+    if data is None:
+        _show_welcome()
+        st.stop()
+    df    = data["df"]
+    stats = data["stats"]
+    meta  = data["meta"]
+    df_s  = stats["df_sorted"].copy()
+else:
+    _show_welcome()
     st.stop()
 
-# ── Parse ──────────────────────────────────────────────────────────────────────
-with st.spinner("Analizando tu historial..."):
-    try:
-        data = parse_mt5(uploaded)
-    except Exception as e:
-        st.error(f"❌ Error: {e}")
-        st.stop()
-
-df    = data["df"]
-stats = data["stats"]
-meta  = data["meta"]
-df_s  = stats["df_sorted"].copy()
-
 # ── Recalcular capital y % siempre en tiempo real (no dentro del parser) ───────
-CAPITAL = st.session_state.capital_manual
+# CAPITAL ya definido arriba
 df_s["balance"]      = CAPITAL + df_s["equity"]
 df_s["rentabilidad"] = df_s["equity"] / CAPITAL * 100
 stats["capital"]     = CAPITAL
@@ -844,9 +961,9 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
-tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen, tab_live, tab_ai = st.tabs([
-    "◈ Dashboard", "⬚ Calendario", "≡ Operaciones",
-    "◎ Símbolo", "◷ Horario", "△ Kaizen", "⚡ Live MT5", "🤖 Kaizen AI"
+tab_live, tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen, tab_ai = st.tabs([
+    "⚡ Live MT5", "◈ Dashboard", "⬚ Calendario", "≡ Operaciones",
+    "◎ Símbolo", "◷ Horario", "△ Kaizen", "🤖 Kaizen AI"
 ])
 
 # ══════════════════════════════════════════════════════════════════════════════
