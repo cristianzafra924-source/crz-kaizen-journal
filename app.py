@@ -46,7 +46,12 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .stApp { background: #060a10; }
 
 /* Hide streamlit elements */
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu, footer { visibility: hidden; }
+header { visibility: hidden; }
+/* Restore sidebar toggle button so users can open/close the sidebar */
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="stSidebarCollapseButton"],
+section[data-testid="stSidebarCollapsedControl"] { visibility: visible !important; }
 .block-container { padding: 0 2rem 2rem; max-width: 1400px; }
 
 /* Header */
