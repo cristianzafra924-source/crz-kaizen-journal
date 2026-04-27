@@ -492,6 +492,29 @@ def _show_welcome(not_found: bool = False):
             f"<div style='display:grid;grid-template-columns:1fr 1fr;gap:12px;'>{p1}{p2}{p3}{p4}</div>",
             unsafe_allow_html=True)
 
+
+# ── Chart theme base ───────────────────────────────────────────────────────────
+import streamlit.components.v1 as components
+import json
+from mt5_live_tab import show_live_tab
+
+LAYOUT = dict(
+    paper_bgcolor="#080c14", plot_bgcolor="#080c14",
+    font=dict(color="#64748b", family="Inter, sans-serif", size=11),
+    margin=dict(l=16, r=16, t=32, b=16),
+    xaxis=dict(gridcolor="#0f1923", showgrid=True, zeroline=False,
+               linecolor="#1e2a3a", tickcolor="#1e2a3a"),
+    yaxis=dict(gridcolor="#0f1923", showgrid=True, zeroline=False,
+               linecolor="#1e2a3a", tickcolor="#1e2a3a"),
+)
+GREEN  = "#10b981"
+RED    = "#f43f5e"
+TEAL   = "#2dd4bf"
+BLUE   = "#6366f1"
+AMBER  = "#f59e0b"
+PURPLE = "#a78bfa"
+MUTED  = "#334155"
+
 def show_equity_darwinex(df_s: pd.DataFrame, capital: float):
     """
     Renderiza la equity curve con Chart.js dentro de un iframe Streamlit.
