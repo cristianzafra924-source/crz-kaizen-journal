@@ -858,39 +858,47 @@ with col_toggle:
 
 if light_mode:
     st.markdown("""<style>
-    .stApp { background: #f8fafc !important; }
+    .stApp { background: #f1f5f9 !important; }
     .crz-header { background: #ffffff !important; border-color: #e2e8f0 !important; }
     .crz-logo { color: #0f172a !important; }
     .crz-tagline { color: #64748b !important; }
-    .metric-card { background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important; }
+    .metric-card { background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important; }
+    .metric-label { color: #64748b !important; }
     .metric-value { color: #0f172a !important; }
     .metric-sub { color: #64748b !important; }
-    .stTabs [data-baseweb="tab-list"] { border-color: #e2e8f0 !important; background: #ffffff !important; }
-    .stTabs [data-baseweb="tab"] { color: #475569 !important; background: #ffffff !important; }
-    .stTabs [aria-selected="true"] { color: #0f172a !important; border-color: #2dd4bf !important; background: #f8fafc !important; }
-    .stTabs [aria-selected="true"] p { color: #0f172a !important; }
+    .stTabs [data-baseweb="tab-list"] { border-color: #e2e8f0 !important; background: #f1f5f9 !important; }
+    .stTabs [data-baseweb="tab"] { color: #64748b !important; background: #f1f5f9 !important; }
+    .stTabs [data-baseweb="tab"]:hover { color: #0f172a !important; background: #ffffff !important; }
+    .stTabs [aria-selected="true"] { color: #0d9488 !important; border-color: #2dd4bf !important; background: #ffffff !important; }
+    .stTabs [aria-selected="true"] p,
+    .stTabs [aria-selected="true"] span,
+    .stTabs [aria-selected="true"] div { color: #0d9488 !important; }
+    p, span, label, div { color: #0f172a !important; }
+    h1, h2, h3, h4 { color: #0f172a !important; }
     [data-testid="stMarkdownContainer"] p { color: #0f172a !important; }
+    [data-testid="stMarkdownContainer"] span { color: #0f172a !important; }
     [data-testid="stMarkdownContainer"] h1,
     [data-testid="stMarkdownContainer"] h2,
     [data-testid="stMarkdownContainer"] h3,
     [data-testid="stMarkdownContainer"] h4 { color: #0f172a !important; }
-    [data-testid="stDataFrame"] * { color: #0f172a !important; }
-    [data-testid="stDataFrame"] th { color: #0f172a !important; background: #f1f5f9 !important; }
-    [data-testid="stDataFrame"] td { color: #0f172a !important; background: #ffffff !important; }
+    [data-testid="stDataFrame"] * { color: #0f172a !important; background: #ffffff !important; }
+    [data-testid="stDataFrame"] th { color: #475569 !important; background: #f8fafc !important; font-weight: 700 !important; }
     .stSelectbox div[data-baseweb="select"] { background: #ffffff !important; border-color: #e2e8f0 !important; }
     .stSelectbox div[data-baseweb="select"] * { color: #0f172a !important; background: #ffffff !important; }
-    .stSelectbox [data-baseweb="popover"] { background: #ffffff !important; }
-    .stSelectbox [data-baseweb="popover"] * { color: #0f172a !important; background: #ffffff !important; }
     [data-baseweb="select"] * { color: #0f172a !important; }
     [data-baseweb="popover"] * { color: #0f172a !important; background: #ffffff !important; }
     [role="option"] { color: #0f172a !important; background: #ffffff !important; }
     [role="option"]:hover { background: #f1f5f9 !important; }
     hr { border-color: #e2e8f0 !important; }
-    label { color: #475569 !important; }
     [data-testid="stNumberInput"] label { color: #475569 !important; }
+    [data-testid="stNumberInput"] input { color: #0f172a !important; background: #ffffff !important; border-color: #e2e8f0 !important; }
     [data-testid="stRadio"] label { color: #475569 !important; }
     [data-testid="stRadio"] p { color: #475569 !important; }
     [data-testid="stCaptionContainer"] p { color: #94a3b8 !important; }
+    [data-testid="stButton"] button { color: #0f172a !important; background: #ffffff !important; border-color: #e2e8f0 !important; }
+    [data-testid="stButton"] button p { color: #0f172a !important; }
+    .stSidebar { background: #ffffff !important; }
+    .stSidebar * { color: #0f172a !important; }
     </style>""", unsafe_allow_html=True)
 
 # ── Capital inicial ────────────────────────────────────────────────────────────
