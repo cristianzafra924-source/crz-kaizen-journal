@@ -230,6 +230,53 @@ h1, h2, h3 { color: #ffffff !important; font-weight: 800 !important; }
 [data-testid="stButton"] button { color: #e2e8f0 !important; background: #1e2a3a !important; border-color: #334155 !important; }
 [data-testid="stButton"] button p { color: #e2e8f0 !important; }
 [data-testid="stButton"] button:hover { background: #2d3748 !important; }
+
+/* ── Sidebar nav ───────────────────────────────────────────── */
+[data-testid="stSidebar"] { background: #0a0f1a !important; border-right: 1px solid #1a2540 !important; }
+[data-testid="stSidebar"] * { font-family: 'Space Grotesk', 'Inter', sans-serif !important; }
+
+.nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 8px; margin-bottom: 2px;
+    cursor: pointer; transition: all 0.15s;
+    font-size: 13px; font-weight: 600; color: #64748b;
+    border: 1px solid transparent;
+    text-decoration: none;
+}
+.nav-item:hover { background: #0d1320; color: #cbd5e1; }
+.nav-item.active {
+    background: rgba(45,212,191,0.1);
+    color: #2dd4bf;
+    border-color: rgba(45,212,191,0.2);
+}
+.nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-section { font-size: 9px; font-weight: 700; color: #334155;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 12px 14px 4px; margin-top: 4px; }
+
+/* Nav buttons in sidebar */
+[data-testid="stSidebar"] [data-testid="stButton"] button {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    color: #64748b !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    padding: 9px 14px !important;
+    border-radius: 8px !important;
+    transition: all 0.15s !important;
+    margin-bottom: 1px !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button:hover {
+    background: #0d1320 !important;
+    color: #cbd5e1 !important;
+    border-color: #1a2540 !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button p {
+    color: inherit !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1056,15 +1103,44 @@ with _btn_col:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
-tab_live, tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen, tab_ai = st.tabs([
-    "⚡ Live MT5", "◈ Dashboard", "⬚ Calendario", "≡ Operaciones",
-    "◎ Símbolo", "◷ Horario", "△ Kaizen", "🤖 Kaizen AI"
-])
+# ── Navegación lateral ────────────────────────────────────────────────────────
+if "nav_tab" not in st.session_state:
+    st.session_state.nav_tab = "live"
+
+with st.sidebar:
+    st.markdown("<div class='nav-section'>Navegación</div>", unsafe_allow_html=True)
+    if st.button("⚡  Live MT5", key="nav_live", use_container_width=True):
+        st.session_state.nav_tab = "live"
+        st.rerun()
+    if st.button("◆  Dashboard", key="nav_dash", use_container_width=True):
+        st.session_state.nav_tab = "dash"
+        st.rerun()
+    if st.button("☰  Calendario", key="nav_cal", use_container_width=True):
+        st.session_state.nav_tab = "cal"
+        st.rerun()
+    if st.button("≡  Operaciones", key="nav_ops", use_container_width=True):
+        st.session_state.nav_tab = "ops"
+        st.rerun()
+    if st.button("⊙  Símbolo", key="nav_sym", use_container_width=True):
+        st.session_state.nav_tab = "sym"
+        st.rerun()
+    if st.button("⊕  Horario", key="nav_hora", use_container_width=True):
+        st.session_state.nav_tab = "hora"
+        st.rerun()
+    if st.button("△  Kaizen", key="nav_kaizen", use_container_width=True):
+        st.session_state.nav_tab = "kaizen"
+        st.rerun()
+    if st.button("◎  Kaizen AI", key="nav_ai", use_container_width=True):
+        st.session_state.nav_tab = "ai"
+        st.rerun()
+
+_nav = st.session_state.nav_tab
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB DASHBOARD
 # ══════════════════════════════════════════════════════════════════════════════
-with tab_dash:
+if _nav == "dash":
     # KPI cards
     c1, c2, c3, c4, c5, c6 = st.columns(6)
     cards = [
@@ -1392,7 +1468,7 @@ renderBar();
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB CALENDARIO
 # ══════════════════════════════════════════════════════════════════════════════
-with tab_cal:
+if _nav == "cal":
     st.markdown("#### Rendimiento por Día")
 
     daily_cal = df_s.groupby("close_date").agg(
@@ -1490,7 +1566,7 @@ with tab_cal:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB OPERACIONES
 # ══════════════════════════════════════════════════════════════════════════════
-with tab_ops:
+if _nav == "ops":
     st.markdown("#### Historial de Operaciones")
     fc1, fc2, fc3 = st.columns(3)
     with fc1: sel_sym  = st.selectbox("Símbolo", ["Todos"] + sorted(df["symbol"].unique().tolist()))
@@ -1526,7 +1602,7 @@ with tab_ops:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB POR SÍMBOLO
 # ══════════════════════════════════════════════════════════════════════════════
-with tab_sym:
+if _nav == "sym":
     st.markdown("#### Análisis por Símbolo")
 
     sym_g = df.groupby("symbol").agg(
@@ -1605,7 +1681,7 @@ with tab_sym:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB POR HORARIO
 # ══════════════════════════════════════════════════════════════════════════════
-with tab_hora:
+if _nav == "hora":
     st.markdown("#### Análisis por Horario y Día de Semana")
 
     hr_g = df.groupby("hour").agg(ops=("profit","count"), pnl=("pnl_net","sum"), wins=("win","sum")).reset_index()
@@ -1712,7 +1788,7 @@ with tab_hora:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB KAIZEN SCORE
 # ══════════════════════════════════════════════════════════════════════════════
-with tab_kaizen:
+if _nav == "kaizen":
     score    = stats["kaizen_score"]
     wr_score = min(stats["win_rate"] / 60 * 30, 30)
     pf_score = min(stats["pfactor"] / 2 * 30, 30)
@@ -1848,7 +1924,7 @@ with tab_kaizen:
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB KAIZEN AI
 # ══════════════════════════════════════════════════════════════════════════════
-with tab_ai:
+if _nav == "ai":
     import streamlit.components.v1 as _components
 
     # Construir resumen de datos reales para el contexto del AI
@@ -2039,7 +2115,7 @@ Responde en formato markdown cuando sea útil (listas, negrita)."""
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB LIVE MT5
 # ══════════════════════════════════════════════════════════════════════════════
-with tab_live:
+if _nav == "live":
     show_live_tab()
 
 
