@@ -1001,7 +1001,11 @@ _bar_bg = "#ffffff" if _lm else "#0d1117"
 _bar_border = "#e2e8f0" if _lm else "#1e2a3a"
 _bar_title = "#0f172a" if _lm else "#f1f5f9"
 _bar_sub = "#64748b"
-st.markdown(f"""
+
+# Botón Cambiar cuenta en la barra superior
+_tb_col, _btn_col = st.columns([6, 1])
+with _tb_col:
+    st.markdown(f"""
 <div style="background:{_bar_bg};border:1px solid {_bar_border};border-left:4px solid {TEAL};
      border-radius:8px;padding:14px 20px;margin-bottom:24px;
      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
@@ -1029,6 +1033,13 @@ st.markdown(f"""
   </div>
 </div>
 """, unsafe_allow_html=True)
+
+with _btn_col:
+    st.markdown("<div style='padding-top:4px;'>", unsafe_allow_html=True)
+    if st.button("⇄ Cambiar\ncuenta", use_container_width=True, help="Conectar otra cuenta MT5"):
+        st.session_state.cuenta_mt5 = ""
+        st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
 tab_live, tab_dash, tab_cal, tab_ops, tab_sym, tab_hora, tab_kaizen, tab_ai = st.tabs([
