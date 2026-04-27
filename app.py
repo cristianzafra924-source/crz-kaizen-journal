@@ -1118,39 +1118,23 @@ _nav_def = [
     ("◆",  "Dashboard",   "dash"),
     ("☰",  "Calendario",  "cal"),
     ("≡",  "Operaciones", "ops"),
-    ("⊙",  "Símbolo",     "sym"),
+    ("⊙",  "Simbolo",     "sym"),
     ("⊕",  "Horario",     "hora"),
     ("△",  "Kaizen",      "kaizen"),
     ("◎",  "Kaizen AI",   "ai"),
 ]
-_lm2 = st.session_state.get("light_mode", False)
-_nb = "#e2e8f0" if _lm2 else "#1e2a3a"
-_nt = "#0f172a" if _lm2 else "#94a3b8"
-_nbg = "#ffffff" if _lm2 else "#0d1320"
-_nav_html = '<div style="display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap;">'
-for _ni, _nl, _nk in _nav_def:
-    _active = _nav == _nk
-    _style = (
-        f"background:#2dd4bf;color:#0a0f1a;border:1px solid #2dd4bf;font-weight:700;"
-        if _active else
-        f"background:{_nbg};color:{_nt};border:1px solid {_nb};font-weight:600;"
-    )
-    _nav_html += (
-        f'<button onclick="void(0)" style="padding:7px 14px;border-radius:7px;'
-        f'font-size:12px;cursor:pointer;letter-spacing:0.04em;'
-        f'font-family:'Space Grotesk','Inter',sans-serif;{_style}">'
-        f'{_ni} {_nl}</button>'
-    )
-_nav_html += '</div>'
-st.markdown(_nav_html, unsafe_allow_html=True)
 _nav_cols = st.columns(len(_nav_def))
 for _ci, (_ni, _nl, _nk) in enumerate(_nav_def):
     with _nav_cols[_ci]:
-        if st.button(f"{_ni} {_nl}", key=f"nav_{_nk}", use_container_width=True,
-                     type="primary" if _nav == _nk else "secondary"):
+        if st.button(
+            f"{_ni} {_nl}",
+            key=f"nav_{_nk}",
+            use_container_width=True,
+            type="primary" if _nav == _nk else "secondary",
+        ):
             st.session_state.nav_tab = _nk
             st.rerun()
-st.markdown("<div style='margin-bottom:8px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB DASHBOARD
