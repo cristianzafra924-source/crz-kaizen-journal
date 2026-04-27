@@ -1102,37 +1102,8 @@ with _btn_col:
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ── Tabs ───────────────────────────────────────────────────────────────────────
-# ── Navegación lateral ────────────────────────────────────────────────────────
 if "nav_tab" not in st.session_state:
     st.session_state.nav_tab = "live"
-
-with st.sidebar:
-    st.markdown("<div class='nav-section'>Navegación</div>", unsafe_allow_html=True)
-    if st.button("⚡  Live MT5", key="nav_live", use_container_width=True):
-        st.session_state.nav_tab = "live"
-        st.rerun()
-    if st.button("◆  Dashboard", key="nav_dash", use_container_width=True):
-        st.session_state.nav_tab = "dash"
-        st.rerun()
-    if st.button("☰  Calendario", key="nav_cal", use_container_width=True):
-        st.session_state.nav_tab = "cal"
-        st.rerun()
-    if st.button("≡  Operaciones", key="nav_ops", use_container_width=True):
-        st.session_state.nav_tab = "ops"
-        st.rerun()
-    if st.button("⊙  Símbolo", key="nav_sym", use_container_width=True):
-        st.session_state.nav_tab = "sym"
-        st.rerun()
-    if st.button("⊕  Horario", key="nav_hora", use_container_width=True):
-        st.session_state.nav_tab = "hora"
-        st.rerun()
-    if st.button("△  Kaizen", key="nav_kaizen", use_container_width=True):
-        st.session_state.nav_tab = "kaizen"
-        st.rerun()
-    if st.button("◎  Kaizen AI", key="nav_ai", use_container_width=True):
-        st.session_state.nav_tab = "ai"
-        st.rerun()
 
 _nav = st.session_state.nav_tab
 
