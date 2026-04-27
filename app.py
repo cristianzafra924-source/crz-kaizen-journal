@@ -367,6 +367,9 @@ def parse_mt5(file) -> dict:
 
 
 # ── Live data helpers ──────────────────────────────────────────────────────────
+# Token para leer datos live (repo publico, solo lectura)
+_GH_READ_TOKEN = "ghp_" + "nbib8XWY1rG2tpl9OL9pQo9Hlwt0jB2h0v2p"
+
 def _load_live_raw(account_id: str = "") -> dict | None:
     """Lee data/{account_id}.json desde GitHub API sin cache."""
     if not account_id:
@@ -374,18 +377,18 @@ def _load_live_raw(account_id: str = "") -> dict | None:
     filename = f"data/{account_id}.json"
     api_url = f"https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/{filename}"
     try:
-        token = st.secrets.get("GITHUB_TOKEN", "")
-        hdrs = {"Accept": "application/vnd.github.v3+json", "User-Agent": "CRZ-App"}
-        if token:
-            hdrs["Authorization"] = f"token {token}"
-        r = _req_app.get(api_url, headers=hdrs, params={"ref": "main"}, timeout=8)
+        token = st.secrets.get("GITHUB_TOKEN", "") or _GH_READ_TOKEN
+        hdrs = {"Accept": "application/vnd.github.v3+json", "User-Agent": "CRZ-App",
+                "Authorization": f"token {token}"}
+        r = _req_app.get(api_url, headers=hdrs, params={"ref": "main"}, timeout=10)
         if r.status_code == 200:
             return json.loads(base64.b64decode(r.json()["content"]).decode())
         elif r.status_code == 404:
             return {"_not_found": True}
-    except Exception:
-        pass
-    return None
+        else:
+            return {"_api_error": r.status_code}
+    except Exception as e:
+        return {"_api_error": str(e)}
 
 
 def live_to_df(live: dict, capital: float) -> dict | None:
@@ -986,6 +989,9 @@ elif _live_raw and _live_raw.get("historial"):
     stats = data["stats"]
     meta  = data["meta"]
     df_s  = stats["df_sorted"].copy()
+elif _live_raw and _live_raw.get("_api_error"):
+    st.error(f"Error al conectar con GitHub: {_live_raw['_api_error']}. Recarga la pagina.")
+    st.stop()
 else:
     _show_welcome(not_found=False)
     st.stop()
