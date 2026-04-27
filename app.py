@@ -475,12 +475,11 @@ def _show_welcome(not_found: bool = False):
 
         st.markdown("**2️⃣ Activa WebRequest en MT5**")
         st.markdown("Herramientas → Opciones → Asesores Expertos")
-        st.markdown("✅ Permitir WebRequest → añade:")
-        st.code("https://api.github.com", language=None)
+        st.markdown("✅ Activa **Permitir WebRequest** y añade:")
+        st.code("https://crz-bridge.cristian-zafra924.workers.dev", language=None)
     with c2:
         st.markdown("**3️⃣ Arrastra el EA al grafico**")
-        st.markdown("En el Navigator busca **CRZ\_Kaizen\_Bridge**, arrastralo a cualquier grafico y en los parametros pon tu:")
-        st.code("GITHUB_TOKEN = ghp_tu_token_aqui", language=None)
+        st.markdown("En el Navigator de MT5 busca **CRZ\_Kaizen\_Bridge**, arrastralo a cualquier grafico y pulsa **Aceptar**. El EA viene preconfigurado, no necesitas cambiar nada.")
 
         st.markdown("**4️⃣ Conecta aqui arriba**")
         st.markdown("El EA detecta tu numero de cuenta automaticamente y sube los datos cada 10 segundos. Escribe tu numero arriba y pulsa **Conectar** ⚡")
