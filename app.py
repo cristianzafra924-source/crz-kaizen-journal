@@ -341,22 +341,21 @@ def parse_mt5(file) -> dict:
 
 
 # ── Live data helpers ──────────────────────────────────────────────────────────
-def _load_live_raw() -> dict | None:
-    """Lee mt5_live.json desde GitHub API (siempre fresco) o fallback local."""
+def _load_live_raw(account_id: str = "") -> dict | None:
+    """Lee data/{account_id}.json desde GitHub API. Si no hay cuenta, retorna None."""
+    if not account_id:
+        return None
     try:
         token = st.secrets.get("GITHUB_TOKEN", "")
         if token:
-            url = "https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/mt5_live.json"
+            filename = f"data/{account_id}.json"
+            url = f"https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/{filename}"
             hdrs = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
             r = _req_app.get(url, headers=hdrs, params={"ref": "main"}, timeout=8)
             if r.status_code == 200:
                 return json.loads(base64.b64decode(r.json()["content"]).decode())
-    except Exception:
-        pass
-    try:
-        p = Path("mt5_live.json")
-        if p.exists():
-            return json.loads(p.read_text(encoding="utf-8"))
+            elif r.status_code == 404:
+                return {"_not_found": True}
     except Exception:
         pass
     return None
@@ -424,26 +423,63 @@ def live_to_df(live: dict, capital: float) -> dict | None:
     return {"meta": meta, "df": df, "stats": s}
 
 
-def _show_welcome():
+def _show_welcome(not_found: bool = False):
     _lm = st.session_state.get("light_mode", False)
     _bg = "#ffffff" if _lm else "#0d1117"
     _border = "#e2e8f0" if _lm else "#1e2a3a"
     _title = "#0f172a" if _lm else "#f1f5f9"
-    _sub = "#64748b"
+    _sub   = "#64748b"
+    _card  = "#050810" if not _lm else "#f8fafc"
+
+    if not_found:
+        st.markdown(f"""
+<div style="background:#1a0a0a;border:1.5px solid #7f1d1d;border-radius:12px;
+     padding:24px 32px;text-align:center;margin:20px auto;max-width:640px;">
+  <div style="font-size:28px;margin-bottom:8px;">📡</div>
+  <div style="font-size:16px;font-weight:600;color:#fca5a5;margin-bottom:6px;">
+    Cuenta no encontrada
+  </div>
+  <div style="font-size:13px;color:#94a3b8;">
+    No hay datos para esa cuenta. Asegúrate de que el bridge esté corriendo en tu PC.
+  </div>
+</div>""", unsafe_allow_html=True)
+
     st.markdown(f"""
 <div style="background:{_bg};border:1.5px dashed {_border};border-radius:12px;
-     padding:60px 40px;text-align:center;margin:40px auto;max-width:640px;">
+     padding:48px 40px;text-align:center;margin:32px auto;max-width:680px;">
   <div style="font-size:48px;margin-bottom:16px;">⚡</div>
-  <div style="font-size:20px;font-weight:600;color:{_title};margin-bottom:8px;">
-    Conecta tu MT5
+  <div style="font-size:22px;font-weight:700;color:{_title};margin-bottom:8px;">
+    Conecta tu cuenta MT5
   </div>
-  <div style="font-size:14px;color:{_sub};margin-bottom:16px;">
-    Ejecuta bridge.py en tu PC con MT5 abierto — la app se actualiza sola.
+  <div style="font-size:14px;color:{_sub};margin-bottom:32px;">
+    Introduce tu número de cuenta en el panel izquierdo,<br>
+    luego sigue estos pasos para activar el bridge en tu PC:
   </div>
-  <div style="font-size:12px;color:{_sub};text-align:left;
-       background:#050810;border-radius:8px;padding:16px;font-family:monospace;">
-    pip install MetaTrader5 python-dotenv<br><br>
-    python bridge.py
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:left;">
+    <div style="background:{_card};border:1px solid #1e2a3a;border-radius:10px;padding:20px;">
+      <div style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:8px;">PASO 1 — INSTALAR</div>
+      <div style="font-family:monospace;font-size:12px;color:#94a3b8;">
+        pip install MetaTrader5<br>python-dotenv requests
+      </div>
+    </div>
+    <div style="background:{_card};border:1px solid #1e2a3a;border-radius:10px;padding:20px;">
+      <div style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:8px;">PASO 2 — CONFIGURAR</div>
+      <div style="font-family:monospace;font-size:12px;color:#94a3b8;">
+        Edita bridge.py<br>GITHUB_TOKEN = "tu_token"
+      </div>
+    </div>
+    <div style="background:{_card};border:1px solid #1e2a3a;border-radius:10px;padding:20px;">
+      <div style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:8px;">PASO 3 — EJECUTAR</div>
+      <div style="font-family:monospace;font-size:12px;color:#4ade80;">
+        Abre MT5<br>python bridge.py
+      </div>
+    </div>
+    <div style="background:{_card};border:1px solid #1e2a3a;border-radius:10px;padding:20px;">
+      <div style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:8px;">PASO 4 — CONECTAR</div>
+      <div style="font-size:12px;color:#94a3b8;">
+        Escribe tu número de cuenta MT5 en el panel izquierdo ←
+      </div>
+    </div>
   </div>
 </div>""", unsafe_allow_html=True)
 
@@ -858,39 +894,59 @@ if "capital_manual" not in st.session_state:
 
 # ── Sidebar: cuenta MT5 + capital + archivo opcional ──────────────────────────
 with st.sidebar:
-    st.markdown("### ⚡ MT5 Live")
-    _cuenta_default = st.session_state.get("cuenta_mt5", "")
+    st.markdown("""
+<div style="padding:4px 0 16px;">
+  <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:2px;">⚡ CRZ Kaizen</div>
+  <div style="font-size:10px;color:#475569;letter-spacing:.1em;text-transform:uppercase;">MT5 Live Dashboard</div>
+</div>""", unsafe_allow_html=True)
+
+    st.markdown("**Número de cuenta MT5**")
     cuenta_input = st.text_input(
-        "Número de cuenta MT5",
-        value=_cuenta_default,
-        placeholder="ej. 504062347",
-        help="Tu número de cuenta MT5. Sirve para verificar qué cuenta está conectada.",
+        "Cuenta",
+        value=st.session_state.get("cuenta_mt5", ""),
+        placeholder="Ej: 504062347",
+        label_visibility="collapsed",
     )
-    if cuenta_input:
-        st.session_state.cuenta_mt5 = cuenta_input
+    if st.button("🔌 Conectar", use_container_width=True, type="primary"):
+        st.session_state.cuenta_mt5 = cuenta_input.strip()
+        st.rerun()
+
+    if st.session_state.get("cuenta_mt5"):
+        st.markdown(f"""
+<div style="background:#0a1a0a;border:1px solid #166534;border-radius:6px;
+     padding:8px 12px;margin:8px 0;font-size:11px;color:#4ade80;">
+  ● Conectado: #{st.session_state.cuenta_mt5}
+</div>""", unsafe_allow_html=True)
+        if st.button("Desconectar", use_container_width=True):
+            st.session_state.cuenta_mt5 = ""
+            st.rerun()
 
     st.markdown("---")
-    st.markdown("### 📊 Historial")
+    st.markdown("**Capital inicial**")
     capital_input = st.number_input(
-        "Capital inicial ($)",
+        "Capital ($)",
         min_value=100,
         max_value=10_000_000,
         value=st.session_state.capital_manual,
         step=1000,
-        help="Tu balance de partida. Ajústalo si el % no cuadra con tu cuenta real.",
+        label_visibility="collapsed",
         key="capital_input_widget",
     )
     st.session_state.capital_manual = int(capital_input)
 
+    st.markdown("---")
+    st.markdown("**Historial MT5** *(opcional)*")
     uploaded = st.file_uploader(
-        "Historial MT5 (.xlsx) — opcional",
+        "Archivo .xlsx",
         type=["xlsx", "xls"],
-        help="Sube para análisis histórico completo. Sin archivo, se usan los datos live del bridge.",
+        label_visibility="collapsed",
+        help="Para análisis histórico desde Excel. Sin archivo, se usan datos live.",
     )
 
 # ── Cargar datos: archivo histórico o datos live ───────────────────────────────
-CAPITAL = st.session_state.capital_manual
-_live_raw = _load_live_raw()
+CAPITAL      = st.session_state.capital_manual
+_cuenta_id   = st.session_state.get("cuenta_mt5", "").strip()
+_live_raw    = _load_live_raw(_cuenta_id)
 
 if uploaded:
     with st.spinner("Analizando historial..."):
@@ -903,6 +959,9 @@ if uploaded:
     stats = data["stats"]
     meta  = data["meta"]
     df_s  = stats["df_sorted"].copy()
+elif _live_raw and _live_raw.get("_not_found"):
+    _show_welcome(not_found=True)
+    st.stop()
 elif _live_raw and _live_raw.get("historial"):
     data = live_to_df(_live_raw, CAPITAL)
     if data is None:
@@ -913,7 +972,7 @@ elif _live_raw and _live_raw.get("historial"):
     meta  = data["meta"]
     df_s  = stats["df_sorted"].copy()
 else:
-    _show_welcome()
+    _show_welcome(not_found=False)
     st.stop()
 
 # ── Recalcular capital y % siempre en tiempo real (no dentro del parser) ───────
