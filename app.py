@@ -342,16 +342,27 @@ def parse_mt5(file) -> dict:
 
 # ── Live data helpers ──────────────────────────────────────────────────────────
 def _load_live_raw(account_id: str = "") -> dict | None:
-    """Lee data/{account_id}.json desde GitHub API. Si no hay cuenta, retorna None."""
+    """Lee data/{account_id}.json desde GitHub (con o sin token)."""
     if not account_id:
         return None
+    filename = f"data/{account_id}.json"
+    # Intento 1: URL raw publica (no necesita token, instantaneo)
+    try:
+        raw = f"https://raw.githubusercontent.com/cristianzafra924-source/crz-kaizen-journal/main/{filename}"
+        r = _req_app.get(raw, timeout=8)
+        if r.status_code == 200:
+            return r.json()
+        elif r.status_code == 404:
+            return {"_not_found": True}
+    except Exception:
+        pass
+    # Intento 2: GitHub API con token (si esta configurado en secrets)
     try:
         token = st.secrets.get("GITHUB_TOKEN", "")
         if token:
-            filename = f"data/{account_id}.json"
-            url = f"https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/{filename}"
+            api_url = f"https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/{filename}"
             hdrs = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-            r = _req_app.get(url, headers=hdrs, params={"ref": "main"}, timeout=8)
+            r = _req_app.get(api_url, headers=hdrs, params={"ref": "main"}, timeout=8)
             if r.status_code == 200:
                 return json.loads(base64.b64decode(r.json()["content"]).decode())
             elif r.status_code == 404:
@@ -454,10 +465,13 @@ def _show_welcome(not_found: bool = False):
             value=st.session_state.get("cuenta_mt5", ""),
             placeholder="Ej: 504062347",
             label_visibility="collapsed",
+            key="cuenta_input_main",
         )
         if st.button("Conectar", use_container_width=True, type="primary"):
-            st.session_state.cuenta_mt5 = cuenta_val.strip()
-            st.rerun()
+            val = st.session_state.get("cuenta_input_main", cuenta_val).strip()
+            if val:
+                st.session_state.cuenta_mt5 = val
+                st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
     _, col2, _ = st.columns([1, 4, 1])
