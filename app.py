@@ -1059,7 +1059,53 @@ if "nav_tab" not in st.session_state:
     st.session_state.nav_tab = "live"
 _nav = st.session_state.get("nav_tab", "live")
 
+# ── Top navigation bar ─────────────────────────────────────────────────────────
+_NAV_ITEMS = [
+    ("⚡", "Live MT5",    "live"),
+    ("◆",  "Dashboard",   "dash"),
+    ("☰",  "Calendario",  "cal"),
+    ("≡",  "Operaciones", "ops"),
+    ("⊙",  "Simbolo",     "sym"),
+    ("⊕",  "Horario",     "hora"),
+    ("△",  "Kaizen",      "kaizen"),
+    ("◎",  "Kaizen AI",   "ai"),
+]
+_lm_nav = st.session_state.get("light_mode", False)
+_nav_bg   = "#f8fafc" if _lm_nav else "#0c0f1c"
+_nav_bdr  = "#e2e8f0" if _lm_nav else "#171e30"
+_nav_html_parts = []
+for _ni, _nl, _nk in _NAV_ITEMS:
+    _active = (_nav == _nk)
+    if _active:
+        _s = "background:linear-gradient(135deg,#0d9488,#2dd4bf);color:#0a0f1a;border:1px solid #2dd4bf;font-weight:700;box-shadow:0 0 12px rgba(45,212,191,.3);"
+    else:
+        _tc = "#475569" if _lm_nav else "#3a4f68"
+        _s = f"background:transparent;color:{_tc};border:1px solid transparent;font-weight:600;"
+    _nav_html_parts.append(
+        f'<span style="padding:8px 15px;border-radius:8px;font-size:12px;'
+        f'letter-spacing:.04em;font-family:Space Grotesk,Inter,sans-serif;'
+        f'cursor:default;display:inline-block;{_s}">'
+        f'{_ni} {_nl}</span>'
+    )
+_nav_row_html = (
+    f'<div style="display:flex;gap:4px;flex-wrap:wrap;padding:10px 0 14px;'
+    f'border-bottom:1px solid {_nav_bdr};margin-bottom:20px;">'
+    + "".join(_nav_html_parts) + "</div>"
+)
+st.markdown(_nav_row_html, unsafe_allow_html=True)
 
+# Functional nav buttons (hidden visually but clickable via columns)
+_nc = st.columns(len(_NAV_ITEMS))
+for _ci, (_ni, _nl, _nk) in enumerate(_NAV_ITEMS):
+    with _nc[_ci]:
+        if st.button(
+            f"{_ni} {_nl}",
+            key=f"nav_{_nk}",
+            use_container_width=True,
+            type="primary" if _nav == _nk else "secondary",
+        ):
+            st.session_state.nav_tab = _nk
+            st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB DASHBOARD
