@@ -60,6 +60,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     justify-content: space-between;
 }
 .crz-logo {
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 20px;
     font-weight: 700;
     color: #ffffff;
@@ -67,7 +68,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     font-weight: 800;
 }
 .crz-logo span { color: #2dd4bf; text-shadow: 0 0 12px rgba(45,212,191,0.4); }
-.crz-tagline { font-size: 11px; color: #64748b; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 2px; }
+.crz-tagline { font-family: 'Space Grotesk', sans-serif; font-size: 10px; color: #64748b; letter-spacing: 0.18em; text-transform: uppercase; margin-top: 3px; font-weight: 500; }
 
 /* Metric cards */
 .metric-card {
@@ -860,7 +861,8 @@ if light_mode:
     st.markdown("""<style>
     .stApp { background: #f1f5f9 !important; }
     .crz-header { background: #ffffff !important; border-color: #e2e8f0 !important; }
-    .crz-logo { color: #0f172a !important; }
+    .crz-logo {
+    font-family: 'Space Grotesk', sans-serif; color: #0f172a !important; }
     .crz-tagline { color: #64748b !important; }
     .metric-card { background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important; }
     .metric-label { color: #64748b !important; }
