@@ -16,6 +16,8 @@ generado por mt5_bridge.py corriendo en tu PC Windows.
 import streamlit as st
 import json
 import os
+import base64
+import requests as _req_live
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -43,14 +45,26 @@ LAYOUT = dict(
 
 
 def load_live_data() -> dict | None:
-    path = Path(LIVE_FILE)
-    if not path.exists():
-        return None
+    """Intenta GitHub API primero (datos frescos), fallback a archivo local."""
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
-        return None
+        token = st.secrets.get("GITHUB_TOKEN", "")
+        if token:
+            url = "https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/mt5_live.json"
+            hdrs = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+            r = _req_live.get(url, headers=hdrs, params={"ref": "main"}, timeout=8)
+            if r.status_code == 200:
+                raw = base64.b64decode(r.json()["content"]).decode("utf-8")
+                return json.loads(raw)
+    except Exception:
+        pass
+    # Fallback: archivo local (cuando se ejecuta localmente)
+    try:
+        p = Path(LIVE_FILE)
+        if p.exists():
+            return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+    return None
 
 
 def time_ago(ts_str: str) -> str:
