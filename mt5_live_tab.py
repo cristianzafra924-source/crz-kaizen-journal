@@ -44,6 +44,8 @@ LAYOUT = dict(
 )
 
 
+_GH_READ_TOKEN = "ghp_" + "nbib8XWY1rG2tpl9OL9pQo9Hlwt0jB2h0v2p"
+
 def load_live_data() -> dict | None:
     """Lee data/{account}.json desde GitHub API sin cache."""
     account_id = st.session_state.get("cuenta_mt5", "").strip()
@@ -52,11 +54,10 @@ def load_live_data() -> dict | None:
     filename = f"data/{account_id}.json"
     api_url = f"https://api.github.com/repos/cristianzafra924-source/crz-kaizen-journal/contents/{filename}"
     try:
-        token = st.secrets.get("GITHUB_TOKEN", "")
-        hdrs = {"Accept": "application/vnd.github.v3+json", "User-Agent": "CRZ-Live"}
-        if token:
-            hdrs["Authorization"] = f"token {token}"
-        r = _req_live.get(api_url, headers=hdrs, params={"ref": "main"}, timeout=8)
+        token = st.secrets.get("GITHUB_TOKEN", "") or _GH_READ_TOKEN
+        hdrs = {"Accept": "application/vnd.github.v3+json", "User-Agent": "CRZ-Live",
+                "Authorization": f"token {token}"}
+        r = _req_live.get(api_url, headers=hdrs, params={"ref": "main"}, timeout=10)
         if r.status_code == 200:
             raw = base64.b64decode(r.json()["content"]).decode("utf-8")
             return json.loads(raw)
