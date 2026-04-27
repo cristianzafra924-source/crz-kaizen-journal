@@ -39,20 +39,18 @@ LAYOUT = dict(
 # ── CSS ────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+html, body, [class*="css"] { font-family: 'Space Grotesk', 'Inter', sans-serif; }
 
-.stApp { background: #060a10; }
-
-/* Hide streamlit elements */
-#MainMenu, footer { visibility: hidden; }
-header { visibility: hidden; }
-/* Restore sidebar toggle button so users can open/close the sidebar */
-[data-testid="stSidebarCollapsedControl"],
-[data-testid="stSidebarCollapseButton"],
-section[data-testid="stSidebarCollapsedControl"] { visibility: visible !important; }
-.block-container { padding: 0 2rem 2rem; max-width: 1400px; }
+/* ── Base ─────────────────────────────────────────────────────────────── */
+.stApp { background: #080b12; }
+#MainMenu, footer, header { visibility: hidden; }
+/* Lock sidebar open — hide both collapse/expand toggle buttons */
+[data-testid="stSidebarCollapseButton"] { display: none !important; }
+[data-testid="stSidebarCollapsedControl"] { display: none !important; }
+section[data-testid="stSidebarCollapsedControl"] { display: none !important; }
+.block-container { padding: 1rem 2rem 3rem; max-width: 100%; }
 
 /* Header */
 .crz-header {
