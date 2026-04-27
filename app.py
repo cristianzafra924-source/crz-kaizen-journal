@@ -16,6 +16,24 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ── Color / layout constants ───────────────────────────────────────────────────
+GREEN  = "#22c55e"
+RED    = "#ef4444"
+TEAL   = "#2dd4bf"
+BLUE   = "#3b82f6"
+AMBER  = "#f59e0b"
+PURPLE = "#a855f7"
+MUTED  = "#475569"
+LAYOUT = dict(
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(family="Inter", color="#94a3b8", size=11),
+    xaxis=dict(gridcolor="#1e2a3a", showgrid=True, zeroline=False),
+    yaxis=dict(gridcolor="#1e2a3a", showgrid=True, zeroline=False),
+    margin=dict(l=48, r=16, t=32, b=32),
+)
+
+
 # ── CSS ────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
