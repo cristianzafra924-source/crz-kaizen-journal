@@ -1,64 +1,55 @@
 //+------------------------------------------------------------------+
 //|                                       CRZ_Kaizen_Bridge.mq5     |
 //|                              CRZ Kaizen Journal - Bridge EA      |
-//|  Sube datos de tu cuenta MT5 a GitHub en tiempo real.            |
-//|  No necesitas Python ni terminal.                                 |
+//|  Sube datos de tu cuenta MT5 en tiempo real.                     |
+//|  No necesitas Python ni token de GitHub.                         |
 //|                                                                   |
 //|  INSTALACION:                                                     |
 //|  1. Copia este archivo en: MT5 > File > Open Data Folder >       |
 //|     MQL5 > Experts                                               |
 //|  2. En MT5: Herramientas > Opciones > Asesores Expertos >        |
-//|     Activar "Permitir WebRequest" y añadir:                      |
-//|     https://api.github.com                                        |
-//|  3. Arrastra el EA a cualquier grafico                           |
-//|  4. Pon tu GITHUB_TOKEN en los parametros y acepta               |
+//|     Activar "Permitir WebRequest" y anadir la URL del Worker     |
+//|  3. Arrastra el EA a cualquier grafico y pulsa Aceptar           |
 //+------------------------------------------------------------------+
 #property copyright "CRZ Kaizen Journal"
-#property version   "1.00"
-#property description "Bridge EA: sube datos MT5 a GitHub sin Python."
+#property version   "2.00"
+#property description "Bridge EA: sube datos MT5 via Cloudflare Worker."
 
 //── Parametros del usuario ─────────────────────────────────────────
-input string GITHUB_TOKEN  = "";                         // GitHub Token (ghp_...)
-input string GITHUB_USER   = "cristianzafra924-source"; // Usuario GitHub
-input string GITHUB_REPO   = "crz-kaizen-journal";      // Repositorio GitHub
-input string GITHUB_BRANCH = "main";                    // Rama
-input int    UPDATE_SECS   = 10;                        // Segundos entre actualizaciones
-input int    HISTORY_DAYS  = 365;                       // Dias de historial
+input string WORKER_URL  = "https://crz-bridge.cristian-zafra924.workers.dev"; // URL del Worker
+input int    UPDATE_SECS = 10;   // Segundos entre actualizaciones
+input int    HISTORY_DAYS = 365; // Dias de historial
 
 //── Variables globales ─────────────────────────────────────────────
 string   g_account_id = "";
-string   g_api_url    = "";
 datetime g_last_push  = 0;
-string   g_cached_sha = "";
 
 //+------------------------------------------------------------------+
 int OnInit()
 {
-    if(GITHUB_TOKEN == "")
+    if(WORKER_URL == "")
     {
-        Alert("CRZ Bridge: configura tu GITHUB_TOKEN en los parametros del EA.");
+        Alert("CRZ Bridge: configura WORKER_URL en los parametros del EA.");
         return INIT_FAILED;
     }
     g_account_id = IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN));
-    g_api_url    = "https://api.github.com/repos/" + GITHUB_USER + "/" + GITHUB_REPO
-                 + "/contents/data/" + g_account_id + ".json";
 
-    Print("=== CRZ Kaizen Bridge iniciado ===");
-    Print("Cuenta : #" + g_account_id + " - " + AccountInfoString(ACCOUNT_NAME));
-    Print("Destino: data/" + g_account_id + ".json");
+    Print("=== CRZ Kaizen Bridge v2 iniciado ===");
+    Print("Cuenta   : #" + g_account_id + " - " + AccountInfoString(ACCOUNT_NAME));
+    Print("Worker   : " + WORKER_URL);
     Print("Intervalo: " + IntegerToString(UPDATE_SECS) + "s");
 
     EventSetTimer(UPDATE_SECS);
-    PushToGitHub();
+    PushToWorker();
     return INIT_SUCCEEDED;
 }
 
 void OnDeinit(const int reason) { EventKillTimer(); Print("CRZ Bridge detenido."); }
-void OnTimer()                  { PushToGitHub(); }
+void OnTimer()                  { PushToWorker(); }
 void OnTick()
 {
     if(TimeCurrent() - g_last_push >= UPDATE_SECS)
-        PushToGitHub();
+        PushToWorker();
 }
 
 //+------------------------------------------------------------------+
@@ -116,7 +107,7 @@ string BuildPositions()
 }
 
 //+------------------------------------------------------------------+
-//| JSON de deals (hoy o historial)                                  |
+//| JSON de deals                                                     |
 //+------------------------------------------------------------------+
 string BuildDeals(datetime from, datetime to, double &pnl_out, bool is_today)
 {
@@ -142,9 +133,9 @@ string BuildDeals(datetime from, datetime to, double &pnl_out, bool is_today)
 
         string time_str;
         if(is_today)
-            time_str = TimeToString(dt, TIME_MINUTES | TIME_SECONDS); // HH:MM:SS
+            time_str = TimeToString(dt, TIME_MINUTES | TIME_SECONDS);
         else
-            time_str = FmtDT(dt); // YYYY-MM-DD HH:MM:SS
+            time_str = FmtDT(dt);
 
         if(count > 0) arr += ",";
         if(is_today)
@@ -184,7 +175,7 @@ string BuildDeals(datetime from, datetime to, double &pnl_out, bool is_today)
 }
 
 //+------------------------------------------------------------------+
-//| Equity series acumulada del historial                             |
+//| Equity series acumulada                                           |
 //+------------------------------------------------------------------+
 string BuildEquitySeries(datetime from, datetime to)
 {
@@ -221,12 +212,11 @@ string BuildFullJSON()
     double pnl_dia  = 0.0;
     double pnl_hist = 0.0;
 
-    string positions   = BuildPositions();
-    string deals_hoy   = BuildDeals(today_start, now + 86400, pnl_dia, true);
-    string historial   = BuildDeals(hist_from,   now + 86400, pnl_hist, false);
-    string eq_series   = BuildEquitySeries(hist_from, now + 86400);
+    string positions = BuildPositions();
+    string deals_hoy = BuildDeals(today_start, now + 86400, pnl_dia, true);
+    string historial = BuildDeals(hist_from,   now + 86400, pnl_hist, false);
+    string eq_series = BuildEquitySeries(hist_from, now + 86400);
 
-    // Contar trades en historial
     HistorySelect(hist_from, now + 86400);
     int n_trades = 0;
     for(int i = 0; i < HistoryDealsTotal(); i++)
@@ -237,7 +227,7 @@ string BuildFullJSON()
         if(dt == DEAL_TYPE_BUY || dt == DEAL_TYPE_SELL) n_trades++;
     }
 
-    string json = StringFormat(
+    return StringFormat(
         "{\"timestamp\":\"%s\",\"estado\":\"conectado\","
         "\"cuenta\":{"
         "\"login\":%I64d,\"nombre\":\"%s\",\"empresa\":\"%s\",\"servidor\":\"%s\","
@@ -266,78 +256,31 @@ string BuildFullJSON()
         positions, deals_hoy, pnl_dia,
         historial, eq_series, n_trades
     );
-    return json;
 }
 
 //+------------------------------------------------------------------+
-//| Obtiene el SHA actual del archivo en GitHub                       |
+//| Envia JSON al Cloudflare Worker                                   |
 //+------------------------------------------------------------------+
-string GetSHA()
-{
-    string req_headers = "Authorization: token " + GITHUB_TOKEN + "\r\n"
-                       + "Accept: application/vnd.github.v3+json\r\n";
-    char   result[];
-    string res_headers;
-    int code = WebRequest("GET", g_api_url + "?ref=" + GITHUB_BRANCH,
-                          req_headers, 10000, NULL, result, res_headers);
-    if(code == 200)
-    {
-        string body = CharArrayToString(result);
-        int pos = StringFind(body, "\"sha\":");
-        if(pos >= 0)
-        {
-            int s = StringFind(body, "\"", pos + 6) + 1;
-            int e = StringFind(body, "\"", s);
-            if(s > 0 && e > s)
-                return StringSubstr(body, s, e - s);
-        }
-    }
-    return "";
-}
-
-//+------------------------------------------------------------------+
-//| Sube el JSON a GitHub                                             |
-//+------------------------------------------------------------------+
-void PushToGitHub()
+void PushToWorker()
 {
     string json = BuildFullJSON();
 
-    // Base64 encode
-    uchar src[], dst[], key[];
-    StringToCharArray(json, src, 0, StringLen(json));
-    CryptEncode(CRYPT_BASE64, src, key, dst);
-    string b64 = CharArrayToString(dst);
-    StringReplace(b64, "\n", "");
-    StringReplace(b64, "\r", "");
-
-    // SHA (necesario para actualizar archivo existente)
-    string sha = GetSHA();
-
-    // Payload
-    string now_str = FmtDT(TimeCurrent());
-    string payload = "{\"message\":\"live " + now_str + "\","
-                   + "\"content\":\"" + b64 + "\","
-                   + "\"branch\":\"" + GITHUB_BRANCH + "\"";
-    if(sha != "") payload += ",\"sha\":\"" + sha + "\"";
-    payload += "}";
-
-    // PUT request
-    string req_headers = "Authorization: token " + GITHUB_TOKEN + "\r\n"
-                       + "Accept: application/vnd.github.v3+json\r\n"
-                       + "Content-Type: application/json\r\n";
+    string req_headers = "Content-Type: application/json\r\n";
     char   post[], result[];
     string res_headers;
-    StringToCharArray(payload, post, 0, StringLen(payload));
+    StringToCharArray(json, post, 0, StringLen(json));
 
-    int code = WebRequest("PUT", g_api_url, req_headers, 20000, post, result, res_headers);
+    int code = WebRequest("POST", WORKER_URL, req_headers, 20000, post, result, res_headers);
 
     g_last_push = TimeCurrent();
+    string now_str = FmtDT(TimeCurrent());
     string bal = DoubleToString(AccountInfoDouble(ACCOUNT_BALANCE), 2);
     string eq  = DoubleToString(AccountInfoDouble(ACCOUNT_EQUITY),  2);
 
-    if(code == 200 || code == 201)
-        Print("[" + now_str + "] Balance: $" + bal + " | Equity: $" + eq + " | GitHub OK");
+    if(code == 200)
+        Print("[" + now_str + "] Balance: $" + bal + " | Equity: $" + eq + " | Worker OK");
     else
-        Print("[" + now_str + "] GitHub Error HTTP " + IntegerToString(code));
+        Print("[" + now_str + "] Worker Error HTTP " + IntegerToString(code)
+              + " | " + CharArrayToString(result));
 }
 //+------------------------------------------------------------------+
