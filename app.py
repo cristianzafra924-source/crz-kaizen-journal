@@ -77,13 +77,19 @@ section[data-testid="stSidebarCollapsedControl"] { visibility: visible !importan
 
 /* Metric cards */
 .metric-card {
-    background: #0d1320;
+    background: #0f1520;
     border: 1px solid #1a2540;
-    border-radius: 10px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 22px 24px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 36px rgba(0,0,0,0.6);
+    border-color: #243055;
 }
 .metric-card::before {
     content: '';
@@ -232,56 +238,98 @@ div[data-testid="stMarkdownContainer"] span { color: #e8edf5 !important; }
 h1, h2, h3 { color: #ffffff !important; font-weight: 800 !important; }
 
 /* Buttons — dark mode */
-[data-testid="stButton"] button { color: #e2e8f0 !important; background: #1e2a3a !important; border-color: #334155 !important; }
-[data-testid="stButton"] button p { color: #e2e8f0 !important; }
-[data-testid="stButton"] button:hover { background: #2d3748 !important; }
+[data-testid="stButton"] button {
+    color: #94a3b8 !important;
+    background: #111827 !important;
+    border: 1px solid #1e2a40 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    transition: all 0.15s ease !important;
+}
+[data-testid="stButton"] button p { color: inherit !important; font-weight: 600 !important; }
+[data-testid="stButton"] button:hover {
+    background: #1a2540 !important;
+    border-color: #2dd4bf55 !important;
+    color: #e2e8f0 !important;
+}
+/* Primary buttons */
+[data-testid="stButton"] button[kind="primary"] {
+    background: linear-gradient(135deg,#0d9488,#2dd4bf) !important;
+    border-color: #2dd4bf !important;
+    color: #0a0f1a !important;
+    font-weight: 700 !important;
+}
+[data-testid="stButton"] button[kind="primary"] p { color: #0a0f1a !important; }
+[data-testid="stButton"] button[kind="primary"]:hover {
+    background: linear-gradient(135deg,#0f9e92,#34d8c3) !important;
+    box-shadow: 0 0 16px rgba(45,212,191,0.35) !important;
+}
 
-/* ── Sidebar nav ───────────────────────────────────────────── */
-[data-testid="stSidebar"] { background: #0a0f1a !important; border-right: 1px solid #1a2540 !important; }
+/* ── Sidebar ──────────────────────────────────────────────────── */
+[data-testid="stSidebar"] {
+    background: #0c0f1a !important;
+    border-right: 1px solid #161d30 !important;
+    min-width: 230px !important;
+}
+[data-testid="stSidebar"] > div:first-child {
+    padding-top: 1rem !important;
+}
 [data-testid="stSidebar"] * { font-family: 'Space Grotesk', 'Inter', sans-serif !important; }
 
-.nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px; border-radius: 8px; margin-bottom: 2px;
-    cursor: pointer; transition: all 0.15s;
-    font-size: 13px; font-weight: 600; color: #64748b;
-    border: 1px solid transparent;
-    text-decoration: none;
+.nav-section {
+    font-size: 9px; font-weight: 700; color: #2a3550;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 16px 16px 6px; margin-top: 4px;
 }
-.nav-item:hover { background: #0d1320; color: #cbd5e1; }
-.nav-item.active {
-    background: rgba(45,212,191,0.1);
-    color: #2dd4bf;
-    border-color: rgba(45,212,191,0.2);
-}
-.nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; }
-.nav-section { font-size: 9px; font-weight: 700; color: #334155;
-    letter-spacing: 0.15em; text-transform: uppercase;
-    padding: 12px 14px 4px; margin-top: 4px; }
 
-/* Nav buttons in sidebar */
+/* Sidebar nav buttons */
 [data-testid="stSidebar"] [data-testid="stButton"] button {
     background: transparent !important;
     border: 1px solid transparent !important;
-    color: #64748b !important;
+    color: #4a5568 !important;
     font-size: 13px !important;
     font-weight: 600 !important;
     text-align: left !important;
-    padding: 9px 14px !important;
-    border-radius: 8px !important;
-    transition: all 0.15s !important;
-    margin-bottom: 1px !important;
+    padding: 10px 16px !important;
+    border-radius: 9px !important;
+    transition: all 0.18s ease !important;
+    margin-bottom: 2px !important;
+    width: 100% !important;
 }
 [data-testid="stSidebar"] [data-testid="stButton"] button:hover {
-    background: #0d1320 !important;
-    color: #cbd5e1 !important;
-    border-color: #1a2540 !important;
+    background: rgba(45,212,191,0.08) !important;
+    color: #2dd4bf !important;
+    border-color: rgba(45,212,191,0.15) !important;
+    transform: translateX(2px) !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button:focus:not(:active) {
+    background: rgba(45,212,191,0.12) !important;
+    color: #2dd4bf !important;
+    border-color: rgba(45,212,191,0.25) !important;
 }
 [data-testid="stSidebar"] [data-testid="stButton"] button p {
     color: inherit !important;
     font-size: 13px !important;
     font-weight: 600 !important;
 }
+
+/* Sidebar inputs */
+[data-testid="stSidebar"] [data-testid="stTextInput"] input {
+    background: #111827 !important;
+    border-color: #1e2a40 !important;
+    color: #e2e8f0 !important;
+    border-radius: 8px !important;
+}
+[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
+    background: #111827 !important;
+    border-color: #1e2a40 !important;
+    color: #e2e8f0 !important;
+}
+[data-testid="stSidebar"] hr { border-color: #161d30 !important; margin: 8px 0 !important; }
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] label { color: #64748b !important; font-size: 12px !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1112,29 +1160,7 @@ if "nav_tab" not in st.session_state:
     st.session_state.nav_tab = "live"
 _nav = st.session_state.get("nav_tab", "live")
 
-# ── Navigation bar ─────────────────────────────────────────────────────────────
-_nav_def = [
-    ("⚡", "Live MT5",    "live"),
-    ("◆",  "Dashboard",   "dash"),
-    ("☰",  "Calendario",  "cal"),
-    ("≡",  "Operaciones", "ops"),
-    ("⊙",  "Simbolo",     "sym"),
-    ("⊕",  "Horario",     "hora"),
-    ("△",  "Kaizen",      "kaizen"),
-    ("◎",  "Kaizen AI",   "ai"),
-]
-_nav_cols = st.columns(len(_nav_def))
-for _ci, (_ni, _nl, _nk) in enumerate(_nav_def):
-    with _nav_cols[_ci]:
-        if st.button(
-            f"{_ni} {_nl}",
-            key=f"nav_{_nk}",
-            use_container_width=True,
-            type="primary" if _nav == _nk else "secondary",
-        ):
-            st.session_state.nav_tab = _nk
-            st.rerun()
-st.markdown("<div style='margin-bottom:4px;'></div>", unsafe_allow_html=True)
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB DASHBOARD
