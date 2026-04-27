@@ -13,7 +13,7 @@ st.set_page_config(
     page_title="CRZ Kaizen Journal",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # ── CSS ────────────────────────────────────────────────────────────────────────
@@ -424,25 +424,61 @@ def live_to_df(live: dict, capital: float) -> dict | None:
 
 
 def _show_welcome(not_found: bool = False):
-    _lm = st.session_state.get("light_mode", False)
-    _bg = "#ffffff" if _lm else "#0d1117"
-    _border = "#e2e8f0" if _lm else "#1e2a3a"
-    _title = "#0f172a" if _lm else "#f1f5f9"
-    _sub   = "#64748b"
-    _card  = "#050810" if not _lm else "#f8fafc"
+    _lm   = st.session_state.get('light_mode', False)
+    _bg   = '#ffffff' if _lm else '#0d1117'
+    _bord = '#e2e8f0' if _lm else '#1e2a3a'
+    _tit  = '#0f172a' if _lm else '#f1f5f9'
+    _sub  = '#64748b'
+    _card = '#f8fafc' if _lm else '#050810'
 
     if not_found:
-        st.markdown(f"""
-<div style="background:#1a0a0a;border:1.5px solid #7f1d1d;border-radius:12px;
-     padding:24px 32px;text-align:center;margin:20px auto;max-width:640px;">
-  <div style="font-size:28px;margin-bottom:8px;">📡</div>
-  <div style="font-size:16px;font-weight:600;color:#fca5a5;margin-bottom:6px;">
-    Cuenta no encontrada
-  </div>
-  <div style="font-size:13px;color:#94a3b8;">
-    No hay datos para esa cuenta. Asegúrate de que el bridge esté corriendo en tu PC.
-  </div>
-</div>""", unsafe_allow_html=True)
+        st.markdown(
+            '<div style="background:#1a0a0a;border:1.5px solid #7f1d1d;border-radius:10px;padding:16px 24px;text-align:center;margin:12px auto;max-width:520px;">'
+            '<div style="font-size:13px;color:#fca5a5;">'
+            'Cuenta no encontrada. Asegurate de que bridge.py este corriendo en tu PC con MT5 abierto.'
+            '</div></div>',
+            unsafe_allow_html=True)
+
+    # Input de cuenta centrado
+    col_l, col_c, col_r = st.columns([1, 2, 1])
+    with col_c:
+        st.markdown(
+            f'<div style="text-align:center;padding:32px 0 16px;">'
+            f'<div style="font-size:40px;margin-bottom:12px;">⚡</div>'
+            f'<div style="font-size:20px;font-weight:700;color:{_tit};margin-bottom:6px;">'
+            f'Conecta tu cuenta MT5</div>'
+            f'<div style="font-size:13px;color:{_sub};margin-bottom:24px;">'
+            f'Introduce tu numero de cuenta MT5</div></div>',
+            unsafe_allow_html=True)
+        cuenta_val = st.text_input(
+            'Numero de cuenta',
+            value=st.session_state.get('cuenta_mt5', ''),
+            placeholder='Ej: 504062347',
+            label_visibility='collapsed',
+        )
+        if st.button('Conectar', use_container_width=True, type='primary'):
+            st.session_state.cuenta_mt5 = cuenta_val.strip()
+            st.rerun()
+
+    st.markdown('<br>', unsafe_allow_html=True)
+
+    # Pasos de instalacion
+    _, col2, _ = st.columns([1, 4, 1])
+    with col2:
+        p1 = f'<div style="background:{_card};border:1px solid {_bord};border-radius:10px;padding:16px;">'
+        p1 += '<div style="font-size:10px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:6px;">PASO 1 - INSTALAR</div>'
+        p1 += '<div style="font-family:monospace;font-size:12px;color:#94a3b8;">pip install MetaTrader5 python-dotenv requests</div></div>'
+        p2 = f'<div style="background:{_card};border:1px solid {_bord};border-radius:10px;padding:16px;">'
+        p2 += '<div style="font-size:10px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:6px;">PASO 2 - CONFIGURAR</div>'
+        p2 += '<div style="font-family:monospace;font-size:12px;color:#94a3b8;">Edita .env: GITHUB_TOKEN=tu_token</div></div>'
+        p3 = f'<div style="background:{_card};border:1px solid {_bord};border-radius:10px;padding:16px;">'
+        p3 += '<div style="font-size:10px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:6px;">PASO 3 - EJECUTAR</div>'
+        p3 += '<div style="font-family:monospace;font-size:12px;color:#4ade80;">Abre MT5 &nbsp;&#9658;&nbsp; python bridge.py</div></div>'
+        p4 = f'<div style="background:{_card};border:1px solid {_bord};border-radius:10px;padding:16px;">'
+        p4 += '<div style="font-size:10px;color:#2dd4bf;font-weight:700;letter-spacing:.1em;margin-bottom:6px;">PASO 4 - CONECTAR</div>'
+        p4 += f'<div style="font-size:12px;color:{_sub};">Escribe tu numero de cuenta arriba y pulsa Conectar</div></div>'
+        grid = f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">{p1}{p2}{p3}{p4}</div>'
+        st.markdown(grid, unsafe_allow_html=True)
 
     st.markdown(f"""
 <div style="background:{_bg};border:1.5px dashed {_border};border-radius:12px;
