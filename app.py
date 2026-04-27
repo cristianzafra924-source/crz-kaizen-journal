@@ -426,9 +426,10 @@ def live_to_df(live: dict, capital: float) -> dict | None:
     s["avg_duration"] = 0.0
     s["df_sorted"]    = df
     s["capital"]      = capital
-    pk = df["equity"].cummax()
-    dd = (df["equity"] - pk) / pk.replace(0, np.nan) * 100
-    s["max_dd"]       = float(dd.min()) if not dd.isna().all() else 0
+    bal_live = capital + df["equity"]
+    pk = bal_live.cummax()
+    dd = (bal_live - pk) / pk * 100
+    s["max_dd"]       = float(dd.min()) if len(dd) > 0 else 0
     wr_sc = min(s["win_rate"] / 60 * 30, 30)
     pf_sc = min(s["pfactor"] / 2 * 30, 30)
     rr    = abs(s["avg_win"] / s["avg_loss"]) if s["avg_loss"] else 0
@@ -977,10 +978,11 @@ df_s["balance"]      = CAPITAL + df_s["equity"]
 df_s["rentabilidad"] = df_s["equity"] / CAPITAL * 100
 stats["capital"]     = CAPITAL
 
-# Recalcular max_dd con capital correcto
-peak_r = df_s["equity"].cummax()
-dd_r   = (df_s["equity"] - peak_r) / peak_r.replace(0, np.nan) * 100
-stats["max_dd"] = float(dd_r.min()) if not dd_r.isna().all() else 0
+# Recalcular max_dd con capital correcto (usar balance, no equity relativa)
+bal_s  = CAPITAL + df_s["equity"]
+peak_r = bal_s.cummax()
+dd_r   = (bal_s - peak_r) / peak_r * 100
+stats["max_dd"] = float(dd_r.min()) if len(dd_r) > 0 else 0
 
 # ── Trader bar ─────────────────────────────────────────────────────────────────
 pnl_color = GREEN if stats["pnl_net"] >= 0 else RED
