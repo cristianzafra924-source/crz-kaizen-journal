@@ -9,6 +9,7 @@ import calendar
 import json, base64, requests as _req_app
 from pathlib import Path
 import streamlit.components.v1 as components
+from mt5_live_tab import show_live_tab
 
 st.set_page_config(
     page_title="CRZ Kaizen Journal",
