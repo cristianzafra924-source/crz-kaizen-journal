@@ -382,6 +382,9 @@ def live_to_df(live: dict, capital: float) -> dict | None:
     df["duration"]   = 0.0
     df["win"]        = df["profit"] > 0
     df = df.dropna(subset=["close_dt"]).sort_values("close_dt").reset_index(drop=True)
+    # Columnas de texto requeridas por la pestaña Operaciones
+    df["open"]       = df["close_dt"].dt.strftime("%Y.%m.%d %H:%M:%S")
+    df["close"]      = df["close_dt"].dt.strftime("%Y.%m.%d %H:%M:%S")
     df["equity"]       = df["pnl_net"].cumsum()
     df["equity_peak"]  = df["equity"].cummax()
     df["balance"]      = capital + df["equity"]
