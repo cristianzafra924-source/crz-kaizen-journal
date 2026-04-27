@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-27 23:19:22",
+  "timestamp": "2026-04-28 02:25:24",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 195425.32,
-    "equity": 197243.17,
+    "equity": 196900.09,
     "margin": 50918.93,
-    "margin_libre": 146324.24,
-    "margin_nivel": 387.37,
-    "profit_abierto": 1817.85,
+    "margin_libre": 145981.16,
+    "margin_nivel": 386.69,
+    "profit_abierto": 1474.77,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "sell",
       "volume": 1,
       "price_open": 78504.47,
-      "price_current": 76938.47,
+      "price_current": 77142.5,
       "sl": 78489.47,
       "tp": 64729.35,
-      "profit": 1566,
-      "swap": 0,
-      "pnl_net": 1566,
+      "profit": 1361.97,
+      "swap": -59.88,
+      "pnl_net": 1302.09,
       "time_open": "2026-04-27 00:57:00"
     },
     {
@@ -36,90 +36,17 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 77777.98,
-      "price_current": 76938.47,
+      "price_current": 77142.5,
       "sl": 79963.14,
       "tp": 64928.11,
-      "profit": 251.85,
-      "swap": 0,
-      "pnl_net": 251.85,
+      "profit": 190.64,
+      "swap": -17.96,
+      "pnl_net": 172.68,
       "time_open": "2026-04-27 14:15:17"
     }
   ],
-  "deals_hoy": [
-    {
-      "ticket": 13732831,
-      "symbol": "BTCUSD",
-      "type": "buy",
-      "volume": 0.5,
-      "price": 78917.02,
-      "profit": -462.31,
-      "commission": -9.86,
-      "swap": 0,
-      "pnl_net": -472.17,
-      "time": "00:55:06"
-    },
-    {
-      "ticket": 13732836,
-      "symbol": "BTCUSD",
-      "type": "buy",
-      "volume": 0.5,
-      "price": 78721.9,
-      "profit": -336.22,
-      "commission": -9.84,
-      "swap": 0,
-      "pnl_net": -346.06,
-      "time": "00:55:06"
-    },
-    {
-      "ticket": 13732838,
-      "symbol": "BTCUSD",
-      "type": "buy",
-      "volume": 0.2,
-      "price": 78730.03,
-      "profit": -128.11,
-      "commission": -3.94,
-      "swap": 0,
-      "pnl_net": -132.05,
-      "time": "00:55:06"
-    },
-    {
-      "ticket": 13732852,
-      "symbol": "BTCUSD",
-      "type": "sell",
-      "volume": 1,
-      "price": 78504.47,
-      "profit": 0,
-      "commission": -19.63,
-      "swap": 0,
-      "pnl_net": -19.63,
-      "time": "00:57:00"
-    },
-    {
-      "ticket": 13736652,
-      "symbol": "USTEC",
-      "type": "buy",
-      "volume": 1.01,
-      "price": 27324.79,
-      "profit": -90.14,
-      "commission": 0,
-      "swap": 0.56,
-      "pnl_net": -89.58,
-      "time": "03:58:26"
-    },
-    {
-      "ticket": 13751706,
-      "symbol": "BTCUSD",
-      "type": "sell",
-      "volume": 0.3,
-      "price": 77777.98,
-      "profit": 0,
-      "commission": -5.83,
-      "swap": 0,
-      "pnl_net": -5.83,
-      "time": "14:15:17"
-    }
-  ],
-  "pnl_dia": -1065.32,
+  "deals_hoy": [],
+  "pnl_dia": 0,
   "historial": [
     {
       "ticket": 13708343,
