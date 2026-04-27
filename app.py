@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import calendar
 import json, base64, requests as _req_app
 from pathlib import Path
+import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="CRZ Kaizen Journal",
