@@ -937,7 +937,7 @@ with st.sidebar:
     st.markdown("<div style='margin-bottom:6px'></div>", unsafe_allow_html=True)
 
     # ── Navigation ────────────────────────────────────────────────
-    st.markdown("<div class='nav-section'>Navegación</div>", unsafe_allow_html=True)
+    _cur_nav = st.session_state.get("nav_tab", "live")
     _NAV_SIDEBAR = [
         ("⚡", "Live MT5",    "live"),
         ("◆",  "Dashboard",   "dash"),
@@ -948,17 +948,21 @@ with st.sidebar:
         ("△",  "Kaizen",      "kaizen"),
         ("◎",  "Kaizen AI",   "ai"),
     ]
-    _cur_nav = st.session_state.get("nav_tab", "live")
     for _ni, _nl, _nk in _NAV_SIDEBAR:
-        _is_active = (_cur_nav == _nk)
-        if _is_active:
-            st.markdown(
-                f'<div style="background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.25);'
-                f'border-radius:9px;padding:9px 14px;margin-bottom:2px;color:#2dd4bf;'
-                f'font-size:13px;font-weight:700;font-family:Space Grotesk,Inter,sans-serif;">'
-                f'{_ni}  {_nl}</div>',
-                unsafe_allow_html=True,
-            )
+        _active = (_cur_nav == _nk)
+        _bg   = "rgba(45,212,191,.12)" if _active else "transparent"
+        _bdr  = "rgba(45,212,191,.28)" if _active else "transparent"
+        _col  = "#2dd4bf" if _active else "#4a5a72"
+        _fw   = "700" if _active else "500"
+        _bar  = "3px solid #2dd4bf" if _active else "3px solid transparent"
+        st.markdown(
+            f'<div style="border-left:{_bar};background:{_bg};border-radius:0 9px 9px 0;'
+            f'padding:10px 14px;margin:1px 0;color:{_col};font-size:13px;font-weight:{_fw};'
+            f'font-family:Space Grotesk,Inter,sans-serif;border-right:1px solid {_bdr};'
+            f'border-top:1px solid {_bdr};border-bottom:1px solid {_bdr};'
+            f'transition:all .15s;cursor:pointer;">{_ni}&nbsp;&nbsp;{_nl}</div>',
+            unsafe_allow_html=True,
+        )
         if st.button(
             f"{_ni}  {_nl}",
             key=f"nav_{_nk}",
