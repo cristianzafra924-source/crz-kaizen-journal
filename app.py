@@ -61,9 +61,9 @@ html,body,[class*="css"] { font-family:'Space Grotesk','Inter',sans-serif; }
 section[data-testid="stSidebar"] {
     transform:none !important;
     margin-left:0 !important;
-    width:230px !important;
-    min-width:230px !important;
-    max-width:230px !important;
+    width:260px !important;
+    min-width:260px !important;
+    max-width:260px !important;
     background:#0c0f1c !important;
     border-right:1px solid #171e30 !important;
     visibility:visible !important;
@@ -96,6 +96,7 @@ section[data-testid="stSidebar"] > div { width:100% !important; overflow-y:auto 
     background:transparent !important;
     border:1px solid transparent !important;
     color:#4a5a72 !important;
+    margin-top:-2px !important;
     font-size:13px !important; font-weight:600 !important;
     text-align:left !important;
     padding:9px 14px !important; border-radius:9px !important;
@@ -919,14 +920,57 @@ if "capital_manual" not in st.session_state:
     st.session_state.capital_manual = 10_000
 
 # ── Sidebar: cuenta MT5 + capital + archivo opcional ──────────────────────────
+if "nav_tab" not in st.session_state:
+    st.session_state.nav_tab = "live"
+
 with st.sidebar:
+    # ── Logo ──────────────────────────────────────────────────────
     st.markdown("""
-<div style="padding:4px 0 16px;">
-  <div style="font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:2px;">⚡ CRZ Kaizen</div>
-  <div style="font-size:10px;color:#475569;letter-spacing:.1em;text-transform:uppercase;">MT5 Live Dashboard</div>
+<div style="padding:12px 4px 4px;">
+  <div style="font-size:17px;font-weight:800;color:#f1f5f9;letter-spacing:.02em;">
+    ⚡ CRZ <span style="color:#2dd4bf;">Kaizen</span>
+  </div>
+  <div style="font-size:9px;color:#253045;letter-spacing:.18em;text-transform:uppercase;
+       font-weight:700;margin-top:2px;">MT5 Live Dashboard</div>
 </div>""", unsafe_allow_html=True)
 
-    st.markdown("**Número de cuenta MT5**")
+    st.markdown("<div style='margin-bottom:6px'></div>", unsafe_allow_html=True)
+
+    # ── Navigation ────────────────────────────────────────────────
+    st.markdown("<div class='nav-section'>Navegación</div>", unsafe_allow_html=True)
+    _NAV_SIDEBAR = [
+        ("⚡", "Live MT5",    "live"),
+        ("◆",  "Dashboard",   "dash"),
+        ("☰",  "Calendario",  "cal"),
+        ("≡",  "Operaciones", "ops"),
+        ("⊙",  "Símbolo",     "sym"),
+        ("⊕",  "Horario",     "hora"),
+        ("△",  "Kaizen",      "kaizen"),
+        ("◎",  "Kaizen AI",   "ai"),
+    ]
+    _cur_nav = st.session_state.get("nav_tab", "live")
+    for _ni, _nl, _nk in _NAV_SIDEBAR:
+        _is_active = (_cur_nav == _nk)
+        if _is_active:
+            st.markdown(
+                f'<div style="background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.25);'
+                f'border-radius:9px;padding:9px 14px;margin-bottom:2px;color:#2dd4bf;'
+                f'font-size:13px;font-weight:700;font-family:Space Grotesk,Inter,sans-serif;">'
+                f'{_ni}  {_nl}</div>',
+                unsafe_allow_html=True,
+            )
+        if st.button(
+            f"{_ni}  {_nl}",
+            key=f"nav_{_nk}",
+            use_container_width=True,
+        ):
+            st.session_state.nav_tab = _nk
+            st.rerun()
+
+    st.markdown("---")
+
+    # ── Account ───────────────────────────────────────────────────
+    st.markdown("<div class='nav-section'>Cuenta MT5</div>", unsafe_allow_html=True)
     cuenta_input = st.text_input(
         "Cuenta",
         value=st.session_state.get("cuenta_mt5", ""),
@@ -940,33 +984,31 @@ with st.sidebar:
     if st.session_state.get("cuenta_mt5"):
         st.markdown(f"""
 <div style="background:#0a1a0a;border:1px solid #166534;border-radius:6px;
-     padding:8px 12px;margin:8px 0;font-size:11px;color:#4ade80;">
-  ● Conectado: #{st.session_state.cuenta_mt5}
+     padding:6px 10px;margin:6px 0;font-size:11px;color:#4ade80;">
+  ● #{st.session_state.cuenta_mt5}
 </div>""", unsafe_allow_html=True)
-        if st.button("Desconectar", use_container_width=True):
+        if st.button("⏏ Desconectar", use_container_width=True):
             st.session_state.cuenta_mt5 = ""
             st.rerun()
 
     st.markdown("---")
-    st.markdown("**Capital inicial**")
+
+    # ── Settings ──────────────────────────────────────────────────
+    st.markdown("<div class='nav-section'>Configuración</div>", unsafe_allow_html=True)
     capital_input = st.number_input(
-        "Capital ($)",
+        "Capital inicial ($)",
         min_value=100,
         max_value=10_000_000,
         value=st.session_state.capital_manual,
         step=1000,
-        label_visibility="collapsed",
         key="capital_input_widget",
     )
     st.session_state.capital_manual = int(capital_input)
 
-    st.markdown("---")
-    st.markdown("**Historial MT5** *(opcional)*")
     uploaded = st.file_uploader(
-        "Archivo .xlsx",
+        "Historial MT5 (.xlsx)",
         type=["xlsx", "xls"],
-        label_visibility="collapsed",
-        help="Para análisis histórico desde Excel. Sin archivo, se usan datos live.",
+        help="Para análisis histórico desde Excel.",
     )
 
 
@@ -1064,33 +1106,9 @@ with _btn_col:
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-if "nav_tab" not in st.session_state:
-    st.session_state.nav_tab = "live"
 _nav = st.session_state.get("nav_tab", "live")
 
-# ── Navigation buttons (horizontal row, always visible) ───────────────────────
-_NAV_ITEMS = [
-    ("⚡", "Live MT5",  "live"),
-    ("◆",  "Dashboard", "dash"),
-    ("☰",  "Calendario","cal"),
-    ("≡",  "Operaciones","ops"),
-    ("⊙",  "Simbolo",   "sym"),
-    ("⊕",  "Horario",   "hora"),
-    ("△",  "Kaizen",    "kaizen"),
-    ("◎",  "Kaizen AI", "ai"),
-]
-_nc = st.columns(len(_NAV_ITEMS))
-for _ci, (_ni, _nl, _nk) in enumerate(_NAV_ITEMS):
-    with _nc[_ci]:
-        if st.button(
-            f"{_ni} {_nl}",
-            key=f"nav_{_nk}",
-            use_container_width=True,
-            type="primary" if _nav == _nk else "secondary",
-        ):
-            st.session_state.nav_tab = _nk
-            st.rerun()
-st.markdown("<div style='margin-bottom:6px'></div>", unsafe_allow_html=True)
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB DASHBOARD
