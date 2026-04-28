@@ -1625,15 +1625,23 @@ if _nav == "ops":
 if _nav == "sym":
     st.markdown("#### Análisis por Símbolo")
 
-    sym_g = df.groupby("symbol").agg(
-        Ops=("profit","count"), Ganadoras=("win","sum"), PnL=("pnl_net","sum"),
-        Mejor=("profit","max"), Peor=("profit","min"),
-        Gan_bruta=("profit", lambda x: x[x>0].sum()),
-        Perd_bruta=("profit", lambda x: x[x<0].sum()),
-    ).reset_index()
-    sym_g["Win_Rate"] = sym_g["Ganadoras"] / sym_g["Ops"] * 100
-    sym_g["Factor"]   = sym_g["Gan_bruta"] / sym_g["Perd_bruta"].abs().replace(0, np.nan)
-    sym_g = sym_g.sort_values("PnL", ascending=False)
+    if "symbol" not in df.columns:
+        st.info("No hay datos de símbolo disponibles para esta cuenta.")
+        sym_g = pd.DataFrame()
+    else:
+        try:
+            sym_g = df.groupby("symbol").agg(
+                Ops=("profit","count"), Ganadoras=("win","sum"), PnL=("pnl_net","sum") if "pnl_net" in df.columns else ("profit","sum"),
+                Mejor=("profit","max"), Peor=("profit","min"),
+                Gan_bruta=("profit", lambda x: x[x>0].sum()),
+                Perd_bruta=("profit", lambda x: x[x<0].sum()),
+            ).reset_index()
+            sym_g["Win_Rate"] = sym_g["Ganadoras"] / sym_g["Ops"] * 100
+            sym_g["Factor"]   = sym_g["Gan_bruta"] / sym_g["Perd_bruta"].abs().replace(0, np.nan)
+            sym_g = sym_g.sort_values("PnL", ascending=False)
+        except Exception as e:
+            st.error(f"Error procesando datos de símbolo: {e}")
+            sym_g = pd.DataFrame()
 
     col_bar, col_wr = st.columns(2)
     with col_bar:
@@ -1704,7 +1712,8 @@ if _nav == "sym":
 if _nav == "hora":
     st.markdown("#### Análisis por Horario y Día de Semana")
 
-    hr_g = df.groupby("hour").agg(ops=("profit","count"), pnl=("pnl_net","sum"), wins=("win","sum")).reset_index()
+    _pnl_col = "pnl_net" if "pnl_net" in df.columns else "profit"
+    hr_g = df.groupby("hour").agg(ops=("profit","count"), pnl=(_pnl_col,"sum"), wins=("win","sum")).reset_index()
     hr_g["win_rate"] = hr_g["wins"] / hr_g["ops"] * 100
 
     wd_order = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
@@ -1821,10 +1830,17 @@ if _nav == "kaizen":
     elif score >= 40: lvl_name, lvl_color, lvl_emoji = "PROGRESS", "#f59e0b", "📈"
     else:             lvl_name, lvl_color, lvl_emoji = "TRAINING", "#f43f5e", "🎯"
 
-    best_hour  = hr_g.loc[hr_g["pnl"].idxmax(), "hour"] if len(hr_g) else 0
-    worst_hour = hr_g.loc[hr_g["pnl"].idxmin(), "hour"] if len(hr_g) else 0
-    best_sym   = sym_g.iloc[0]["symbol"] if len(sym_g) else "—"
-    worst_sym  = sym_g.iloc[-1]["symbol"] if len(sym_g) else "—"
+    try:
+        _pnl_s = hr_g["pnl"].dropna()
+        best_hour  = hr_g.loc[_pnl_s.idxmax(), "hour"] if len(_pnl_s) else 0
+        worst_hour = hr_g.loc[_pnl_s.idxmin(), "hour"] if len(_pnl_s) else 0
+    except (ValueError, KeyError):
+        best_hour, worst_hour = 0, 0
+    try:
+        best_sym  = sym_g.iloc[0]["symbol"]  if len(sym_g) else "—"
+        worst_sym = sym_g.iloc[-1]["symbol"] if len(sym_g) else "—"
+    except (KeyError, IndexError):
+        best_sym = worst_sym = "—"
 
     def hud_circle(pct, color, size, stroke, label, value):
         r   = (size - stroke) / 2; cx = size / 2
