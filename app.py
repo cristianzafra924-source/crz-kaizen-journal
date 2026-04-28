@@ -124,36 +124,46 @@ section[data-testid="stSidebar"] {
 }
 
 /* ── Sidebar nav buttons ─────────────────────────────────── */
-/* Sidebar nav buttons — invisible click overlay on top of HTML visual */
-[data-testid="stSidebar"] [data-testid="stButton"] {
-    margin-top:-44px !important;
-    position:relative !important;
-    z-index:10 !important;
-}
-[data-testid="stSidebar"] [data-testid="stButton"] button {
-    width:100% !important; height:44px !important;
-    background:transparent !important; border:none !important;
-    opacity:0 !important; cursor:pointer !important;
-}
-
-/* Sidebar non-nav buttons (Conectar, Desconectar) — make visible */
-[data-testid="stSidebar"] [data-testid="stButton"]:has(button[kind="primary"]),
-[data-testid="stSidebar"] [data-testid="stButton"]:has(button[kind="secondary"]) {
-    margin-top:0 !important;
-}
+/* ── Sidebar nav buttons ─────────────────────────────────── */
+/* Active nav item (type=primary) */
 [data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] {
-    background:linear-gradient(135deg,#0d9488,#2dd4bf) !important;
-    color:#0a0f1a !important; font-weight:700 !important;
-    opacity:1 !important; border-radius:8px !important;
-    border:none !important; padding:8px 14px !important; height:auto !important;
+    background:rgba(45,212,191,.1) !important;
+    border-left:3px solid #2dd4bf !important;
+    border-top:1px solid rgba(45,212,191,.2) !important;
+    border-bottom:1px solid rgba(45,212,191,.2) !important;
+    border-right:1px solid rgba(45,212,191,.2) !important;
+    border-radius:0 9px 9px 0 !important;
+    color:#2dd4bf !important;
+    font-size:13px !important; font-weight:700 !important;
+    padding:10px 14px !important;
+    text-align:left !important;
+    margin-bottom:2px !important;
+    box-shadow:none !important;
 }
-[data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] p { color:#0a0f1a !important; }
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] p {
+    color:#2dd4bf !important; font-weight:700 !important;
+}
+/* Inactive nav item (type=secondary) */
 [data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] {
-    background:#111827 !important; color:#94a3b8 !important;
-    opacity:1 !important; border-radius:8px !important;
-    border:1px solid #1e2a40 !important; padding:8px 14px !important; height:auto !important;
+    background:transparent !important;
+    border:1px solid transparent !important;
+    border-left:3px solid transparent !important;
+    border-radius:0 9px 9px 0 !important;
+    color:#4a5a72 !important;
+    font-size:13px !important; font-weight:500 !important;
+    padding:10px 14px !important;
+    text-align:left !important;
+    margin-bottom:2px !important;
+    transition:all .15s ease !important;
 }
-[data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] p { color:#94a3b8 !important; }
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"]:hover {
+    background:rgba(45,212,191,.06) !important;
+    border-left-color:rgba(45,212,191,.3) !important;
+    color:#94a3b8 !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] p {
+    color:inherit !important; font-weight:500 !important;
+}
 
 /* ── Header ──────────────────────────────────────────────── */
 .crz-header {
@@ -995,23 +1005,11 @@ with st.sidebar:
     ]
     for _ni, _nl, _nk in _NAV_SIDEBAR:
         _active = (_cur_nav == _nk)
-        _bg   = "rgba(45,212,191,.12)" if _active else "transparent"
-        _bdr  = "rgba(45,212,191,.28)" if _active else "transparent"
-        _col  = "#2dd4bf" if _active else "#4a5a72"
-        _fw   = "700" if _active else "500"
-        _bar  = "3px solid #2dd4bf" if _active else "3px solid transparent"
-        st.markdown(
-            f'<div style="border-left:{_bar};background:{_bg};border-radius:0 9px 9px 0;'
-            f'padding:10px 14px;margin:1px 0;color:{_col};font-size:13px;font-weight:{_fw};'
-            f'font-family:Space Grotesk,Inter,sans-serif;border-right:1px solid {_bdr};'
-            f'border-top:1px solid {_bdr};border-bottom:1px solid {_bdr};'
-            f'transition:all .15s;cursor:pointer;">{_ni}&nbsp;&nbsp;{_nl}</div>',
-            unsafe_allow_html=True,
-        )
         if st.button(
             f"{_ni}  {_nl}",
             key=f"nav_{_nk}",
             use_container_width=True,
+            type="primary" if _active else "secondary",
         ):
             st.session_state.nav_tab = _nk
             st.rerun()
