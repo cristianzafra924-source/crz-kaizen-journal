@@ -1699,7 +1699,7 @@ if _nav == "sym":
         sym_g[["symbol","Ops","Ganadoras","Win_Rate","PnL","Factor","Mejor","Peor"]]
         .rename(columns={"symbol":"Símbolo","Win_Rate":"Win Rate %","Factor":"Factor Ben."})
         .style.set_properties(**{"color":"#e2e8f0"})
-        .map(color_profit, subset=["PnL","Mejor","Peor"])
+        .map(lambda v: "color:#22c55e" if isinstance(v,(int,float)) and v>0 else ("color:#ef4444" if isinstance(v,(int,float)) and v<0 else ""), subset=["PnL","Mejor","Peor"])
         .format({"Win Rate %":"{:.1f}%","PnL":"{:+.2f}","Factor Ben.":"{:.2f}",
                  "Mejor":"{:+.2f}","Peor":"{:.2f}"}),
         use_container_width=True
@@ -1825,21 +1825,35 @@ if _nav == "kaizen":
     rr_score = min(rr_ratio / 2 * 20, 20)
     dd_score = max(20 + stats["max_dd"] / 5, 0)
 
+    # Compute helper aggregations for insights
+    _pc = "pnl_net" if "pnl_net" in df.columns else "profit"
+    try:
+        hr_g = df.groupby("hour").agg(ops=("profit","count"), pnl=(_pc,"sum"), wins=("win","sum")).reset_index()
+    except Exception:
+        hr_g = pd.DataFrame(columns=["hour","pnl","wins","ops"])
+    try:
+        if "symbol" in df.columns:
+            sym_g = df.groupby("symbol").agg(pnl=(_pc,"sum")).reset_index().sort_values("pnl", ascending=False).reset_index(drop=True)
+        else:
+            sym_g = pd.DataFrame(columns=["symbol","pnl"])
+    except Exception:
+        sym_g = pd.DataFrame(columns=["symbol","pnl"])
+
     if score >= 80:   lvl_name, lvl_color, lvl_emoji = "MASTER",   "#10b981", "🏆"
     elif score >= 60: lvl_name, lvl_color, lvl_emoji = "PRO",      "#2dd4bf", "⚡"
     elif score >= 40: lvl_name, lvl_color, lvl_emoji = "PROGRESS", "#f59e0b", "📈"
     else:             lvl_name, lvl_color, lvl_emoji = "TRAINING", "#f43f5e", "🎯"
 
     try:
-        _pnl_s = hr_g["pnl"].dropna()
-        best_hour  = hr_g.loc[_pnl_s.idxmax(), "hour"] if len(_pnl_s) else 0
-        worst_hour = hr_g.loc[_pnl_s.idxmin(), "hour"] if len(_pnl_s) else 0
-    except (ValueError, KeyError):
+        _pnl_s = hr_g["pnl"].dropna() if len(hr_g) else pd.Series(dtype=float)
+        best_hour  = int(hr_g.loc[_pnl_s.idxmax(), "hour"]) if len(_pnl_s) else 0
+        worst_hour = int(hr_g.loc[_pnl_s.idxmin(), "hour"]) if len(_pnl_s) else 0
+    except Exception:
         best_hour, worst_hour = 0, 0
     try:
-        best_sym  = sym_g.iloc[0]["symbol"]  if len(sym_g) else "—"
-        worst_sym = sym_g.iloc[-1]["symbol"] if len(sym_g) else "—"
-    except (KeyError, IndexError):
+        best_sym  = str(sym_g.iloc[0]["symbol"])  if len(sym_g) else "—"
+        worst_sym = str(sym_g.iloc[-1]["symbol"]) if len(sym_g) else "—"
+    except Exception:
         best_sym = worst_sym = "—"
 
     def hud_circle(pct, color, size, stroke, label, value):
