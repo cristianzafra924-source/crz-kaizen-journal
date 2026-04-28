@@ -57,22 +57,54 @@ html,body,[class*="css"] { font-family:'Space Grotesk','Inter',sans-serif; }
     opacity:1 !important; visibility:visible !important;
 }
 
-/* ── Sidebar panel — ALWAYS VISIBLE ─────────────────────── */
+/* ── Sidebar panel ───────────────────────────────────────── */
 section[data-testid="stSidebar"] {
-    transform:none !important;
-    margin-left:0 !important;
-    width:260px !important;
-    min-width:260px !important;
-    max-width:260px !important;
     background:#0c0f1c !important;
     border-right:1px solid #171e30 !important;
-    visibility:visible !important;
-    display:flex !important;
-    flex-shrink:0 !important;
-    position:relative !important;
+    min-width:260px !important;
+    max-width:260px !important;
 }
-section[data-testid="stSidebar"] > div { width:100% !important; overflow-y:auto !important; }
 [data-testid="stSidebar"] > div:first-child { padding-top:.75rem !important; }
+
+/* ── Sidebar toggle buttons — big, teal, always visible ── */
+[data-testid="stSidebarCollapseButton"] {
+    position:absolute !important;
+    top:12px !important; right:-18px !important;
+    z-index:9999 !important;
+    visibility:visible !important;
+    opacity:1 !important;
+}
+[data-testid="stSidebarCollapseButton"] button {
+    background:#2dd4bf !important;
+    border-radius:50% !important;
+    color:#0a0f1a !important;
+    border:none !important;
+    width:32px !important; height:32px !important;
+    box-shadow:0 2px 12px rgba(45,212,191,.5) !important;
+    cursor:pointer !important;
+    visibility:visible !important; opacity:1 !important;
+    font-size:14px !important;
+}
+/* Expand button (shown when sidebar is collapsed) */
+[data-testid="stSidebarCollapsedControl"] {
+    visibility:visible !important;
+    opacity:1 !important;
+    position:fixed !important;
+    left:0 !important; top:50% !important;
+    transform:translateY(-50%) !important;
+    z-index:9999 !important;
+}
+[data-testid="stSidebarCollapsedControl"] button {
+    background:#2dd4bf !important;
+    border-radius:0 8px 8px 0 !important;
+    color:#0a0f1a !important;
+    border:none !important;
+    width:24px !important; height:48px !important;
+    box-shadow:4px 0 16px rgba(45,212,191,.4) !important;
+    cursor:pointer !important;
+    visibility:visible !important; opacity:1 !important;
+    font-size:16px !important;
+}
 [data-testid="stSidebar"] * { font-family:'Space Grotesk','Inter',sans-serif !important; }
 [data-testid="stSidebar"] hr { border-color:#171e30 !important; margin:6px 0 !important; }
 [data-testid="stSidebar"] p,
