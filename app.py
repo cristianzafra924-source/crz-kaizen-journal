@@ -480,6 +480,16 @@ def live_to_df(live: dict, capital: float) -> dict | None:
     df["close"]      = df["close_dt"].dt.strftime("%Y.%m.%d %H:%M:%S")
     df["equity"]       = df["pnl_net"].cumsum()
     df["equity_peak"]  = df["equity"].cummax()
+
+    # Auto-derivar capital inicial desde MT5: balance_actual - pnl_total_historico
+    cuenta_info = live.get("cuenta", {})
+    mt5_balance = cuenta_info.get("balance", 0)
+    total_pnl   = float(df["pnl_net"].sum()) if len(df) > 0 else 0.0
+    if mt5_balance > 0 and abs(total_pnl) > 0:
+        derived = round(mt5_balance - total_pnl, 2)
+        if derived > 100:
+            capital = derived
+
     df["balance"]      = capital + df["equity"]
     df["rentabilidad"] = df["equity"] / capital * 100
 
