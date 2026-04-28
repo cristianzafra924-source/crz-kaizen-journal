@@ -2109,27 +2109,28 @@ Responde en formato markdown cuando sea útil (listas, negrita)."""
                     {"role": m["role"], "content": m["content"]}
                     for m in st.session_state.ai_messages
                 ]
-                api_key = st.secrets.get("ANTHROPIC_API_KEY", "")
+                api_key = st.secrets.get("GROQ_API_KEY", "")
                 if not api_key:
-                    answer = "⚠️ Falta la API key. Añade `ANTHROPIC_API_KEY` en Settings → Secrets de Streamlit Cloud."
+                    answer = "⚠️ Falta la API key. Añade `GROQ_API_KEY` en Settings → Secrets de Streamlit Cloud."
                 else:
                     resp = _req.post(
-                        "https://api.anthropic.com/v1/messages",
+                        "https://api.groq.com/openai/v1/chat/completions",
                         headers={
-                            "content-type": "application/json",
-                            "x-api-key": api_key,
-                            "anthropic-version": "2023-06-01",
+                            "Content-Type": "application/json",
+                            "Authorization": f"Bearer {api_key}",
                         },
                         json={
-                            "model": "claude-haiku-4-5-20251001",
+                            "model": "llama-3.1-70b-versatile",
                             "max_tokens": 1024,
-                            "system": TRADING_CONTEXT,
-                            "messages": messages_api,
+                            "messages": [
+                                {"role": "system", "content": TRADING_CONTEXT},
+                                *messages_api
+                            ],
                         },
                         timeout=30
                     )
                     if resp.status_code == 200:
-                        answer = resp.json()["content"][0]["text"]
+                        answer = resp.json()["choices"][0]["message"]["content"]
                     else:
                         answer = f"Error {resp.status_code}: {resp.text[:200]}"
             except Exception as e:
