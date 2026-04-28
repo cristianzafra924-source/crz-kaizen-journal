@@ -92,23 +92,36 @@ section[data-testid="stSidebar"] > div { width:100% !important; overflow-y:auto 
 }
 
 /* ── Sidebar nav buttons ─────────────────────────────────── */
+/* Sidebar nav buttons — invisible click overlay on top of HTML visual */
+[data-testid="stSidebar"] [data-testid="stButton"] {
+    margin-top:-44px !important;
+    position:relative !important;
+    z-index:10 !important;
+}
 [data-testid="stSidebar"] [data-testid="stButton"] button {
-    background:transparent !important;
-    border:1px solid transparent !important;
-    color:#4a5a72 !important;
-    margin-top:-2px !important;
-    font-size:13px !important; font-weight:600 !important;
-    text-align:left !important;
-    padding:9px 14px !important; border-radius:9px !important;
-    transition:all .18s ease !important; margin-bottom:2px !important;
+    width:100% !important; height:44px !important;
+    background:transparent !important; border:none !important;
+    opacity:0 !important; cursor:pointer !important;
 }
-[data-testid="stSidebar"] [data-testid="stButton"] button:hover {
-    background:rgba(45,212,191,.08) !important;
-    color:#2dd4bf !important;
-    border-color:rgba(45,212,191,.2) !important;
-    padding-left:18px !important;
+
+/* Sidebar non-nav buttons (Conectar, Desconectar) — make visible */
+[data-testid="stSidebar"] [data-testid="stButton"]:has(button[kind="primary"]),
+[data-testid="stSidebar"] [data-testid="stButton"]:has(button[kind="secondary"]) {
+    margin-top:0 !important;
 }
-[data-testid="stSidebar"] [data-testid="stButton"] button p { color:inherit !important; font-weight:600 !important; }
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] {
+    background:linear-gradient(135deg,#0d9488,#2dd4bf) !important;
+    color:#0a0f1a !important; font-weight:700 !important;
+    opacity:1 !important; border-radius:8px !important;
+    border:none !important; padding:8px 14px !important; height:auto !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] p { color:#0a0f1a !important; }
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] {
+    background:#111827 !important; color:#94a3b8 !important;
+    opacity:1 !important; border-radius:8px !important;
+    border:1px solid #1e2a40 !important; padding:8px 14px !important; height:auto !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] p { color:#94a3b8 !important; }
 
 /* ── Header ──────────────────────────────────────────────── */
 .crz-header {
