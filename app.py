@@ -2109,28 +2109,27 @@ Responde en formato markdown cuando sea útil (listas, negrita)."""
                     {"role": m["role"], "content": m["content"]}
                     for m in st.session_state.ai_messages
                 ]
-                api_key = st.secrets.get("OPENAI_API_KEY", "")
+                api_key = st.secrets.get("ANTHROPIC_API_KEY", "")
                 if not api_key:
-                    answer = "⚠️ Falta la API key de OpenAI. Añádela en Settings → Secrets de Streamlit Cloud como `OPENAI_API_KEY`."
+                    answer = "⚠️ Falta la API key. Añade `ANTHROPIC_API_KEY` en Settings → Secrets de Streamlit Cloud."
                 else:
                     resp = _req.post(
-                        "https://api.openai.com/v1/chat/completions",
+                        "https://api.anthropic.com/v1/messages",
                         headers={
-                            "Content-Type": "application/json",
-                            "Authorization": f"Bearer {api_key}",
+                            "content-type": "application/json",
+                            "x-api-key": api_key,
+                            "anthropic-version": "2023-06-01",
                         },
                         json={
-                            "model": "gpt-4o-mini",
-                            "max_tokens": 1000,
-                            "messages": [
-                                {"role": "system", "content": TRADING_CONTEXT},
-                                *messages_api
-                            ],
+                            "model": "claude-haiku-4-5-20251001",
+                            "max_tokens": 1024,
+                            "system": TRADING_CONTEXT,
+                            "messages": messages_api,
                         },
                         timeout=30
                     )
                     if resp.status_code == 200:
-                        answer = resp.json()["choices"][0]["message"]["content"]
+                        answer = resp.json()["content"][0]["text"]
                     else:
                         answer = f"Error {resp.status_code}: {resp.text[:200]}"
             except Exception as e:
