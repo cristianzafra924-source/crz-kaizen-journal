@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-28 15:27:35",
+  "timestamp": "2026-04-28 15:27:45",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,15 +7,58 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 194717.69,
-    "equity": 197164.03,
+    "equity": 197189.43,
     "margin": 56436.76,
-    "margin_libre": 140727.27,
-    "margin_nivel": 349.35,
-    "profit_abierto": 2446.34,
+    "margin_libre": 140752.67,
+    "margin_nivel": 349.4,
+    "profit_abierto": 2471.74,
     "divisa": "USD",
     "apalancamiento": 100
   },
-  "posiciones_abiertas": [],
+  "posiciones_abiertas": [
+    {
+      "ticket": 14704626,
+      "symbol": "BTCUSD",
+      "type": "sell",
+      "volume": 1,
+      "price_open": 78504.47,
+      "price_current": 76208.53,
+      "sl": 78489.47,
+      "tp": 65125.27,
+      "profit": 2295.94,
+      "swap": -59.88,
+      "pnl_net": 2236.06,
+      "time_open": "2026-04-27 00:57:00"
+    },
+    {
+      "ticket": 14727423,
+      "symbol": "BTCUSD",
+      "type": "sell",
+      "volume": 0.3,
+      "price_open": 77777.98,
+      "price_current": 76208.53,
+      "sl": 77719.53,
+      "tp": 64928.11,
+      "profit": 470.84,
+      "swap": -17.96,
+      "pnl_net": 452.88,
+      "time_open": "2026-04-27 14:15:17"
+    },
+    {
+      "ticket": 14780109,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.12,
+      "price_open": 4598.19,
+      "price_current": 4580.09,
+      "sl": 4513.23,
+      "tp": 5417.5,
+      "profit": -217.2,
+      "swap": 0,
+      "pnl_net": -217.2,
+      "time_open": "2026-04-28 15:20:46"
+    }
+  ],
   "deals_hoy": [
     {
       "ticket": 13790483,
