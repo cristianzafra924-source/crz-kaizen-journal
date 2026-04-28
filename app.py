@@ -1913,7 +1913,7 @@ if _nav == "kaizen":
         (wr_score/30*100, BLUE,      140, 11, "Win Rate", f"{stats['win_rate']:.0f}%"),
         (pf_score/30*100, TEAL,      140, 11, "Factor",   f"{stats['pfactor']:.1f}x"),
         (rr_score/20*100, PURPLE,    140, 11, "R/R",      f"{rr_ratio:.1f}x"),
-        (dd_score/20*100, AMBER,     140, 11, "DD Ctrl",  f"{abs(stats['max_dd']):.0f}%"),
+        (max(0, 100+stats["max_dd"]), AMBER, 140, 11, "Max DD", f"{stats['max_dd']:.0f}%"),
     ]
     c_main, c1, c2, c3, c4 = st.columns([1.4, 1, 1, 1, 1])
     for col_w, (pct, color, size, stroke, label, val) in zip([c_main,c1,c2,c3,c4], circles):
@@ -1924,16 +1924,16 @@ if _nav == "kaizen":
     stats_grid = [
         ("PnL Total",     f"{stats['pnl_net']:+,.2f}$",   GREEN if stats["pnl_net"] >= 0 else RED),
         ("Operaciones",   str(stats["total_ops"]),          "#e2e8f0"),
-        ("Mejor Trade",   f"{stats['best']:+,.2f}$",       GREEN),
-        ("Peor Trade",    f"{stats['worst']:+,.2f}$",      RED),
+        ("Mejor Trade",   f"{stats['best']:+,.0f}$",       GREEN),
+        ("Peor Trade",    f"{stats['worst']:+,.0f}$",      RED),
         ("Mejor Hora",    f"{best_hour}:00",               TEAL),
         ("Peor Hora",     f"{worst_hour}:00",              "#f43f5e"),
         ("Mejor Símbolo", best_sym,                        GREEN),
         ("Evitar",        worst_sym,                       RED),
         ("Ganadoras",     str(stats["winners"]),           GREEN),
         ("Perdedoras",    str(stats["losers"]),            RED),
-        ("Avg Ganadora",  f"{stats['avg_win']:+,.2f}$",   GREEN),
-        ("Avg Perdedora", f"{stats['avg_loss']:+,.2f}$",  RED),
+        ("Avg Ganadora",  f"{stats['avg_win']:+,.0f}$",   GREEN),
+        ("Avg Perdedora", f"{stats['avg_loss']:+,.0f}$",  RED),
     ]
     rows = [stats_grid[i:i+4] for i in range(0, len(stats_grid), 4)]
     for row in rows:
