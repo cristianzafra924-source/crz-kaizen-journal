@@ -2120,7 +2120,7 @@ Responde en formato markdown cuando sea útil (listas, negrita)."""
                             "Authorization": f"Bearer {api_key}",
                         },
                         json={
-                            "model": "llama-3.1-70b-versatile",
+                            "model": "llama-3.3-70b-versatile",
                             "max_tokens": 1024,
                             "messages": [
                                 {"role": "system", "content": TRADING_CONTEXT},
