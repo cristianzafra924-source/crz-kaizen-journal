@@ -43,7 +43,7 @@ st.markdown("""
 
 /* ── Reset & base ─────────────────────────────────────────── */
 html,body,[class*="css"] { font-family:'Space Grotesk','Inter',sans-serif; }
-.stApp { background:#111827; }
+.stApp { background:#1c2333; }
 #MainMenu,footer,header { visibility:hidden; }
 .block-container { padding:1.2rem 2rem 3rem; max-width:100%; }
 
