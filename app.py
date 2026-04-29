@@ -2452,7 +2452,7 @@ if _nav == "news":
         "⚔️ Conflictos":      "war conflict military attack strike invasion",
         "🚫 Sanciones":       "sanctions embargo trade war tariff",
         "🛢️ Energía":         "oil gas crude petroleum OPEC energy pipeline",
-        "🏦 Bancos Centrales": ""central bank" "interest rate" "federal reserve" ECB inflation",
+        '🏦 Bancos Centrales': 'central bank interest rate federal reserve ECB inflation',
         "⚠️ Crisis política":  "political crisis protest coup election instability",
         "🌊 Rutas comerciales": "shipping strait Hormuz Suez Red Sea blockade",
     }
