@@ -59,7 +59,7 @@ html,body,[class*="css"] { font-family:'Space Grotesk','Inter',sans-serif; }
 
 /* ── Sidebar panel ───────────────────────────────────────── */
 section[data-testid="stSidebar"] {
-    background:#0c0f1c !important;
+    background:#151c2e !important;
     border-right:1px solid #171e30 !important;
     min-width:260px !important;
     max-width:260px !important;
