@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-29 09:34:16",
+  "timestamp": "2026-04-29 09:34:26",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 194717.3,
-    "equity": 196063.94,
+    "equity": 196064.89,
     "margin": 61937.71,
-    "margin_libre": 134126.23,
+    "margin_libre": 134127.18,
     "margin_nivel": 316.55,
-    "profit_abierto": 1346.64,
+    "profit_abierto": 1347.59,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "sell",
       "volume": 1,
       "price_open": 78504.47,
-      "price_current": 77022.49,
+      "price_current": 77019.54,
       "sl": 78489.47,
       "tp": 65125.27,
-      "profit": 1481.98,
+      "profit": 1484.93,
       "swap": -119.35,
-      "pnl_net": 1362.63,
+      "pnl_net": 1365.58,
       "time_open": "2026-04-27 00:57:00"
     },
     {
@@ -36,12 +36,12 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 77777.98,
-      "price_current": 77022.49,
+      "price_current": 77019.54,
       "sl": 77719.53,
       "tp": 64928.11,
-      "profit": 226.65,
+      "profit": 227.53,
       "swap": -35.8,
-      "pnl_net": 190.85,
+      "pnl_net": 191.73,
       "time_open": "2026-04-27 14:15:17"
     },
     {
@@ -50,12 +50,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4583.54,
+      "price_current": 4583.42,
       "sl": 4513.23,
       "tp": 5417.5,
-      "profit": -175.8,
+      "profit": -177.24,
       "swap": -11.98,
-      "pnl_net": -187.78,
+      "pnl_net": -189.22,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4583.54,
+      "price_current": 4583.42,
       "sl": 4531.27,
       "tp": 0,
-      "profit": -7.08,
+      "profit": -8.52,
       "swap": -11.98,
-      "pnl_net": -19.06,
+      "pnl_net": -20.5,
       "time_open": "2026-04-28 18:52:26"
     }
   ],
