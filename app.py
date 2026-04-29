@@ -2529,28 +2529,30 @@ if _nav == "monitor":
 📡 Monitor · Noticias en vivo
 </div>""", unsafe_allow_html=True)
 
+    # IDs de canal YouTube (permanentes) — siempre cargan el live actual
     _live_channels = {
-        "📺 Al Jazeera English":  "FtZoPn-kHMw",
-        "📺 Sky News":            "9Auq9mYxFEE",
-        "📺 France 24 English":   "l8pmfNyEsqw",
-        "📺 Euronews English":    "7qCECv0gGaM",
-        "📺 DW News":             "live_stream?channel=UCknLrEdhRCp1aegoMqRaCZg",
-        "📺 Bloomberg TV":        "live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg",
-        "📺 CNBC International":  "live_stream?channel=UCvJJ_dzjViJCoLf5uKUTwoA",
+        "📺 Al Jazeera English":  "UCNye-wNBqNL5ZzHSJdpkDEA",
+        "📺 Sky News":            "UCoMdktPbSTixAyNGwb-UYkQ",
+        "📺 France 24 English":   "UCQfwfsi5VrQ8yKZ-UWmAEFg",
+        "📺 Euronews English":    "UCSrZ3UV4jOidv8ppoVuvW9Q",
+        "📺 DW News":             "UCknLrEdhRCp1aegoMqRaCZg",
+        "📺 Bloomberg TV":        "UCIALMKvObZNtJ6AmdCLP7Lg",
+        "📺 CNBC International":  "UCrp_UI8XA1V2T9T7bitAZKA",
+    }
+    _live_links = {
+        "📺 Al Jazeera English":  "https://www.youtube.com/@aljazeeraenglish/live",
+        "📺 Sky News":            "https://www.youtube.com/@SkyNews/live",
+        "📺 France 24 English":   "https://www.youtube.com/@France24_en/live",
+        "📺 Euronews English":    "https://www.youtube.com/@euronews/live",
+        "📺 DW News":             "https://www.youtube.com/@dwnews/live",
+        "📺 Bloomberg TV":        "https://www.youtube.com/@Bloomberg/live",
+        "📺 CNBC International":  "https://www.youtube.com/@CNBCi/live",
     }
 
-    _ch_col, _mute_col = st.columns([4, 1])
-    with _ch_col:
-        _sel_ch = st.selectbox("Canal", list(_live_channels.keys()), key="monitor_ch")
-    with _mute_col:
-        _autoplay = st.toggle("Autoplay", value=False, key="monitor_autoplay")
+    _sel_ch = st.selectbox("Canal", list(_live_channels.keys()), key="monitor_ch")
 
-    _vid = _live_channels[_sel_ch]
-    if _vid.startswith("live_stream"):
-        _embed_url = f"https://www.youtube-nocookie.com/embed/{_vid}&rel=0"
-    else:
-        _ap = "1" if _autoplay else "0"
-        _embed_url = f"https://www.youtube-nocookie.com/embed/{_vid}?autoplay={_ap}&rel=0&modestbranding=1"
+    _ch_id = _live_channels[_sel_ch]
+    _embed_url = f"https://www.youtube-nocookie.com/embed/live_stream?channel={_ch_id}&rel=0&modestbranding=1"
 
     _components.html(f"""
     <iframe width="100%" height="520"
@@ -2561,5 +2563,6 @@ if _nav == "monitor":
     </iframe>
     """, height=530)
 
-    st.markdown("<div style='margin-top:8px;font-size:10px;color:#334155;text-align:center;'>Si el canal no carga, prueba otro. Los streams de YouTube pueden estar pausados temporalmente.</div>", unsafe_allow_html=True)
+    _link = _live_links[_sel_ch]
+    st.markdown(f"<div style='margin-top:8px;text-align:center;'><a href='{_link}' target='_blank' style='font-size:11px;color:#2dd4bf;'>🔗 Abrir {_sel_ch} en YouTube</a> &nbsp;·&nbsp; <span style='font-size:10px;color:#334155;'>Si no carga aquí, usa el enlace directo</span></div>", unsafe_allow_html=True)
 
