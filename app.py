@@ -2526,11 +2526,11 @@ if _nav == "monitor":
     import streamlit.components.v1 as _comp
     from datetime import datetime as _dtnow, timezone as _utc
 
-    # ── Header ─────────────────────────────────────────────────────────────
+    # ── Header ──────────────────────────────────────────────────────────────
     _utc_str = _dtnow.now(_utc).strftime("%a %d %b %Y  %H:%M UTC")
     st.markdown(f"""
 <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;
-     background:#060d1a;border:1px solid #0f1f35;border-radius:8px;margin-bottom:12px;flex-wrap:wrap;">
+     background:#060d1a;border:1px solid #0f1f35;border-radius:8px;margin-bottom:12px;">
   <div style="width:8px;height:8px;background:#ef4444;border-radius:50%;
        box-shadow:0 0 8px #ef4444;flex-shrink:0;"></div>
   <span style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;">MONITOR GLOBAL</span>
@@ -2543,11 +2543,11 @@ if _nav == "monitor":
   </svg>
   <span style="font-size:10px;font-weight:700;color:#22c55e;">DEFCON 5 &nbsp;·&nbsp; 0%</span>
   <span style="color:#1e2a3a;">|</span>
-  <span style="font-size:9px;color:#334155;letter-spacing:.05em;">GDELT · ACLED · LiveUAMap</span>
+  <span style="font-size:9px;color:#334155;">GDELT · ACLED · LiveUAMap</span>
   <span style="font-size:10px;color:#475569;margin-left:auto;">{_utc_str}</span>
 </div>""", unsafe_allow_html=True)
 
-    # ── Selectores ──────────────────────────────────────────────────────────
+    # ── Selector zona ────────────────────────────────────────────────────────
     _mon_maps = {
         "🌍 Global / Ucrania": "https://liveuamap.com",
         "🇸🇾 Siria":           "https://syria.liveuamap.com",
@@ -2556,50 +2556,57 @@ if _nav == "monitor":
         "🇮🇱 Israel / Gaza":   "https://israel.liveuamap.com",
         "🌏 Asia":             "https://asia.liveuamap.com",
     }
-    # Canales con video ID fijo (24/7 streams más estables)
-    _mon_chs = {
-        "📺 Al Jazeera English": "gCNeDWCI0vo",
-        "📺 France 24 English":  "l8pmfNyEsqw",
-        "📺 DW News":            "GfpIVAXA7gE",
-        "📺 Euronews English":   "7qCECv0gGaM",
-        "📺 Sky News":           "9Auq9mYxFEE",
-        "📺 Bloomberg":          "dp8PhLsUcFE",
-        "📺 CNBC":               "6WQKp91LVCQ",
-        "📺 CNN International":  "aXaFerFsL7o",
-        "📺 France 24 Español":  "9GpOeI8KGCI",
-    }
-
-    _ms1, _ms2 = st.columns(2)
-    with _ms1:
-        _sel_map = st.selectbox("Zona del mapa", list(_mon_maps.keys()), key="mon_map")
-    with _ms2:
-        _sel_ch = st.selectbox("Canal de noticias", list(_mon_chs.keys()), key="mon_ch")
-
+    _sel_map = st.selectbox("Zona del mapa", list(_mon_maps.keys()), key="mon_map")
     _map_url = _mon_maps[_sel_map]
-    _vid_id  = _mon_chs[_sel_ch]
-    _yt_url  = f"https://www.youtube-nocookie.com/embed/{_vid_id}?rel=0&modestbranding=1"
 
-    # ── Layout ──────────────────────────────────────────────────────────────
+    # ── Layout: mapa | panel ─────────────────────────────────────────────────
     _col_map, _col_right = st.columns([6, 4])
 
     with _col_map:
-        st.markdown("<div style='font-size:8px;color:#ef4444;font-weight:700;letter-spacing:.15em;margin-bottom:4px;'>🔴 SITUACION GLOBAL · EN VIVO</div>", unsafe_allow_html=True)
-        _comp.iframe(_map_url, height=640)
+        st.markdown("<div style='font-size:8px;color:#ef4444;font-weight:700;"
+                    "letter-spacing:.15em;margin-bottom:4px;'>🔴 SITUACION GLOBAL · EN VIVO</div>",
+                    unsafe_allow_html=True)
+        _comp.iframe(_map_url, height=680)
 
     with _col_right:
-        st.markdown("<div style='font-size:8px;color:#2dd4bf;font-weight:700;letter-spacing:.15em;margin-bottom:4px;'>📺 NOTICIAS EN VIVO</div>", unsafe_allow_html=True)
-        _comp.iframe(_yt_url, height=300)
+        # Canales de noticias
+        st.markdown("<div style='font-size:8px;color:#2dd4bf;font-weight:700;"
+                    "letter-spacing:.15em;margin-bottom:8px;'>📺 CANALES EN VIVO</div>",
+                    unsafe_allow_html=True)
+        _channels_grid = [
+            ("Bloomberg",   "https://www.youtube.com/@Bloomberg/live",         "#f59e0b"),
+            ("Sky News",    "https://www.youtube.com/@SkyNews/live",            "#0ea5e9"),
+            ("Euronews",    "https://www.youtube.com/@euronews/live",           "#3b82f6"),
+            ("DW News",     "https://www.youtube.com/@dwnews/live",             "#6366f1"),
+            ("CNBC Intl",   "https://www.youtube.com/@CNBCi/live",              "#22c55e"),
+            ("CNN Intl",    "https://www.youtube.com/@cnni/live",               "#ef4444"),
+            ("France 24",   "https://www.youtube.com/@France24_en/live",        "#f97316"),
+            ("Al Jazeera",  "https://www.youtube.com/@aljazeeraenglish/live",   "#2dd4bf"),
+            ("Al Arabiya",  "https://www.youtube.com/@AlArabiya/live",          "#a855f7"),
+        ]
+        _ch_html = "<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:12px;'>"
+        for _ch_name, _ch_url, _ch_color in _channels_grid:
+            _ch_html += f"""<a href="{_ch_url}" target="_blank"
+style="display:block;padding:6px 4px;background:#0a1020;border:1px solid {_ch_color}33;
+border-top:2px solid {_ch_color};border-radius:5px;text-align:center;
+font-size:10px;font-weight:700;color:{_ch_color};text-decoration:none;
+letter-spacing:.04em;">{_ch_name}</a>"""
+        _ch_html += "</div>"
+        st.markdown(_ch_html, unsafe_allow_html=True)
 
-        st.markdown("<div style='font-size:8px;color:#f97316;font-weight:700;letter-spacing:.15em;margin:10px 0 4px;'>⚡ ALERTAS GDELT · TIEMPO REAL</div>", unsafe_allow_html=True)
+        # GDELT alertas
+        st.markdown("<div style='font-size:8px;color:#f97316;font-weight:700;"
+                    "letter-spacing:.15em;margin-bottom:6px;'>⚡ ALERTAS GDELT · TIEMPO REAL</div>",
+                    unsafe_allow_html=True)
 
         @st.cache_data(ttl=300)
-        def _get_gdelt_monitor():
-            import requests as _rmon
+        def _get_mon_feed():
+            import requests as _r
             try:
-                _res = _rmon.get(
+                _res = _r.get(
                     "https://api.gdeltproject.org/api/v2/doc/doc"
                     "?query=war+conflict+sanctions+military+attack"
-                    "&mode=artlist&format=json&maxrecords=18&sort=DateDesc&timespan=12h",
+                    "&mode=artlist&format=json&maxrecords=20&sort=DateDesc&timespan=12h",
                     timeout=12)
                 if _res.status_code == 200:
                     return _res.json().get("articles", [])
@@ -2607,43 +2614,49 @@ if _nav == "monitor":
                 pass
             return []
 
-        _gdelt_arts = _get_gdelt_monitor()
+        _arts = _get_mon_feed()
 
-        _kcolors = {
+        _kc_map = {
             "war":"#ef4444","conflict":"#ef4444","attack":"#ef4444","kill":"#ef4444",
             "military":"#f97316","sanction":"#f97316","missile":"#f97316",
             "oil":"#eab308","gas":"#eab308","energy":"#eab308",
             "iran":"#ef4444","russia":"#f97316","ukraine":"#f97316",
-            "china":"#a855f7","nuclear":"#a855f7","bomb":"#ef4444",
+            "china":"#a855f7","nuclear":"#a855f7",
         }
-        def _kc(title):
+        def _get_kc(title):
             t = (title or "").lower()
-            for k, c in _kcolors.items():
+            for k, c in _kc_map.items():
                 if k in t: return c
             return "#475569"
-        def _kago(s):
+
+        def _get_ago(s):
             try:
-                from datetime import datetime as _d, timezone as _u
-                dt = _d(int(s[:4]),int(s[4:6]),int(s[6:8]),int(s[9:11]),int(s[11:13]),tzinfo=_u.utc)
-                h = int((_d.now(_u.utc)-dt).total_seconds()/3600)
+                from datetime import datetime as _dd, timezone as _uu
+                _dt = _dd(int(s[:4]),int(s[4:6]),int(s[6:8]),
+                          int(s[9:11]),int(s[11:13]),tzinfo=_uu.utc)
+                h = int((_dd.now(_uu.utc)-_dt).total_seconds()/3600)
                 return "Ahora" if h<=0 else f"{h}h"
-            except:
+            except Exception:
                 return ""
 
-        _fhtml = "<div style='max-height:320px;overflow-y:auto;'>"
-        if not _gdelt_arts:
-            _fhtml += "<p style='color:#475569;font-size:11px;padding:8px;'>Sin alertas. Reintenta en 1 min.</p>"
-        for _ga in _gdelt_arts:
-            _gc2 = _kc(_ga.get("title",""))
-            _fhtml += f"""<div style='padding:7px 10px;margin-bottom:5px;background:#0a1020;
-border-radius:5px;border-left:2px solid {_gc2};'>
-<a href='{_ga.get("url","#")}' target='_blank'
-   style='font-size:11px;color:#cbd5e1;text-decoration:none;line-height:1.4;display:block;'>
-{_ga.get("title","")}</a>
-<div style='font-size:9px;color:#334155;margin-top:3px;'>
-<span style='background:{_gc2}22;color:{_gc2};font-size:8px;font-weight:700;
-padding:1px 4px;border-radius:2px;margin-right:4px;'>
-{(_ga.get("sourcecountry","??") or "??")[:2].upper()}</span>
-{_ga.get("domain","")}&nbsp;·&nbsp;{_kago(_ga.get("seendate",""))}</div></div>"""
-        _fhtml += "</div>"
-        st.markdown(_fhtml, unsafe_allow_html=True)
+        _fh = "<div style='max-height:490px;overflow-y:auto;padding-right:2px;'>"
+        if not _arts:
+            _fh += "<p style='color:#475569;font-size:11px;padding:8px;'>Sin alertas recientes.</p>"
+        for _a in _arts:
+            _c = _get_kc(_a.get("title", ""))
+            _country = (_a.get("sourcecountry") or "??")[:2].upper()
+            _fh += (
+                f"<div style='padding:7px 10px;margin-bottom:5px;background:#0a1020;"
+                f"border-radius:5px;border-left:2px solid {_c};'>"
+                f"<a href='{_a.get('url','#')}' target='_blank' "
+                f"style='font-size:11px;color:#cbd5e1;text-decoration:none;"
+                f"line-height:1.4;display:block;'>{_a.get('title','')}</a>"
+                f"<div style='font-size:9px;color:#334155;margin-top:3px;'>"
+                f"<span style='background:{_c}22;color:{_c};font-size:8px;"
+                f"font-weight:700;padding:1px 4px;border-radius:2px;margin-right:4px;'>"
+                f"{_country}</span>"
+                f"{_a.get('domain','')}&nbsp;·&nbsp;{_get_ago(_a.get('seendate',''))}"
+                f"</div></div>"
+            )
+        _fh += "</div>"
+        st.markdown(_fh, unsafe_allow_html=True)
