@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-29 23:43:17",
+  "timestamp": "2026-04-29 23:43:27",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 197490.52,
-    "equity": 196259.15,
+    "equity": 196259.69,
     "margin": 24137.71,
-    "margin_libre": 172121.44,
+    "margin_libre": 172121.98,
     "margin_nivel": 813.08,
-    "profit_abierto": -1231.37,
+    "profit_abierto": -1230.83,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4544.23,
+      "price_current": 4544.56,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -647.52,
+      "profit": -643.56,
       "swap": -11.98,
-      "pnl_net": -659.5,
+      "pnl_net": -655.54,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4544.23,
+      "price_current": 4544.56,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -478.8,
+      "profit": -474.84,
       "swap": -11.98,
-      "pnl_net": -490.78,
+      "pnl_net": -486.82,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 75390.41,
-      "price_current": 75717.52,
+      "price_current": 75742.51,
       "sl": 76693.66,
       "tp": 0,
-      "profit": -98.13,
+      "profit": -105.63,
       "swap": 0,
-      "pnl_net": -98.13,
+      "pnl_net": -105.63,
       "time_open": "2026-04-29 22:05:35"
     },
     {
@@ -64,12 +64,12 @@
       "type": "sell",
       "volume": 1,
       "price_open": 27142.05,
-      "price_current": 27125.01,
+      "price_current": 27124.89,
       "sl": 27561.68,
       "tp": 24920.88,
-      "profit": 17.04,
+      "profit": 17.16,
       "swap": 0,
-      "pnl_net": 17.04,
+      "pnl_net": 17.16,
       "time_open": "2026-04-29 23:42:05"
     }
   ],
