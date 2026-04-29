@@ -1196,6 +1196,10 @@ elif _live_raw and _live_raw.get("historial"):
     stats = data["stats"]
     meta  = data["meta"]
     df_s  = stats["df_sorted"].copy()
+    # Usar capital derivado de MT5 (no el manual) si es válido
+    if stats.get("capital", 0) > CAPITAL:
+        CAPITAL = stats["capital"]
+        st.session_state.capital_manual = int(CAPITAL)
 elif _live_raw and _live_raw.get("_api_error"):
     st.error(f"Error al conectar con GitHub: {_live_raw['_api_error']}. Recarga la pagina.")
     st.stop()
