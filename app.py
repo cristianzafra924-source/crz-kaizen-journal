@@ -592,7 +592,16 @@ def _show_welcome(not_found: bool = False):
     # ── Hero ────────────────────────────────────────────────────────────
     st.markdown("""
 <div class="welcome-hero">
-  <div style="font-size:42px;margin-bottom:8px;">⚡</div>
+  <div style="margin-bottom:12px;">
+    <svg width="52" height="40" viewBox="0 0 52 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="2,32 12,20 22,26 34,8 50,14" stroke="#2dd4bf" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="2" cy="32" r="2.5" fill="#2dd4bf" opacity="0.6"/>
+      <circle cx="12" cy="20" r="2.5" fill="#2dd4bf" opacity="0.6"/>
+      <circle cx="22" cy="26" r="2.5" fill="#2dd4bf" opacity="0.6"/>
+      <circle cx="34" cy="8" r="2.5" fill="#2dd4bf"/>
+      <circle cx="50" cy="14" r="2.5" fill="#2dd4bf" opacity="0.6"/>
+    </svg>
+  </div>
   <div style="font-size:26px;font-weight:800;color:#f1f5f9;font-family:'Space Grotesk',Inter,sans-serif;">
     CRZ Kaizen Journal
   </div>
