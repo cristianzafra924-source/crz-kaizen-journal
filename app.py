@@ -2310,9 +2310,9 @@ if _nav == "news":
     with _col1:
         _from = st.date_input("Desde", value=_today, key="news_from")
     with _col2:
-        _to   = st.date_input("Hasta", value=_today + timedelta(days=3), key="news_to")
+        _to   = st.date_input("Hasta", value=_today + timedelta(days=7), key="news_to")
     with _col3:
-        _impact_filter = st.selectbox("Impacto", ["Todos", "high", "medium", "low"], key="news_impact")
+        _impact_filter = st.selectbox("Impacto", ["Todos", "high", "medium", "low"], index=0, key="news_impact")
 
     @st.cache_data(ttl=900)
     def _fetch_calendar(from_dt, to_dt, api_key):
@@ -2331,7 +2331,7 @@ if _nav == "news":
     _impact_labels = {"high": "ALTO", "medium": "MEDIO", "low": "BAJO"}
 
     if not _events:
-        st.info("No hay eventos para el período seleccionado.")
+        st.info("No hay eventos para el período seleccionado. Prueba a ampliar las fechas o cambia el filtro de impacto a "Todos".")
     else:
         st.markdown(f"<div style='font-size:11px;color:#475569;margin-bottom:12px;'>{len(_events)} eventos encontrados</div>", unsafe_allow_html=True)
         for ev in sorted(_events, key=lambda x: x.get("time","")):
