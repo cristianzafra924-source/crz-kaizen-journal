@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-04-29 23:25:34",
+  "timestamp": "2026-04-29 23:25:44",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
     "nombre": " Cristian Zafra gomez",
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
-    "balance": 196573.22,
-    "equity": 195832.81,
-    "margin": 40375.63,
-    "margin_libre": 155457.18,
-    "margin_nivel": 485.03,
-    "profit_abierto": -740.41,
+    "balance": 197026.52,
+    "equity": 195822.45,
+    "margin": 22327.34,
+    "margin_libre": 173495.11,
+    "margin_nivel": 877.05,
+    "profit_abierto": -1204.07,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4544.13,
+      "price_current": 4544.74,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -648.72,
+      "profit": -641.4,
       "swap": -11.98,
-      "pnl_net": -660.7,
+      "pnl_net": -653.38,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4544.13,
+      "price_current": 4544.74,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -480,
+      "profit": -472.68,
       "swap": -11.98,
-      "pnl_net": -491.98,
+      "pnl_net": -484.66,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,27 +50,13 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 75390.41,
-      "price_current": 75586.5,
+      "price_current": 75610.51,
       "sl": 76693.66,
       "tp": 0,
-      "profit": -58.83,
+      "profit": -66.03,
       "swap": 0,
-      "pnl_net": -58.83,
+      "pnl_net": -66.03,
       "time_open": "2026-04-29 22:05:35"
-    },
-    {
-      "ticket": 14853462,
-      "symbol": "USTEC",
-      "type": "buy",
-      "volume": 10,
-      "price_open": 27058.91,
-      "price_current": 27106.02,
-      "sl": 27060.36,
-      "tp": 0,
-      "profit": 471.1,
-      "swap": 0,
-      "pnl_net": 471.1,
-      "time_open": "2026-04-29 23:20:59"
     }
   ],
   "deals_hoy": [
@@ -265,9 +251,21 @@
       "swap": 0,
       "pnl_net": 0,
       "time": "23:20:59"
+    },
+    {
+      "ticket": 13864617,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 10,
+      "price": 27104.24,
+      "profit": 453.3,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 453.3,
+      "time": "23:25:38"
     }
   ],
-  "pnl_dia": 1855.92,
+  "pnl_dia": 2309.22,
   "historial": [
     {
       "ticket": 13708343,
@@ -1230,6 +1228,19 @@
       "pnl_net": 0,
       "win": false,
       "time": "2026-04-29 23:20:59"
+    },
+    {
+      "ticket": 13864617,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 10,
+      "price": 27104.24,
+      "profit": 453.3,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 453.3,
+      "win": true,
+      "time": "2026-04-29 23:25:38"
     }
   ],
   "equity_series": [
@@ -1306,7 +1317,8 @@
     -2790.08,
     -2790.08,
     -3426.78,
-    -3426.78
+    -3426.78,
+    -2973.48
   ],
-  "n_trades": 74
+  "n_trades": 75
 }
