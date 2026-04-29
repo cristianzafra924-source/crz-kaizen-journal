@@ -145,21 +145,22 @@ section[data-testid="stSidebar"] {
 }
 /* Inactive nav item (type=secondary) */
 [data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] {
-    background:transparent !important;
-    border:1px solid transparent !important;
+    background:#1e2a3a !important;
+    border:1px solid #2d3a4f !important;
     border-left:3px solid transparent !important;
     border-radius:0 9px 9px 0 !important;
-    color:#4a5a72 !important;
+    color:#7a8fa8 !important;
     font-size:13px !important; font-weight:500 !important;
     padding:10px 14px !important;
     text-align:left !important;
-    margin-bottom:2px !important;
+    margin-bottom:3px !important;
     transition:all .15s ease !important;
 }
 [data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"]:hover {
-    background:rgba(45,212,191,.06) !important;
-    border-left-color:rgba(45,212,191,.3) !important;
-    color:#94a3b8 !important;
+    background:#243044 !important;
+    border-left-color:#2dd4bf !important;
+    border-color:#2dd4bf55 !important;
+    color:#e2e8f0 !important;
 }
 [data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] p {
     color:inherit !important; font-weight:500 !important;
