@@ -529,63 +529,147 @@ def live_to_df(live: dict, capital: float) -> dict | None:
 
 
 def _show_welcome(not_found: bool = False):
-    _lm  = st.session_state.get("light_mode", False)
-    _tit = "#0f172a" if _lm else "#f1f5f9"
-    _sub = "#64748b"
+    TEAL = "#2dd4bf"
+
+    st.markdown("""
+<style>
+.step-card {
+    background:#0d1117; border:1px solid #1e2a3a;
+    border-radius:12px; padding:20px 22px; margin-bottom:10px;
+    display:flex; align-items:flex-start; gap:16px;
+}
+.step-num {
+    background:linear-gradient(135deg,#0d9488,#2dd4bf);
+    color:#0a0f1a; font-weight:800; font-size:14px;
+    min-width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; margin-top:2px;
+}
+.step-title { font-size:14px; font-weight:700; color:#f1f5f9; margin-bottom:4px; }
+.step-body  { font-size:12px; color:#94a3b8; line-height:1.6; }
+.step-code  {
+    background:#050810; border:1px solid #1e2a3a; border-radius:6px;
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:#2dd4bf;
+    padding:6px 10px; margin-top:6px; word-break:break-all;
+}
+.welcome-hero {
+    text-align:center; padding:32px 0 24px;
+}
+.connect-box {
+    background:#0d1117; border:1px solid #1e2a3a; border-top:3px solid #2dd4bf;
+    border-radius:12px; padding:24px; margin-bottom:24px;
+}
+</style>
+""", unsafe_allow_html=True)
 
     if not_found:
-        st.error("Cuenta no encontrada. Asegurate de que el EA este activo en MT5 con tu cuenta abierta.")
+        st.warning("⚠️ Cuenta no encontrada. Asegurate de que el EA este activo en MT5 y espera 10 segundos.")
 
-    # Titulo
-    st.markdown("<div style=\"text-align:center;padding:24px 0 16px;\">"
-                "<div style=\"font-size:38px;\">&#9889;</div>"
-                f"<div style=\"font-size:22px;font-weight:700;color:{_tit};margin:8px 0 4px;\">CRZ Kaizen Journal</div>"
-                f"<div style=\"font-size:13px;color:{_sub};\">Conecta tu cuenta MT5 &mdash; sin Python, sin terminal</div>"
-                "</div>", unsafe_allow_html=True)
+    # ── Hero ────────────────────────────────────────────────────────────
+    st.markdown("""
+<div class="welcome-hero">
+  <div style="font-size:42px;margin-bottom:8px;">⚡</div>
+  <div style="font-size:26px;font-weight:800;color:#f1f5f9;font-family:'Space Grotesk',Inter,sans-serif;">
+    CRZ Kaizen Journal
+  </div>
+  <div style="font-size:13px;color:#475569;margin-top:6px;">
+    Trading consciente · Mejora continua · 1% mejor cada día
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("---")
-
-    # Input de cuenta
-    _, col_c, _ = st.columns([1, 2, 1])
+    # ── Connect box ─────────────────────────────────────────────────────
+    st.markdown('<div class="connect-box">', unsafe_allow_html=True)
+    st.markdown(f'<div style="font-size:11px;color:{TEAL};font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;">Conectar cuenta MT5</div>', unsafe_allow_html=True)
+    _, col_c, _ = st.columns([1, 3, 1])
     with col_c:
-        st.markdown(f"<p style=\"text-align:center;font-size:12px;color:{_sub};margin-bottom:4px;\">Numero de cuenta MT5</p>", unsafe_allow_html=True)
         cuenta_val = st.text_input("Cuenta", value=st.session_state.get("cuenta_mt5",""),
-            placeholder="Ej: 504062347", label_visibility="collapsed", key="cuenta_input_main")
-        if st.button("⚡  Conectar", use_container_width=True, type="primary"):
+            placeholder="Escribe tu número de cuenta MT5 (ej: 504062347)",
+            label_visibility="collapsed", key="cuenta_input_main")
+        if st.button("⚡  Conectar ahora", use_container_width=True, type="primary"):
             val = st.session_state.get("cuenta_input_main", cuenta_val).strip()
             if val:
                 st.session_state.cuenta_mt5 = val
                 st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("---")
+    # ── Steps ───────────────────────────────────────────────────────────
+    st.markdown(f'<div style="font-size:11px;color:{TEAL};font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px;">Instala el EA una sola vez · 5 minutos</div>', unsafe_allow_html=True)
 
-    # Pasos de instalacion
-    st.markdown(f"<p style=\"text-align:center;font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;text-transform:uppercase;\">Como conectar — instala el EA una sola vez</p>", unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown("**1️⃣ Descarga el EA**")
-        st.markdown("Descarga **CRZ\_Kaizen\_Bridge.mq5** y copialo en:")
-        st.code("MT5 → Archivo → Abrir carpeta de datos\n→ MQL5 → Experts", language=None)
-
-        st.markdown("**2️⃣ Activa WebRequest en MT5**")
-        st.markdown("Herramientas → Opciones → Asesores Expertos")
-        st.markdown("✅ Activa **Permitir WebRequest** y añade:")
-        st.code("https://crz-bridge.cristian-zafra924.workers.dev", language=None)
-    with c2:
-        st.markdown("**3️⃣ Arrastra el EA al grafico**")
-        st.markdown("En el Navigator de MT5 busca **CRZ\_Kaizen\_Bridge**, arrastralo a cualquier grafico y pulsa **Aceptar**. El EA viene preconfigurado, no necesitas cambiar nada.")
-
-        st.markdown("**4️⃣ Conecta aqui arriba**")
-        st.markdown("El EA detecta tu numero de cuenta automaticamente y sube los datos cada 10 segundos. Escribe tu numero arriba y pulsa **Conectar** ⚡")
-
-    st.markdown("---")
-    # Boton descarga EA
     _, col_dl, _ = st.columns([1, 2, 1])
     with col_dl:
         st.link_button(
             "⬇️  Descargar CRZ_Kaizen_Bridge.mq5",
             "https://raw.githubusercontent.com/cristianzafra924-source/crz-kaizen-journal/main/CRZ_Kaizen_Bridge.mq5",
             use_container_width=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    col_l, col_r = st.columns(2)
+    with col_l:
+        st.markdown("""
+<div class="step-card">
+  <div class="step-num">1</div>
+  <div>
+    <div class="step-title">Instala el EA en MT5</div>
+    <div class="step-body">
+      Abre MT5 y ve a:<br>
+      <b>Archivo → Abrir carpeta de datos → MQL5 → Experts</b><br>
+      Pega el archivo <b>CRZ_Kaizen_Bridge.mq5</b> en esa carpeta y cierra.
+    </div>
+  </div>
+</div>
+
+<div class="step-card">
+  <div class="step-num">2</div>
+  <div>
+    <div class="step-title">Activa WebRequest</div>
+    <div class="step-body">
+      En MT5: <b>Herramientas → Opciones → Asesores Expertos</b><br>
+      Marca <b>"Permitir WebRequest"</b> y añade esta URL:
+      <div class="step-code">https://crz-bridge.cristian-zafra924.workers.dev</div>
+      Haz clic en <b>Aceptar</b>.
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    with col_r:
+        st.markdown("""
+<div class="step-card">
+  <div class="step-num">3</div>
+  <div>
+    <div class="step-title">Activa el EA en un gráfico</div>
+    <div class="step-body">
+      En el <b>Navegador</b> de MT5 busca <b>CRZ_Kaizen_Bridge</b>.<br>
+      Arrástralo a cualquier gráfico abierto.<br>
+      En la ventana que aparece, pulsa <b>Aceptar</b>.<br>
+      Verás una carita 🙂 en la esquina del gráfico.
+    </div>
+  </div>
+</div>
+
+<div class="step-card">
+  <div class="step-num">4</div>
+  <div>
+    <div class="step-title">Conecta aquí arriba</div>
+    <div class="step-body">
+      El EA sube tus datos automáticamente cada <b>10 segundos</b>.<br>
+      Escribe tu <b>número de cuenta MT5</b> en el campo de arriba<br>
+      y pulsa <b>Conectar</b>. ¡Listo! 🎯
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    st.markdown(f"""
+<div style="text-align:center;margin-top:20px;padding:14px;background:#050810;
+     border-radius:8px;border:1px solid #0f1923;">
+  <span style="font-size:11px;color:#334155;">
+    ✅ Sin Python · ✅ Sin terminal · ✅ Datos en tiempo real · ✅ Seguro y encriptado
+  </span>
+</div>
+""", unsafe_allow_html=True)
 
 def show_equity_darwinex(df_s: pd.DataFrame, capital: float):
     """
