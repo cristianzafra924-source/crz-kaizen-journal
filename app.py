@@ -1016,11 +1016,8 @@ render();
 
 
 # ── Global theme toggle ────────────────────────────────────────────────────────
-if "light_mode" not in st.session_state:
-    st.session_state.light_mode = False
-
 # ── Header ─────────────────────────────────────────────────────────────────────
-col_hd, col_toggle = st.columns([5, 1])
+col_hd, _ = st.columns([5, 1])
 with col_hd:
     st.markdown("""
 <div class="crz-header">
@@ -1034,29 +1031,7 @@ with col_hd:
   <div style="font-size:11px;color:#475569;">改善 · 1% mejor cada día</div>
 </div>
 """, unsafe_allow_html=True)
-with col_toggle:
-    st.markdown("<div style='padding-top:14px;'>", unsafe_allow_html=True)
-    _btn_lbl = "☀️  Claro" if not st.session_state.light_mode else "🌙  Oscuro"
-    st.markdown("""<style>
-    div[data-testid='column']:last-child [data-testid='stButton'] button {
-        background:#1f2937 !important; color:#f1f5f9 !important;
-        border:1px solid #374151 !important; border-radius:8px !important;
-        padding:6px 16px !important; font-size:13px !important; font-weight:600 !important;
-        box-shadow:0 2px 8px rgba(0,0,0,0.4) !important; min-height:36px !important;
-        letter-spacing:0.02em !important;
-    }
-    div[data-testid='column']:last-child [data-testid='stButton'] button:hover {
-        background:#2dd4bf22 !important; border-color:#2dd4bf !important; color:#2dd4bf !important;
-    }
-    div[data-testid='column']:last-child [data-testid='stButton'] button p {
-        color:#f1f5f9 !important; font-weight:600 !important;
-    }
-    </style>""", unsafe_allow_html=True)
-    if st.button(_btn_lbl, key="theme_btn", help="Cambiar tema oscuro/claro"):
-        st.session_state.light_mode = not st.session_state.light_mode
-        st.rerun()
-    light_mode = st.session_state.light_mode
-    st.markdown("</div>", unsafe_allow_html=True)
+light_mode = False
 
 if light_mode:
     st.markdown("""<style>
