@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-29 12:28:20",
+  "timestamp": "2026-04-29 12:28:31",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,15 +7,86 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 194711.52,
-    "equity": 195549.78,
+    "equity": 195568.71,
     "margin": 73487.92,
-    "margin_libre": 122061.86,
-    "margin_nivel": 266.1,
-    "profit_abierto": 838.26,
+    "margin_libre": 122080.79,
+    "margin_nivel": 266.12,
+    "profit_abierto": 857.19,
     "divisa": "USD",
     "apalancamiento": 100
   },
-  "posiciones_abiertas": [],
+  "posiciones_abiertas": [
+    {
+      "ticket": 14704626,
+      "symbol": "BTCUSD",
+      "type": "sell",
+      "volume": 1,
+      "price_open": 78504.47,
+      "price_current": 77110.99,
+      "sl": 78489.47,
+      "tp": 65125.27,
+      "profit": 1393.48,
+      "swap": -119.35,
+      "pnl_net": 1274.13,
+      "time_open": "2026-04-27 00:57:00"
+    },
+    {
+      "ticket": 14727423,
+      "symbol": "BTCUSD",
+      "type": "sell",
+      "volume": 0.3,
+      "price_open": 77777.98,
+      "price_current": 77110.99,
+      "sl": 77719.53,
+      "tp": 64928.11,
+      "profit": 200.1,
+      "swap": -35.8,
+      "pnl_net": 164.3,
+      "time_open": "2026-04-27 14:15:17"
+    },
+    {
+      "ticket": 14780109,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.12,
+      "price_open": 4598.19,
+      "price_current": 4569.31,
+      "sl": 4485.69,
+      "tp": 5417.5,
+      "profit": -346.56,
+      "swap": -11.98,
+      "pnl_net": -358.54,
+      "time_open": "2026-04-28 15:20:46"
+    },
+    {
+      "ticket": 14795547,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.12,
+      "price_open": 4584.13,
+      "price_current": 4569.31,
+      "sl": 4485.69,
+      "tp": 0,
+      "profit": -177.84,
+      "swap": -11.98,
+      "pnl_net": -189.82,
+      "time_open": "2026-04-28 18:52:26"
+    },
+    {
+      "ticket": 14813572,
+      "symbol": "BTCUSD",
+      "type": "sell",
+      "volume": 0.3,
+      "price_open": 77001.4,
+      "price_current": 77110.99,
+      "sl": 77588.14,
+      "tp": 0,
+      "profit": -32.88,
+      "swap": 0,
+      "pnl_net": -32.88,
+      "time_open": "2026-04-29 09:59:40"
+    }
+  ],
   "deals_hoy": [
     {
       "ticket": 13828157,
