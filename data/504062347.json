@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-29 12:28:11",
+  "timestamp": "2026-04-29 12:28:20",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,86 +7,15 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 194711.52,
-    "equity": 195560.68,
+    "equity": 195549.78,
     "margin": 73487.92,
-    "margin_libre": 122072.76,
-    "margin_nivel": 266.11,
-    "profit_abierto": 849.16,
+    "margin_libre": 122061.86,
+    "margin_nivel": 266.1,
+    "profit_abierto": 838.26,
     "divisa": "USD",
     "apalancamiento": 100
   },
-  "posiciones_abiertas": [
-    {
-      "ticket": 14704626,
-      "symbol": "BTCUSD",
-      "type": "sell",
-      "volume": 1,
-      "price_open": 78504.47,
-      "price_current": 77114.51,
-      "sl": 78489.47,
-      "tp": 65125.27,
-      "profit": 1389.96,
-      "swap": -119.35,
-      "pnl_net": 1270.61,
-      "time_open": "2026-04-27 00:57:00"
-    },
-    {
-      "ticket": 14727423,
-      "symbol": "BTCUSD",
-      "type": "sell",
-      "volume": 0.3,
-      "price_open": 77777.98,
-      "price_current": 77114.51,
-      "sl": 77719.53,
-      "tp": 64928.11,
-      "profit": 199.04,
-      "swap": -35.8,
-      "pnl_net": 163.24,
-      "time_open": "2026-04-27 14:15:17"
-    },
-    {
-      "ticket": 14780109,
-      "symbol": "XAUUSD",
-      "type": "buy",
-      "volume": 0.12,
-      "price_open": 4598.19,
-      "price_current": 4569.21,
-      "sl": 4485.69,
-      "tp": 5417.5,
-      "profit": -347.76,
-      "swap": -11.98,
-      "pnl_net": -359.74,
-      "time_open": "2026-04-28 15:20:46"
-    },
-    {
-      "ticket": 14795547,
-      "symbol": "XAUUSD",
-      "type": "buy",
-      "volume": 0.12,
-      "price_open": 4584.13,
-      "price_current": 4569.21,
-      "sl": 4485.69,
-      "tp": 0,
-      "profit": -179.04,
-      "swap": -11.98,
-      "pnl_net": -191.02,
-      "time_open": "2026-04-28 18:52:26"
-    },
-    {
-      "ticket": 14813572,
-      "symbol": "BTCUSD",
-      "type": "sell",
-      "volume": 0.3,
-      "price_open": 77001.4,
-      "price_current": 77114.51,
-      "sl": 77588.14,
-      "tp": 0,
-      "profit": -33.93,
-      "swap": 0,
-      "pnl_net": -33.93,
-      "time_open": "2026-04-29 09:59:40"
-    }
-  ],
+  "posiciones_abiertas": [],
   "deals_hoy": [
     {
       "ticket": 13828157,
