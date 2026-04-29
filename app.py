@@ -2524,7 +2524,40 @@ if _nav == "news":
 
 if _nav == "monitor":
     import streamlit.components.v1 as _components
+    import requests as _rq2
+    from datetime import datetime as _dt2, timezone as _tz2
 
+    # ── Header bar ──────────────────────────────────────────────────────────
+    _now_utc = _dt2.now(_tz2.utc).strftime("%a %d %b %Y  %H:%M:%S UTC")
+    st.markdown(f"""
+<div style="display:flex;align-items:center;gap:12px;padding:6px 16px;
+     background:#060d1a;border:1px solid #0f1f35;border-radius:8px;margin-bottom:12px;">
+  <div style="width:7px;height:7px;background:#ef4444;border-radius:50%;
+       box-shadow:0 0 6px #ef4444;animation:none;flex-shrink:0;"></div>
+  <span style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;">MONITOR GLOBAL</span>
+  <span style="color:#1e2a3a;">|</span>
+  <svg width="20" height="20" viewBox="0 0 20 20">
+    <circle cx="10" cy="10" r="7" fill="none" stroke="#1e2a3a" stroke-width="2.5"/>
+    <circle cx="10" cy="10" r="7" fill="none" stroke="#22c55e" stroke-width="2.5"
+      stroke-dasharray="0 44" stroke-linecap="round" transform="rotate(-90 10 10)"/>
+    <text x="10" y="14" text-anchor="middle" fill="#22c55e" font-size="6" font-weight="700">5</text>
+  </svg>
+  <span style="font-size:10px;font-weight:700;color:#22c55e;">DEFCON 5 &nbsp;·&nbsp; 0%</span>
+  <span style="color:#1e2a3a;">|</span>
+  <span style="font-size:9px;color:#334155;letter-spacing:.05em;">GDELT · ACLED · LiveUAMap · OpenStreetMap</span>
+  <span style="font-size:10px;color:#475569;margin-left:auto;">{_now_utc}</span>
+</div>""", unsafe_allow_html=True)
+
+    # ── Selectores ───────────────────────────────────────────────────────────
+    _s1, _s2, _s3 = st.columns([2, 2, 1])
+    _monitor_maps = {
+        "🌍 Global / Ucrania": "https://liveuamap.com",
+        "🇸🇾 Siria":           "https://syria.liveuamap.com",
+        "🇱🇧 Líbano":          "https://lebanon.liveuamap.com",
+        "🇮🇷 Irán":            "https://iran.liveuamap.com",
+        "🇮🇱 Israel / Gaza":   "https://israel.liveuamap.com",
+        "🌏 Asia":             "https://asia.liveuamap.com",
+    }
     _monitor_channels = {
         "Al Jazeera":  "UCNye-wNBqNL5ZzHSJdpkDEA",
         "Sky News":    "UCoMdktPbSTixAyNGwb-UYkQ",
@@ -2533,152 +2566,87 @@ if _nav == "monitor":
         "DW News":     "UCknLrEdhRCp1aegoMqRaCZg",
         "Bloomberg":   "UCIALMKvObZNtJ6AmdCLP7Lg",
     }
-    _sel_ch = st.selectbox("Canal noticias en vivo", list(_monitor_channels.keys()), key="mon_ch")
-    _yt_src = f"https://www.youtube-nocookie.com/embed/live_stream?channel={_monitor_channels[_sel_ch]}&rel=0&modestbranding=1"
+    with _s1:
+        _sel_map = st.selectbox("Zona conflicto", list(_monitor_maps.keys()), key="mon_map")
+    with _s2:
+        _sel_ch  = st.selectbox("Canal noticias", list(_monitor_channels.keys()), key="mon_ch")
+    with _s3:
+        _show_feed = st.toggle("Feed GDELT", value=True, key="mon_feed")
 
-    _html = """<!DOCTYPE html>
-<html><head><meta charset="utf-8">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#060d1a;font-family:Inter,monospace;color:#e2e8f0;overflow:hidden;height:800px;}
-.hdr{display:flex;align-items:center;gap:10px;padding:0 14px;background:#060d1a;border-bottom:1px solid #0f1f35;height:38px;}
-.dot{width:7px;height:7px;background:#ef4444;border-radius:50%;animation:p 1.2s infinite;flex-shrink:0;}
-@keyframes p{0%,100%{opacity:1;box-shadow:0 0 6px #ef4444}50%{opacity:.25;box-shadow:none}}
-.title{font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;}
-.sep{color:#1e2a3a;}
-.defcon-val{font-size:10px;font-weight:700;color:#22c55e;}
-.sources{font-size:9px;color:#334155;letter-spacing:.05em;}
-.clock{font-size:10px;color:#475569;margin-left:auto;font-variant-numeric:tabular-nums;}
-.grid{display:grid;grid-template-columns:63% 37%;height:762px;}
-#map{width:100%;height:762px;background:#060d1a;}
-.leaflet-container{background:#060d1a!important;}
-.right{display:flex;flex-direction:column;border-left:1px solid #0f1f35;}
-.yt{height:355px;border-bottom:1px solid #0f1f35;}
-.yt iframe{width:100%;height:355px;border:none;}
-.feed{flex:1;overflow-y:auto;padding:10px 12px;}
-.feed::-webkit-scrollbar{width:3px;}
-.feed::-webkit-scrollbar-thumb{background:#1e2a3a;border-radius:2px;}
-.f-hdr{font-size:8px;color:#ef4444;font-weight:700;letter-spacing:.18em;margin-bottom:9px;display:flex;align-items:center;gap:6px;}
-.f-hdr::after{content:'';flex:1;height:1px;background:#0f1f35;}
-.item{padding:7px 10px;margin-bottom:5px;background:#0a1020;border-radius:5px;border-left:2px solid #ef4444;}
-.item a{font-size:11px;color:#cbd5e1;text-decoration:none;line-height:1.4;display:block;}
-.item a:hover{color:#2dd4bf;}
-.meta{font-size:9px;color:#334155;margin-top:3px;display:flex;gap:5px;align-items:center;}
-.ctag{font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px;}
-.legend{position:absolute;bottom:20px;left:10px;z-index:1000;background:#060d1aee;border:1px solid #1e2a3a;border-radius:6px;padding:8px 12px;}
-.leg-row{display:flex;align-items:center;gap:7px;font-size:9px;color:#94a3b8;margin-bottom:4px;}
-.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.leaflet-popup-content-wrapper{background:#0d1117!important;border:1px solid #1e2a3a!important;border-radius:6px!important;color:#e2e8f0!important;box-shadow:none!important;}
-.leaflet-popup-tip{background:#0d1117!important;}
-</style>
-</head><body>
-<div class="hdr">
-  <div class="dot"></div>
-  <span class="title">MONITOR GLOBAL</span>
-  <span class="sep">|</span>
-  <svg width="22" height="22" viewBox="0 0 22 22" style="flex-shrink:0">
-    <circle cx="11" cy="11" r="8" fill="none" stroke="#1e2a3a" stroke-width="3"/>
-    <circle cx="11" cy="11" r="8" fill="none" stroke="#22c55e" stroke-width="3"
-      stroke-dasharray="0 51" stroke-linecap="round" transform="rotate(-90 11 11)"/>
-    <text x="11" y="15" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="700">5</text>
-  </svg>
-  <span class="defcon-val">DEFCON 5 &nbsp;·&nbsp; 0%</span>
-  <span class="sep">|</span>
-  <span class="sources">GDELT · ACLED · OpenStreetMap/CARTO</span>
-  <div class="clock" id="clk"></div>
-</div>
-<div class="grid">
-  <div style="position:relative;">
-    <div id="map"></div>
-    <div class="legend">
-      <div class="leg-row"><div class="leg-dot" style="background:#ef4444;box-shadow:0 0 6px #ef4444;"></div>Alerta Alta</div>
-      <div class="leg-row"><div class="leg-dot" style="background:#f97316;box-shadow:0 0 5px #f97316;"></div>Elevado</div>
-      <div class="leg-row"><div class="leg-dot" style="background:#eab308;box-shadow:0 0 4px #eab308;"></div>Monitoreando</div>
-      <div class="leg-row"><div class="leg-dot" style="background:#3b82f6;box-shadow:0 0 4px #3b82f6;"></div>Base Militar</div>
-      <div class="leg-row"><div class="leg-dot" style="background:#a855f7;box-shadow:0 0 4px #a855f7;"></div>Nuclear</div>
-    </div>
+    _map_url = _monitor_maps[_sel_map]
+    _yt_url  = f"https://www.youtube-nocookie.com/embed/live_stream?channel={_monitor_channels[_sel_ch]}&rel=0&modestbranding=1"
+
+    # ── Layout principal: mapa izq | noticias der ────────────────────────────
+    _col_map, _col_right = st.columns([6, 4])
+
+    with _col_map:
+        st.markdown("""<div style='font-size:8px;color:#ef4444;font-weight:700;
+            letter-spacing:.15em;margin-bottom:4px;'>
+            🔴 SITUACION GLOBAL · EN VIVO</div>""", unsafe_allow_html=True)
+        _components.iframe(_map_url, height=650)
+
+    with _col_right:
+        st.markdown("""<div style='font-size:8px;color:#2dd4bf;font-weight:700;
+            letter-spacing:.15em;margin-bottom:4px;'>
+            📺 NOTICIAS EN VIVO</div>""", unsafe_allow_html=True)
+        _components.iframe(_yt_url, height=320)
+
+        if _show_feed:
+            st.markdown("""<div style='font-size:8px;color:#ef4444;font-weight:700;
+                letter-spacing:.15em;margin:8px 0 4px;'>
+                ⚡ ALERTAS GDELT · TIEMPO REAL</div>""", unsafe_allow_html=True)
+
+            @st.cache_data(ttl=300)
+            def _fetch_monitor_feed():
+                try:
+                    _r = _rq2.get(
+                        "https://api.gdeltproject.org/api/v2/doc/doc"
+                        "?query=war+conflict+sanctions+military+attack"
+                        "&mode=artlist&format=json&maxrecords=20&sort=DateDesc&timespan=12h",
+                        timeout=15)
+                    if _r.status_code == 200:
+                        return _r.json().get("articles", [])
+                except:
+                    pass
+                return []
+
+            _feed_arts = _fetch_monitor_feed()
+            _cat_c = {
+                "conflict":"#ef4444","war":"#ef4444","attack":"#ef4444",
+                "military":"#f97316","sanction":"#f97316",
+                "oil":"#eab308","gas":"#eab308",
+                "iran":"#ef4444","russia":"#f97316","ukraine":"#f97316",
+                "china":"#a855f7","nuclear":"#a855f7",
+            }
+            def _get_color(t):
+                t = (t or "").lower()
+                for k, c in _cat_c.items():
+                    if k in t: return c
+                return "#475569"
+            def _time_ago(s):
+                try:
+                    _d = _dt2(int(s[:4]),int(s[4:6]),int(s[6:8]),int(s[9:11]),int(s[11:13]),tzinfo=_tz2.utc)
+                    h = int((_dt2.now(_tz2.utc)-_d).total_seconds()/3600)
+                    return "Ahora" if h <= 0 else f"{h}h"
+                except:
+                    return ""
+
+            _feed_container = st.container(height=320)
+            with _feed_container:
+                if not _feed_arts:
+                    st.caption("Sin alertas recientes.")
+                for _fa in _feed_arts:
+                    _fc = _get_color(_fa.get("title",""))
+                    _fa_ago = _time_ago(_fa.get("seendate",""))
+                    st.markdown(f"""
+<div style="padding:7px 10px;margin-bottom:5px;background:#0a1020;
+     border-radius:5px;border-left:2px solid {_fc};">
+  <a href="{_fa.get('url','#')}" target="_blank"
+     style="font-size:11px;color:#cbd5e1;text-decoration:none;line-height:1.4;">
+    {_fa.get('title','')}</a>
+  <div style="font-size:9px;color:#334155;margin-top:3px;">
+    <span style="background:{_fc}22;color:{_fc};font-size:8px;font-weight:700;
+          padding:1px 4px;border-radius:2px;">{(_fa.get('sourcecountry','??') or '??')[:2].upper()}</span>
+    &nbsp;{_fa.get('domain','')}&nbsp;·&nbsp;{_fa_ago}
   </div>
-  <div class="right">
-    <div class="yt">
-      <iframe src="YT_SRC" allowfullscreen allow="autoplay;encrypted-media" loading="lazy"></iframe>
-    </div>
-    <div class="feed">
-      <div class="f-hdr">ALERTAS EN TIEMPO REAL</div>
-      <div id="items"><span style="color:#334155;font-size:11px;">Cargando...</span></div>
-    </div>
-  </div>
-</div>
-<script>
-(function(){
-  function tick(){document.getElementById('clk').textContent=new Date().toUTCString().replace('GMT','UTC');}
-  tick();setInterval(tick,1000);
-
-  var map=L.map('map',{zoomControl:true,attributionControl:false}).setView([25,15],2);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19}).addTo(map);
-
-  var zones=[
-    {lat:49.0,lng:32.0,r:7,c:'#ef4444',label:'Ucrania — Conflicto activo'},
-    {lat:31.5,lng:34.5,r:6,c:'#ef4444',label:'Israel / Gaza'},
-    {lat:33.5,lng:36.3,r:5,c:'#f97316',label:'Siria'},
-    {lat:15.5,lng:32.5,r:5,c:'#ef4444',label:'Sudan'},
-    {lat:15.2,lng:44.2,r:5,c:'#f97316',label:'Yemen'},
-    {lat:19.0,lng:96.5,r:4,c:'#f97316',label:'Myanmar'},
-    {lat:12.0,lng:15.0,r:4,c:'#eab308',label:'Sahel (Chad/Niger)'},
-    {lat:6.0,lng:25.0,r:5,c:'#f97316',label:'Sudan del Sur'},
-    {lat:3.0,lng:37.0,r:4,c:'#eab308',label:'Somalia'},
-    {lat:34.5,lng:69.2,r:4,c:'#eab308',label:'Afghanistan'},
-    {lat:33.9,lng:35.5,r:4,c:'#f97316',label:'Libano'},
-    {lat:43.0,lng:41.7,r:3,c:'#eab308',label:'Caucaso'},
-    {lat:-4.0,lng:21.8,r:5,c:'#f97316',label:'RDC — Este'},
-    {lat:13.5,lng:2.1,r:4,c:'#f97316',label:'Mali/Niger'},
-    {lat:36.8,lng:-76.3,r:4,c:'#3b82f6',label:'Norfolk Naval (US)'},
-    {lat:51.5,lng:-0.1,r:3,c:'#3b82f6',label:'RAF Northolt (UK)'},
-    {lat:35.7,lng:51.4,r:3,c:'#a855f7',label:'Instalacion nuclear — Iran'},
-    {lat:48.8,lng:2.3,r:3,c:'#a855f7',label:'CEA — Francia'},
-    {lat:35.6,lng:139.7,r:3,c:'#a855f7',label:'Nuclear — Japon'},
-  ];
-  zones.forEach(function(z){
-    L.circleMarker([z.lat,z.lng],{radius:z.r,fillColor:z.c,color:z.c,weight:1.5,opacity:0.9,fillOpacity:0.5})
-    .bindPopup('<div style="font-family:Inter,sans-serif;font-size:12px;color:#e2e8f0;">'+z.label+'</div>')
-    .addTo(map);
-  });
-
-  fetch('https://api.gdeltproject.org/api/v2/geo/geo?query=war+conflict+military+attack&mode=pointdata&format=geojson&timespan=7d')
-  .then(function(r){return r.json();})
-  .then(function(d){
-    if(!d.features)return;
-    d.features.slice(0,300).forEach(function(f){
-      if(!f.geometry)return;
-      var c=f.geometry.coordinates;
-      L.circleMarker([c[1],c[0]],{radius:3,fillColor:'#ef4444',color:'#ef4444',weight:0,opacity:0.6,fillOpacity:0.4})
-      .bindPopup('<div style="font-family:Inter,sans-serif;font-size:11px;color:#e2e8f0;">'+(f.properties&&f.properties.name||'Evento GDELT')+'</div>')
-      .addTo(map);
-    });
-  }).catch(function(){});
-
-  var catC={conflict:'#ef4444',war:'#ef4444',attack:'#ef4444',military:'#f97316',sanction:'#f97316',oil:'#eab308',gas:'#eab308',iran:'#ef4444',russia:'#f97316',ukraine:'#f97316',china:'#a855f7',nuclear:'#a855f7'};
-  function getC(t){t=(t||'').toLowerCase();for(var k in catC){if(t.indexOf(k)>=0)return catC[k];}return'#475569';}
-  function ago(s){try{var d=new Date(s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8)+'T'+s.slice(9,11)+':'+s.slice(11,13)+':00Z');var h=Math.round((Date.now()-d)/3600000);return h<=0?'Ahora':h+'h';}catch(e){return'';}}
-  function loadFeed(){
-    fetch('https://api.gdeltproject.org/api/v2/doc/doc?query=war+conflict+sanctions+military+attack&mode=artlist&format=json&maxrecords=30&sort=DateDesc&timespan=12h')
-    .then(function(r){return r.json();})
-    .then(function(d){
-      var arts=d.articles||[],html='';
-      arts.forEach(function(a){
-        var c=getC(a.title);
-        html+='<div class="item" style="border-left-color:'+c+'">'+
-          '<a href="'+a.url+'" target="_blank">'+a.title+'</a>'+
-          '<div class="meta"><span class="ctag" style="background:'+c+'22;color:'+c+'">'+(a.sourcecountry||'??').slice(0,2).toUpperCase()+'</span>'+(a.domain||'')+'<span style="margin-left:auto">'+ago(a.seendate||'')+'</span></div></div>';
-      });
-      document.getElementById('items').innerHTML=html||'<span style="color:#334155;font-size:11px;">Sin alertas.</span>';
-    }).catch(function(){document.getElementById('items').innerHTML='<span style="color:#334155;font-size:11px;">Feed no disponible.</span>';});
-  }
-  loadFeed();setInterval(loadFeed,300000);
-})();
-</script>
-</body></html>"""
-
-    _html = _html.replace("YT_SRC", _yt_src)
-    _components.html(_html, height=802, scrolling=False)
+</div>""", unsafe_allow_html=True)
