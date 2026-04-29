@@ -550,31 +550,37 @@ def _show_welcome(not_found: bool = False):
     st.markdown("""
 <style>
 .step-card {
-    background:#0d1117; border:1px solid #1e2a3a;
-    border-radius:12px; padding:20px 22px; margin-bottom:10px;
-    display:flex; align-items:flex-start; gap:16px;
+    background:#0d1117 !important; border:1px solid #1e2a3a !important;
+    border-radius:12px !important; padding:20px 22px !important; margin-bottom:10px !important;
+    display:flex !important; align-items:flex-start !important; gap:16px !important;
 }
 .step-num {
-    background:linear-gradient(135deg,#0d9488,#2dd4bf);
-    color:#0a0f1a; font-weight:800; font-size:14px;
-    min-width:32px; height:32px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    flex-shrink:0; margin-top:2px;
+    background:linear-gradient(135deg,#0d9488,#2dd4bf) !important;
+    color:#0a0f1a !important; font-weight:800 !important; font-size:14px !important;
+    min-width:32px !important; height:32px !important; border-radius:50% !important;
+    display:flex !important; align-items:center !important; justify-content:center !important;
+    flex-shrink:0 !important; margin-top:2px !important;
 }
-.step-title { font-size:14px; font-weight:700; color:#f1f5f9; margin-bottom:4px; }
-.step-body  { font-size:12px; color:#94a3b8; line-height:1.6; }
+.step-title { font-size:14px !important; font-weight:700 !important; color:#f1f5f9 !important; margin-bottom:4px !important; }
+.step-body  { font-size:12px !important; color:#94a3b8 !important; line-height:1.6 !important; }
+.step-body b { color:#e2e8f0 !important; }
 .step-code  {
-    background:#050810; border:1px solid #1e2a3a; border-radius:6px;
-    font-family:'JetBrains Mono',monospace; font-size:11px; color:#2dd4bf;
-    padding:6px 10px; margin-top:6px; word-break:break-all;
+    background:#050810 !important; border:1px solid #2dd4bf44 !important; border-radius:6px !important;
+    font-family:'JetBrains Mono',monospace !important; font-size:11px !important; color:#2dd4bf !important;
+    padding:6px 10px !important; margin-top:6px !important; word-break:break-all !important;
+    display:block !important;
 }
-.welcome-hero {
-    text-align:center; padding:32px 0 24px;
-}
+.welcome-hero { text-align:center !important; padding:32px 0 24px !important; }
+.welcome-hero div { color:inherit !important; }
 .connect-box {
-    background:#0d1117; border:1px solid #1e2a3a; border-top:3px solid #2dd4bf;
-    border-radius:12px; padding:24px; margin-bottom:24px;
+    background:#0d1117 !important; border:1px solid #1e2a3a !important; border-top:3px solid #2dd4bf !important;
+    border-radius:12px !important; padding:24px !important; margin-bottom:24px !important;
 }
+.welcome-footer {
+    text-align:center !important; margin-top:20px !important; padding:14px !important;
+    background:#050810 !important; border-radius:8px !important; border:1px solid #0f1923 !important;
+}
+.welcome-footer span { font-size:11px !important; color:#475569 !important; }
 </style>
 """, unsafe_allow_html=True)
 
