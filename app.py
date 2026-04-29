@@ -2527,7 +2527,7 @@ if _nav == "monitor":
     from datetime import datetime as _dtnow, timezone as _utc
 
     # ── Header ──────────────────────────────────────────────────────────────
-    _utc_str = _dtnow.now(_utc).strftime("%a %d %b %Y  %H:%M UTC")
+    _utc_str = _dtnow.now(_utc.utc).strftime("%a %d %b %Y  %H:%M UTC")
     st.markdown(f"""
 <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;
      background:#060d1a;border:1px solid #0f1f35;border-radius:8px;margin-bottom:12px;">
