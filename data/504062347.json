@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-29 23:43:07",
+  "timestamp": "2026-04-29 23:43:17",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 197490.52,
-    "equity": 196268.01,
+    "equity": 196259.15,
     "margin": 24137.71,
-    "margin_libre": 172130.3,
-    "margin_nivel": 813.12,
-    "profit_abierto": -1222.51,
+    "margin_libre": 172121.44,
+    "margin_nivel": 813.08,
+    "profit_abierto": -1231.37,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4544.48,
+      "price_current": 4544.23,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -644.52,
+      "profit": -647.52,
       "swap": -11.98,
-      "pnl_net": -656.5,
+      "pnl_net": -659.5,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4544.48,
+      "price_current": 4544.23,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -475.8,
+      "profit": -478.8,
       "swap": -11.98,
-      "pnl_net": -487.78,
+      "pnl_net": -490.78,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 75390.41,
-      "price_current": 75697.53,
+      "price_current": 75717.52,
       "sl": 76693.66,
       "tp": 0,
-      "profit": -92.14,
+      "profit": -98.13,
       "swap": 0,
-      "pnl_net": -92.14,
+      "pnl_net": -98.13,
       "time_open": "2026-04-29 22:05:35"
     },
     {
@@ -64,12 +64,12 @@
       "type": "sell",
       "volume": 1,
       "price_open": 27142.05,
-      "price_current": 27128.14,
+      "price_current": 27125.01,
       "sl": 27561.68,
       "tp": 24920.88,
-      "profit": 13.91,
+      "profit": 17.04,
       "swap": 0,
-      "pnl_net": 13.91,
+      "pnl_net": 17.04,
       "time_open": "2026-04-29 23:42:05"
     }
   ],
