@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-29 14:26:10",
+  "timestamp": "2026-04-29 14:26:20",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 195028.8,
-    "equity": 194545.11,
+    "equity": 194548.25,
     "margin": 49796.77,
-    "margin_libre": 144748.34,
+    "margin_libre": 144751.48,
     "margin_nivel": 390.68,
-    "profit_abierto": -483.69,
+    "profit_abierto": -480.55,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4568.9,
+      "price_current": 4569.01,
       "sl": 4485.69,
       "tp": 5417.5,
-      "profit": -351.48,
+      "profit": -350.16,
       "swap": -11.98,
-      "pnl_net": -363.46,
+      "pnl_net": -362.14,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4568.9,
+      "price_current": 4569.01,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -182.76,
+      "profit": -181.44,
       "swap": -11.98,
-      "pnl_net": -194.74,
+      "pnl_net": -193.42,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.5,
       "price_open": 77602.98,
-      "price_current": 77481.46,
+      "price_current": 77480.96,
       "sl": 77598.97,
       "tp": 0,
-      "profit": 60.76,
+      "profit": 61.01,
       "swap": 0,
-      "pnl_net": 60.76,
+      "pnl_net": 61.01,
       "time_open": "2026-04-29 12:58:15"
     },
     {
@@ -64,12 +64,12 @@
       "type": "sell",
       "volume": 0.5,
       "price_open": 77508.96,
-      "price_current": 77481.46,
+      "price_current": 77480.96,
       "sl": 77797.5,
       "tp": 0,
-      "profit": 13.75,
+      "profit": 14,
       "swap": 0,
-      "pnl_net": 13.75,
+      "pnl_net": 14,
       "time_open": "2026-04-29 14:22:21"
     }
   ],
