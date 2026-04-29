@@ -1149,18 +1149,6 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # ── Settings ──────────────────────────────────────────────────
-    st.markdown("<div class='nav-section'>Configuración</div>", unsafe_allow_html=True)
-    capital_input = st.number_input(
-        "Capital inicial ($)",
-        min_value=100,
-        max_value=10_000_000,
-        value=st.session_state.capital_manual,
-        step=1000,
-        key="capital_input_widget",
-    )
-    st.session_state.capital_manual = int(capital_input)
-
     uploaded = st.file_uploader(
         "Historial MT5 (.xlsx)",
         type=["xlsx", "xls"],
