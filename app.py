@@ -127,40 +127,41 @@ section[data-testid="stSidebar"] {
 /* ── Sidebar nav buttons ─────────────────────────────────── */
 /* Active nav item (type=primary) */
 [data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] {
-    background:rgba(45,212,191,.1) !important;
-    border-left:3px solid #2dd4bf !important;
-    border-top:1px solid rgba(45,212,191,.2) !important;
-    border-bottom:1px solid rgba(45,212,191,.2) !important;
-    border-right:1px solid rgba(45,212,191,.2) !important;
-    border-radius:0 9px 9px 0 !important;
+    background:#111520 !important;
+    border:1px solid #182035 !important;
+    border-top:2px solid #2dd4bf !important;
+    border-radius:8px !important;
     color:#2dd4bf !important;
     font-size:13px !important; font-weight:700 !important;
     padding:10px 14px !important;
     text-align:left !important;
-    margin-bottom:2px !important;
-    box-shadow:none !important;
+    margin-bottom:3px !important;
+    box-shadow:0 4px 16px rgba(0,0,0,.5) !important;
 }
 [data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] p {
     color:#2dd4bf !important; font-weight:700 !important;
 }
 /* Inactive nav item (type=secondary) */
 [data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] {
-    background:#1e2a3a !important;
-    border:1px solid #2d3a4f !important;
-    border-left:3px solid transparent !important;
-    border-radius:0 9px 9px 0 !important;
-    color:#7a8fa8 !important;
+    background:#111520 !important;
+    border:1px solid #182035 !important;
+    border-top:2px solid transparent !important;
+    border-radius:8px !important;
+    color:#64748b !important;
     font-size:13px !important; font-weight:500 !important;
     padding:10px 14px !important;
     text-align:left !important;
     margin-bottom:3px !important;
-    transition:all .15s ease !important;
+    transition:all .2s ease !important;
+    box-shadow:0 2px 8px rgba(0,0,0,.3) !important;
 }
 [data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"]:hover {
-    background:#243044 !important;
-    border-left-color:#2dd4bf !important;
-    border-color:#2dd4bf55 !important;
+    background:#111520 !important;
+    border-color:#243055 !important;
+    border-top:2px solid #2dd4bf !important;
     color:#e2e8f0 !important;
+    box-shadow:0 4px 16px rgba(0,0,0,.5) !important;
+    transform:translateY(-1px) !important;
 }
 [data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] p {
     color:inherit !important; font-weight:500 !important;
