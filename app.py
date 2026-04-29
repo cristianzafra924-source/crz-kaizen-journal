@@ -2525,58 +2525,140 @@ if _nav == "news":
 if _nav == "monitor":
     import streamlit.components.v1 as _components
 
-    st.markdown("""<div style='font-size:9px;color:#2dd4bf;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:16px;'>
-📡 Monitor · Noticias en vivo
-</div>""", unsafe_allow_html=True)
-
-    # IDs de canal YouTube (permanentes) — siempre cargan el live actual
-    _live_channels = {
-        "📺 Al Jazeera English":  "UCNye-wNBqNL5ZzHSJdpkDEA",
-        "📺 Sky News":            "UCoMdktPbSTixAyNGwb-UYkQ",
-        "📺 France 24 English":   "UCQfwfsi5VrQ8yKZ-UWmAEFg",
-        "📺 Euronews English":    "UCSrZ3UV4jOidv8ppoVuvW9Q",
-        "📺 DW News":             "UCknLrEdhRCp1aegoMqRaCZg",
-        "📺 Bloomberg TV":        "UCIALMKvObZNtJ6AmdCLP7Lg",
-        "📺 CNBC International":  "UCrp_UI8XA1V2T9T7bitAZKA",
+    _monitor_channels = {
+        "Al Jazeera":  "UCNye-wNBqNL5ZzHSJdpkDEA",
+        "Sky News":    "UCoMdktPbSTixAyNGwb-UYkQ",
+        "France 24":   "UCQfwfsi5VrQ8yKZ-UWmAEFg",
+        "Euronews":    "UCSrZ3UV4jOidv8ppoVuvW9Q",
+        "DW News":     "UCknLrEdhRCp1aegoMqRaCZg",
+        "Bloomberg":   "UCIALMKvObZNtJ6AmdCLP7Lg",
     }
-    _live_links = {
-        "📺 Al Jazeera English":  "https://www.youtube.com/@aljazeeraenglish/live",
-        "📺 Sky News":            "https://www.youtube.com/@SkyNews/live",
-        "📺 France 24 English":   "https://www.youtube.com/@France24_en/live",
-        "📺 Euronews English":    "https://www.youtube.com/@euronews/live",
-        "📺 DW News":             "https://www.youtube.com/@dwnews/live",
-        "📺 Bloomberg TV":        "https://www.youtube.com/@Bloomberg/live",
-        "📺 CNBC International":  "https://www.youtube.com/@CNBCi/live",
+    _monitor_maps = {
+        "Global":      "https://liveuamap.com",
+        "Ucrania":     "https://liveuamap.com",
+        "Siria":       "https://syria.liveuamap.com",
+        "Libano":      "https://lebanon.liveuamap.com",
+        "Iran":        "https://iran.liveuamap.com",
+        "Israel/Gaza": "https://israel.liveuamap.com",
     }
 
-    _sel_ch = st.selectbox("Canal", list(_live_channels.keys()), key="monitor_ch")
+    _mc1, _mc2 = st.columns(2)
+    with _mc1:
+        _sel_map = st.selectbox("Zona conflicto", list(_monitor_maps.keys()), key="mon_map")
+    with _mc2:
+        _sel_ch  = st.selectbox("Canal noticias", list(_monitor_channels.keys()), key="mon_ch")
 
-    _ch_id = _live_channels[_sel_ch]
-    _embed_url = f"https://www.youtube-nocookie.com/embed/live_stream?channel={_ch_id}&rel=0&modestbranding=1"
+    _map_src = _monitor_maps[_sel_map]
+    _yt_src  = f"https://www.youtube-nocookie.com/embed/live_stream?channel={_monitor_channels[_sel_ch]}&rel=0&modestbranding=1"
 
-    _components.iframe(_embed_url, height=530)
+    _monitor_html = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+*{{margin:0;padding:0;box-sizing:border-box;}}
+body{{background:#060d1a;font-family:Inter,sans-serif;color:#e2e8f0;overflow:hidden;height:790px;}}
+.hdr{{display:flex;align-items:center;gap:10px;padding:6px 14px;background:#0a1020;border-bottom:1px solid #1e2a3a;height:36px;}}
+.dot{{width:7px;height:7px;background:#ef4444;border-radius:50%;animation:p 1s infinite;}}
+@keyframes p{{0%,100%{{opacity:1}}50%{{opacity:.3}}}}
+.defcon{{background:#22c55e;color:#000;font-weight:800;font-size:10px;padding:2px 8px;border-radius:3px;letter-spacing:.05em;}}
+.grid{{display:grid;grid-template-columns:62% 38%;height:754px;}}
+.map-wrap iframe{{width:100%;height:754px;border:none;}}
+.right{{display:flex;flex-direction:column;border-left:1px solid #1e2a3a;}}
+.yt-wrap{{height:380px;border-bottom:1px solid #1e2a3a;}}
+.yt-wrap iframe{{width:100%;height:380px;border:none;}}
+.feed{{flex:1;overflow-y:auto;padding:10px;background:#060d1a;}}
+.feed-hdr{{font-size:9px;color:#ef4444;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;}}
+.item{{border-left:2px solid #ef4444;padding:7px 10px;margin-bottom:7px;background:#0d1117;border-radius:0 6px 6px 0;cursor:pointer;}}
+.item a{{font-size:11px;color:#e2e8f0;text-decoration:none;line-height:1.45;display:block;}}
+.item a:hover{{color:#2dd4bf;}}
+.meta{{font-size:10px;color:#475569;margin-top:3px;}}
+.clock{{font-size:10px;color:#475569;margin-left:auto;}}
+.tag{{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-right:4px;}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="dot"></div>
+  <span style="font-size:10px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;">MONITOR GLOBAL</span>
+  <div class="defcon">DEFCON 5</div>
+  <span style="font-size:10px;color:#475569;">|</span>
+  <span style="font-size:10px;color:#94a3b8;">Fuentes: ACLED · GDELT · LiveUAMap</span>
+  <div class="clock" id="clk"></div>
+</div>
+<div class="grid">
+  <div class="map-wrap">
+    <iframe src="{_map_src}" allowfullscreen loading="lazy"></iframe>
+  </div>
+  <div class="right">
+    <div class="yt-wrap">
+      <iframe src="{_yt_src}" allowfullscreen allow="autoplay;encrypted-media" loading="lazy"></iframe>
+    </div>
+    <div class="feed">
+      <div class="feed-hdr">⚡ Alertas GDELT · En tiempo real</div>
+      <div id="items"><span style="color:#475569;font-size:11px;">Cargando noticias...</span></div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){{
+  function tick(){{
+    var n=new Date();
+    document.getElementById('clk').textContent=
+      n.toUTCString().replace('GMT','UTC');
+  }}
+  tick(); setInterval(tick,1000);
 
-    _link = _live_links[_sel_ch]
-    st.markdown(f"<div style='margin-top:8px;text-align:center;'><a href='{_link}' target='_blank' style='font-size:11px;color:#2dd4bf;'>🔗 Abrir {_sel_ch} en YouTube</a> &nbsp;·&nbsp; <span style='font-size:10px;color:#334155;'>Si no carga aquí, usa el enlace directo</span></div>", unsafe_allow_html=True)
+  var cats={{
+    conflict:'#ef4444',sanction:'#f97316',oil:'#eab308',
+    gas:'#eab308',bank:'#3b82f6',iran:'#ef4444',
+    russia:'#ef4444',ukraine:'#f97316',china:'#a855f7'
+  }};
+  function getColor(t){{
+    t=t.toLowerCase();
+    for(var k in cats){{ if(t.indexOf(k)>=0) return cats[k]; }}
+    return '#6b7280';
+  }}
+  function timeSince(s){{
+    try{{
+      var y=s.slice(0,4),mo=s.slice(4,6),d=s.slice(6,8),
+          h=s.slice(9,11),mi=s.slice(11,13);
+      var dt=new Date(y+'-'+mo+'-'+d+'T'+h+':'+mi+':00Z');
+      var diff=Math.round((Date.now()-dt)/3600000);
+      return diff<=0?'Ahora':diff+'h';
+    }}catch(e){{return '';}}
+  }}
+  function loadFeed(){{
+    fetch('https://api.gdeltproject.org/api/v2/doc/doc?query=war+conflict+sanctions+military&mode=artlist&format=json&maxrecords=25&sort=DateDesc&timespan=12h')
+    .then(function(r){{return r.json();}})
+    .then(function(data){{
+      var arts=data.articles||[];
+      if(!arts.length){{
+        document.getElementById('items').innerHTML='<span style="color:#475569;font-size:11px;">Sin alertas recientes.</span>';
+        return;
+      }}
+      var html='';
+      arts.forEach(function(a){{
+        var c=getColor(a.title||'');
+        var ago=timeSince(a.seendate||'');
+        html+='<div class="item" style="border-left-color:'+c+'">'+
+          '<a href="'+a.url+'" target="_blank">'+a.title+'</a>'+
+          '<div class="meta">'+
+            '<span class="tag" style="background:'+c+'22;color:'+c+'">'+a.sourcecountry+'</span>'+
+            a.domain+' &middot; '+ago+
+          '</div></div>';
+      }});
+      document.getElementById('items').innerHTML=html;
+    }})
+    .catch(function(){{
+      document.getElementById('items').innerHTML='<span style="color:#475569;font-size:11px;">Sin conexión al feed.</span>';
+    }});
+  }}
+  loadFeed();
+  setInterval(loadFeed,300000);
+}})();
+</script>
+</body>
+</html>"""
 
-    # ── Mapa de Conflictos en Vivo ──────────────────────────────────────────
-    st.markdown("""<div style='margin-top:32px;margin-bottom:12px;'>
-<div style='font-size:9px;color:#ef4444;font-weight:700;letter-spacing:.15em;text-transform:uppercase;'>
-🔴 Mapa de Conflictos · Liveuamap en tiempo real
-</div></div>""", unsafe_allow_html=True)
-
-    _map_regions = {
-        "🌍 Global / Ucrania":  "https://liveuamap.com",
-        "🇸🇾 Siria":            "https://syria.liveuamap.com",
-        "🇱🇧 Líbano":           "https://lebanon.liveuamap.com",
-        "🇮🇷 Irán":             "https://iran.liveuamap.com",
-        "🇮🇱 Israel / Gaza":    "https://israel.liveuamap.com",
-        "🌏 Asia":              "https://asia.liveuamap.com",
-    }
-    _sel_region = st.selectbox("Región", list(_map_regions.keys()), key="monitor_region")
-    _map_url = _map_regions[_sel_region]
-
-    _components.iframe(_map_url, height=620)
-
-    st.markdown(f"<div style='margin-top:6px;text-align:center;'><a href='{_map_url}' target='_blank' style='font-size:11px;color:#ef4444;'>🔗 Abrir mapa completo en nueva pestaña</a></div>", unsafe_allow_html=True)
-
+    _components.html(_monitor_html, height=800, scrolling=False)
