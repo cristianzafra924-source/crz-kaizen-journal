@@ -2314,15 +2314,19 @@ if _nav == "news":
     with _col3:
         _impact_filter = st.selectbox("Impacto", ["Todos", "high", "medium", "low"], index=0, key="news_impact")
 
-    @st.cache_data(ttl=900)
+    @st.cache_data(ttl=300)
     def _fetch_calendar(from_dt, to_dt, api_key):
         url = f"https://finnhub.io/api/v1/calendar/economic?from={from_dt}&to={to_dt}&token={api_key}"
-        r = _rq.get(url, timeout=15)
-        if r.status_code == 200:
-            return r.json().get("economicCalendar", [])
-        return []
+        resp = _rq.get(url, timeout=15)
+        if resp.status_code == 200:
+            data = resp.json()
+            cal = data.get("economicCalendar", [])
+            return cal, resp.status_code, str(list(data.keys()))
+        return [], resp.status_code, resp.text[:200]
 
-    _events = _fetch_calendar(str(_from), str(_to), _fh_key)
+    _events, _api_status, _api_keys = _fetch_calendar(str(_from), str(_to), _fh_key)
+    if _api_status != 200 or len(_events) == 0:
+        st.caption(f"Debug: status={_api_status} | keys={_api_keys} | from={_from} to={_to}")
 
     if _impact_filter != "Todos":
         _events = [e for e in _events if e.get("impact") == _impact_filter]
