@@ -2524,7 +2524,69 @@ if _nav == "news":
 
 if _nav == "monitor":
     import streamlit.components.v1 as _comp
+    import xml.etree.ElementTree as _ET
+    import json as _json
     from datetime import datetime as _dtnow, timezone as _utc
+
+    # ── Canales: RSS YouTube para obtener video ID actual ────────────────────
+    _ch_defs = [
+        ("Bloomberg",  "UCIALMKvObZNtJ6AmdCLP7Lg", "#f59e0b"),
+        ("Sky News",   "UCoMdktPbSTixAyNGwb-UYkQ", "#0ea5e9"),
+        ("Euronews",   "UCSrZ3UV4jOidv8ppoVuvW9Q", "#3b82f6"),
+        ("DW News",    "UCknLrEdhRCp1aegoMqRaCZg", "#6366f1"),
+        ("CNBC",       "UCrp_UI8XA1V2T9T7bitAZKA", "#22c55e"),
+        ("CNN Intl",   "UCupvZG-5ko_eiXAupbDfxWw", "#ef4444"),
+        ("France 24",  "UCQfwfsi5VrQ8yKZ-UWmAEFg", "#f97316"),
+        ("Al Jazeera", "UCNye-wNBqNL5ZzHSJdpkDEA", "#2dd4bf"),
+        ("Al Arabiya", "UCi_lr_ysQEFA46MKKmKMtOg", "#a855f7"),
+    ]
+
+    @st.cache_data(ttl=180)
+    def _get_ch_video(ch_id):
+        """Obtiene el ultimo video ID del canal via RSS."""
+        try:
+            _rss = requests.get(
+                f"https://www.youtube.com/feeds/videos.xml?channel_id={ch_id}",
+                timeout=8, headers={"User-Agent": "Mozilla/5.0"})
+            if _rss.status_code == 200:
+                _root = _ET.fromstring(_rss.content)
+                _ns = {"yt": "http://www.youtube.com/xml/schemas/2015",
+                       "atom": "http://www.w3.org/2005/Atom"}
+                for _entry in _root.findall("atom:entry", _ns):
+                    _vid = _entry.find("yt:videoId", _ns)
+                    if _vid is not None:
+                        return _vid.text
+        except Exception:
+            pass
+        return None
+
+    # Construir lista de canales con video IDs obtenidos via RSS
+    _ch_list = []
+    for _cn, _cid, _cc in _ch_defs:
+        _vid = _get_ch_video(_cid)
+        _ch_list.append({
+            "name": _cn,
+            "channelId": _cid,
+            "videoId": _vid or "",
+            "color": _cc
+        })
+
+    # ── GDELT desde Python (sin CORS) ────────────────────────────────────────
+    @st.cache_data(ttl=300)
+    def _get_gdelt_mon():
+        try:
+            _gr = requests.get(
+                "https://api.gdeltproject.org/api/v2/doc/doc"
+                "?query=war+conflict+sanctions+military+attack"
+                "&mode=artlist&format=json&maxrecords=25&sort=DateDesc&timespan=12h",
+                timeout=12)
+            if _gr.status_code == 200:
+                return _gr.json().get("articles", [])
+        except Exception:
+            pass
+        return []
+
+    _gdelt_arts = _get_gdelt_mon()
 
     # ── Header ──────────────────────────────────────────────────────────────
     _utc_str = _dtnow.now(_utc.utc).strftime("%a %d %b %Y  %H:%M UTC")
@@ -2563,89 +2625,116 @@ if _nav == "monitor":
     _col_map, _col_right = st.columns([6, 4])
 
     with _col_map:
-        st.markdown("<div style='font-size:8px;color:#ef4444;font-weight:700;"
-                    "letter-spacing:.15em;margin-bottom:4px;'>🔴 SITUACION GLOBAL · EN VIVO</div>",
+        st.markdown("<div style=\'font-size:8px;color:#ef4444;font-weight:700;"
+                    "letter-spacing:.15em;margin-bottom:4px;\'>🔴 SITUACION GLOBAL · EN VIVO</div>",
                     unsafe_allow_html=True)
         _comp.iframe(_map_url, height=680)
 
     with _col_right:
-        # Panel de noticias: canal selector + YouTube + GDELT en un componente HTML
-        _yt_html = """<!DOCTYPE html>
+        # Serializar datos para inyectar en HTML
+        _ch_json  = _json.dumps(_ch_list)
+        _art_json = _json.dumps([{
+            "title": _a.get("title",""),
+            "url":   _a.get("url","#"),
+            "domain": _a.get("domain",""),
+            "country": (_a.get("sourcecountry") or "??")[:2].upper(),
+            "seen":  _a.get("seendate",""),
+        } for _a in _gdelt_arts])
+
+        _panel_html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#060d1a;font-family:Inter,sans-serif;color:#e2e8f0;}
-.tabs{display:flex;flex-wrap:wrap;gap:4px;padding:8px 8px 0;background:#060d1a;}
-.tab{padding:4px 8px;font-size:9px;font-weight:700;letter-spacing:.06em;
-     border-radius:4px;cursor:pointer;border:1px solid #1e2a3a;
-     color:#64748b;background:#0a1020;transition:all .15s;}
-.tab:hover{color:#e2e8f0;border-color:#2dd4bf;}
-.tab.active{color:#060d1a;background:#2dd4bf;border-color:#2dd4bf;}
-.player{width:100%;height:270px;background:#000;border-top:1px solid #0f1f35;}
-.player iframe{width:100%;height:270px;border:none;}
-.note{font-size:9px;color:#334155;padding:4px 8px;background:#060d1a;}
-.feed-hdr{font-size:8px;color:#f97316;font-weight:700;letter-spacing:.15em;
-          padding:8px 8px 4px;background:#060d1a;border-top:1px solid #0f1f35;}
-.feed{height:280px;overflow-y:auto;padding:0 8px 8px;}
-.feed::-webkit-scrollbar{width:3px;}
-.feed::-webkit-scrollbar-thumb{background:#1e2a3a;border-radius:2px;}
-.item{padding:6px 8px;margin-bottom:4px;background:#0a1020;
-      border-radius:4px;border-left:2px solid #ef4444;}
-.item a{font-size:10px;color:#cbd5e1;text-decoration:none;line-height:1.4;display:block;}
-.item a:hover{color:#2dd4bf;}
-.meta{font-size:8px;color:#334155;margin-top:2px;}
-.tag{font-size:7px;font-weight:700;padding:1px 3px;border-radius:2px;margin-right:3px;}
+*{{margin:0;padding:0;box-sizing:border-box;}}
+body{{background:#060d1a;font-family:Inter,sans-serif;color:#e2e8f0;height:700px;overflow:hidden;display:flex;flex-direction:column;}}
+.tabs{{display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:#060d1a;flex-shrink:0;}}
+.tab{{padding:4px 8px;font-size:9px;font-weight:700;letter-spacing:.06em;border-radius:4px;
+      cursor:pointer;border:1px solid #1e2a3a;color:#64748b;background:#0a1020;transition:all .15s;}}
+.tab:hover{{color:#e2e8f0;border-color:#475569;}}
+.tab.active{{color:#060d1a;border-color:var(--c);background:var(--c);}}
+.player{{width:100%;height:250px;background:#000;flex-shrink:0;border-top:1px solid #0f1f35;border-bottom:1px solid #0f1f35;}}
+.player iframe{{width:100%;height:250px;border:none;}}
+.note{{font-size:9px;color:#334155;padding:3px 8px;background:#060d1a;flex-shrink:0;}}
+.fhdr{{font-size:8px;color:#f97316;font-weight:700;letter-spacing:.15em;padding:7px 8px 4px;flex-shrink:0;}}
+.feed{{flex:1;overflow-y:auto;padding:0 8px 8px;}}
+.feed::-webkit-scrollbar{{width:3px;}}
+.feed::-webkit-scrollbar-thumb{{background:#1e2a3a;border-radius:2px;}}
+.item{{padding:6px 8px;margin-bottom:4px;background:#0a1020;border-radius:4px;border-left:2px solid #ef4444;}}
+.item a{{font-size:10px;color:#cbd5e1;text-decoration:none;line-height:1.4;display:block;}}
+.item a:hover{{color:#2dd4bf;}}
+.meta{{font-size:8px;color:#334155;margin-top:2px;}}
+.tag{{font-size:7px;font-weight:700;padding:1px 3px;border-radius:2px;margin-right:3px;}}
 </style>
 </head><body>
-<div class="tabs">
-  <div class="tab active" onclick="loadCh(this,'UCIALMKvObZNtJ6AmdCLP7Lg')">Bloomberg</div>
-  <div class="tab" onclick="loadCh(this,'UCoMdktPbSTixAyNGwb-UYkQ')">Sky News</div>
-  <div class="tab" onclick="loadCh(this,'UCSrZ3UV4jOidv8ppoVuvW9Q')">Euronews</div>
-  <div class="tab" onclick="loadCh(this,'UCknLrEdhRCp1aegoMqRaCZg')">DW News</div>
-  <div class="tab" onclick="loadCh(this,'UCrp_UI8XA1V2T9T7bitAZKA')">CNBC</div>
-  <div class="tab" onclick="loadCh(this,'UCupvZG-5ko_eiXAupbDfxWw')">CNN Intl</div>
-  <div class="tab" onclick="loadCh(this,'UCQfwfsi5VrQ8yKZ-UWmAEFg')">France 24</div>
-  <div class="tab" onclick="loadCh(this,'UCNye-wNBqNL5ZzHSJdpkDEA')">Al Jazeera</div>
-  <div class="tab" onclick="loadCh(this,'UCi_lr_ysQEFA46MKKmKMtOg')">Al Arabiya</div>
-</div>
-<div class="player">
-  <iframe id="yt"
-    src="https://www.youtube-nocookie.com/embed/live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg&rel=0&modestbranding=1"
-    allow="accelerometer;autoplay;encrypted-media;picture-in-picture" allowfullscreen>
-  </iframe>
-</div>
-<div class="note">⚠️ Si aparece error, el canal no emite ahora. Prueba otro.</div>
-<div class="feed-hdr">⚡ ALERTAS GDELT · TIEMPO REAL</div>
-<div class="feed" id="feed"><span style="color:#334155;font-size:10px;">Cargando...</span></div>
+<div class="tabs" id="tabs"></div>
+<div class="player"><iframe id="yt" allowfullscreen
+  allow="accelerometer;autoplay;encrypted-media;picture-in-picture"></iframe></div>
+<div class="note" id="note"></div>
+<div class="fhdr">⚡ ALERTAS GDELT · TIEMPO REAL</div>
+<div class="feed" id="feed"></div>
 <script>
-function loadCh(el, chId){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('yt').src=
-    'https://www.youtube-nocookie.com/embed/live_stream?channel='+chId+'&rel=0&modestbranding=1';
-}
-var kc={war:'#ef4444',conflict:'#ef4444',attack:'#ef4444',military:'#f97316',
-        sanction:'#f97316',oil:'#eab308',gas:'#eab308',iran:'#ef4444',
-        russia:'#f97316',ukraine:'#f97316',china:'#a855f7',nuclear:'#a855f7'};
-function getC(t){t=(t||'').toLowerCase();for(var k in kc){if(t.indexOf(k)>=0)return kc[k];}return'#475569';}
-function ago(s){try{var d=new Date(s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8)+'T'+s.slice(9,11)+':'+s.slice(11,13)+':00Z');var h=Math.round((Date.now()-d)/3600000);return h<=0?'Ahora':h+'h';}catch(e){return'';}}
-function loadFeed(){
-  fetch('https://api.gdeltproject.org/api/v2/doc/doc?query=war+conflict+sanctions+military&mode=artlist&format=json&maxrecords=25&sort=DateDesc&timespan=12h')
-  .then(r=>r.json()).then(d=>{
-    var arts=d.articles||[],h='';
-    arts.forEach(a=>{
-      var c=getC(a.title);
-      h+='<div class="item" style="border-left-color:'+c+'">'+
-         '<a href="'+a.url+'" target="_blank">'+a.title+'</a>'+
-         '<div class="meta"><span class="tag" style="background:'+c+'22;color:'+c+'">'+
-         (a.sourcecountry||'??').slice(0,2).toUpperCase()+'</span>'+
-         a.domain+' · '+ago(a.seendate)+'</div></div>';
-    });
-    document.getElementById('feed').innerHTML=h||'<span style="color:#334155;font-size:10px;">Sin alertas.</span>';
-  }).catch(()=>{document.getElementById('feed').innerHTML='<span style="color:#334155;font-size:10px;">Feed no disponible.</span>';});
-}
-loadFeed();setInterval(loadFeed,300000);
+var CHS={_ch_json};
+var ARTS={_art_json};
+
+var kc={{war:'#ef4444',conflict:'#ef4444',attack:'#ef4444',kill:'#ef4444',
+         military:'#f97316',sanction:'#f97316',missile:'#f97316',
+         oil:'#eab308',gas:'#eab308',energy:'#eab308',
+         iran:'#ef4444',russia:'#f97316',ukraine:'#f97316',
+         china:'#a855f7',nuclear:'#a855f7'}};
+function getC(t){{t=(t||'').toLowerCase();for(var k in kc){{if(t.indexOf(k)>=0)return kc[k];}}return'#475569';}}
+function ago(s){{
+  try{{
+    var d=new Date(s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8)+'T'+s.slice(9,11)+':'+s.slice(11,13)+':00Z');
+    var h=Math.round((Date.now()-d)/3600000);
+    return h<=0?'Ahora':h+'h';
+  }}catch(e){{return'';}}
+}}
+
+// Build channel tabs
+var tabsEl=document.getElementById('tabs');
+CHS.forEach(function(ch,i){{
+  var t=document.createElement('div');
+  t.className='tab'+(i===0?' active':'');
+  t.textContent=ch.name;
+  t.style.setProperty('--c',ch.color);
+  t.onclick=function(){{
+    document.querySelectorAll('.tab').forEach(function(x){{x.classList.remove('active');}});
+    t.classList.add('active');
+    loadVideo(ch);
+  }};
+  tabsEl.appendChild(t);
+}});
+
+function loadVideo(ch){{
+  var yt=document.getElementById('yt');
+  var note=document.getElementById('note');
+  if(ch.videoId){{
+    yt.src='https://www.youtube-nocookie.com/embed/'+ch.videoId+'?rel=0&modestbranding=1';
+    note.textContent='';
+  }}else{{
+    yt.src='https://www.youtube-nocookie.com/embed/live_stream?channel='+ch.channelId+'&rel=0&modestbranding=1';
+    note.textContent='⚠️ Video en vivo — si no carga, el canal no emite ahora.';
+  }}
+}}
+
+// Load first channel
+if(CHS.length>0) loadVideo(CHS[0]);
+
+// Render GDELT articles (datos ya cargados desde Python)
+var feedEl=document.getElementById('feed');
+if(!ARTS||ARTS.length===0){{
+  feedEl.innerHTML='<span style="color:#334155;font-size:10px;">Sin alertas recientes.</span>';
+}}else{{
+  var h='';
+  ARTS.forEach(function(a){{
+    var c=getC(a.title);
+    h+='<div class="item" style="border-left-color:'+c+'">'+
+       '<a href="'+a.url+'" target="_blank">'+a.title+'</a>'+
+       '<div class="meta"><span class="tag" style="background:'+c+'22;color:'+c+'">'+
+       a.country+'</span>'+a.domain+' · '+ago(a.seen)+'</div></div>';
+  }});
+  feedEl.innerHTML=h;
+}}
 </script>
 </body></html>"""
 
-        _comp.html(_yt_html, height=700, scrolling=False)
+        _comp.html(_panel_html, height=705, scrolling=False)
