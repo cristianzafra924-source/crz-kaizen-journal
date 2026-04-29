@@ -2527,29 +2527,26 @@ if _nav == "monitor":
     import requests as _rq2
     from datetime import datetime as _dt2, timezone as _tz2
 
-    # ── Header bar ──────────────────────────────────────────────────────────
-    _now_utc = _dt2.now(_tz2.utc).strftime("%a %d %b %Y  %H:%M:%S UTC")
-    st.markdown(f"""
-<div style="display:flex;align-items:center;gap:12px;padding:6px 16px;
-     background:#060d1a;border:1px solid #0f1f35;border-radius:8px;margin-bottom:12px;">
-  <div style="width:7px;height:7px;background:#ef4444;border-radius:50%;
-       box-shadow:0 0 6px #ef4444;animation:none;flex-shrink:0;"></div>
-  <span style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;">MONITOR GLOBAL</span>
-  <span style="color:#1e2a3a;">|</span>
-  <svg width="20" height="20" viewBox="0 0 20 20">
-    <circle cx="10" cy="10" r="7" fill="none" stroke="#1e2a3a" stroke-width="2.5"/>
-    <circle cx="10" cy="10" r="7" fill="none" stroke="#22c55e" stroke-width="2.5"
-      stroke-dasharray="0 44" stroke-linecap="round" transform="rotate(-90 10 10)"/>
-    <text x="10" y="14" text-anchor="middle" fill="#22c55e" font-size="6" font-weight="700">5</text>
-  </svg>
-  <span style="font-size:10px;font-weight:700;color:#22c55e;">DEFCON 5 &nbsp;·&nbsp; 0%</span>
-  <span style="color:#1e2a3a;">|</span>
-  <span style="font-size:9px;color:#334155;letter-spacing:.05em;">GDELT · ACLED · LiveUAMap · OpenStreetMap</span>
-  <span style="font-size:10px;color:#475569;margin-left:auto;">{_now_utc}</span>
+    # Header
+    _now_utc = _dt2.now(_tz2.utc).strftime("%a %d %b %Y  %H:%M UTC")
+    st.markdown(f"""<div style="display:flex;align-items:center;gap:12px;padding:7px 16px;
+background:#060d1a;border:1px solid #0f1f35;border-radius:8px;margin-bottom:10px;flex-wrap:wrap;">
+<div style="width:8px;height:8px;background:#ef4444;border-radius:50%;box-shadow:0 0 7px #ef4444;flex-shrink:0;"></div>
+<span style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;">MONITOR GLOBAL</span>
+<span style="color:#1e2a3a;">|</span>
+<svg width="20" height="20" viewBox="0 0 20 20" style="flex-shrink:0"><circle cx="10" cy="10" r="7" fill="none" stroke="#1e2a3a" stroke-width="2.5"/><text x="10" y="14" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="700">5</text></svg>
+<span style="font-size:10px;font-weight:700;color:#22c55e;">DEFCON 5</span>
+<span style="color:#1e2a3a;">|</span>
+<span style="font-size:9px;color:#334155;">GDELT · ACLED · LiveUAMap</span>
+<span style="font-size:10px;color:#475569;margin-left:auto;">{_now_utc}</span>
+<a href="https://www.worldmonitor.app" target="_blank"
+style="font-size:9px;color:#2dd4bf;text-decoration:none;border:1px solid #2dd4bf;
+padding:3px 10px;border-radius:4px;font-weight:700;letter-spacing:.05em;">
+🌍 WorldMonitor Full</a>
 </div>""", unsafe_allow_html=True)
 
-    # ── Selectores ───────────────────────────────────────────────────────────
-    _s1, _s2, _s3 = st.columns([2, 2, 1])
+    # Selectores
+    _sc1, _sc2 = st.columns(2)
     _monitor_maps = {
         "🌍 Global / Ucrania": "https://liveuamap.com",
         "🇸🇾 Siria":           "https://syria.liveuamap.com",
@@ -2559,94 +2556,81 @@ if _nav == "monitor":
         "🌏 Asia":             "https://asia.liveuamap.com",
     }
     _monitor_channels = {
-        "Al Jazeera":  "UCNye-wNBqNL5ZzHSJdpkDEA",
-        "Sky News":    "UCoMdktPbSTixAyNGwb-UYkQ",
-        "France 24":   "UCQfwfsi5VrQ8yKZ-UWmAEFg",
-        "Euronews":    "UCSrZ3UV4jOidv8ppoVuvW9Q",
-        "DW News":     "UCknLrEdhRCp1aegoMqRaCZg",
-        "Bloomberg":   "UCIALMKvObZNtJ6AmdCLP7Lg",
+        "📺 Bloomberg":    "UCIALMKvObZNtJ6AmdCLP7Lg",
+        "📺 Sky News":     "UCoMdktPbSTixAyNGwb-UYkQ",
+        "📺 Euronews":     "UCSrZ3UV4jOidv8ppoVuvW9Q",
+        "📺 DW News":      "UCknLrEdhRCp1aegoMqRaCZg",
+        "📺 CNBC Intl":    "UCrp_UI8XA1V2T9T7bitAZKA",
+        "📺 CNN Intl":     "UCupvZG-5ko_eiXAupbDfxWw",
+        "📺 France 24":    "UCQfwfsi5VrQ8yKZ-UWmAEFg",
+        "📺 Al Jazeera":   "UCNye-wNBqNL5ZzHSJdpkDEA",
+        "📺 Al Arabiya":   "UCi_lr_ysQEFA46MKKmKMtOg",
     }
-    with _s1:
-        _sel_map = st.selectbox("Zona conflicto", list(_monitor_maps.keys()), key="mon_map")
-    with _s2:
-        _sel_ch  = st.selectbox("Canal noticias", list(_monitor_channels.keys()), key="mon_ch")
-    with _s3:
-        _show_feed = st.toggle("Feed GDELT", value=True, key="mon_feed")
+    with _sc1:
+        _sel_map = st.selectbox("Zona del mapa", list(_monitor_maps.keys()), key="mon_map")
+    with _sc2:
+        _sel_ch = st.selectbox("Canal de noticias", list(_monitor_channels.keys()), key="mon_ch")
 
     _map_url = _monitor_maps[_sel_map]
     _yt_url  = f"https://www.youtube-nocookie.com/embed/live_stream?channel={_monitor_channels[_sel_ch]}&rel=0&modestbranding=1"
 
-    # ── Layout principal: mapa izq | noticias der ────────────────────────────
-    _col_map, _col_right = st.columns([6, 4])
+    # Layout: mapa grande | panel derecho
+    _cm, _cr = st.columns([6, 4])
 
-    with _col_map:
-        st.markdown("""<div style='font-size:8px;color:#ef4444;font-weight:700;
-            letter-spacing:.15em;margin-bottom:4px;'>
-            🔴 SITUACION GLOBAL · EN VIVO</div>""", unsafe_allow_html=True)
-        _components.iframe(_map_url, height=650)
+    with _cm:
+        st.markdown("<div style='font-size:8px;color:#ef4444;font-weight:700;letter-spacing:.15em;margin-bottom:4px;'>🔴 SITUACION GLOBAL · EN VIVO · LiveUAMap</div>", unsafe_allow_html=True)
+        _components.iframe(_map_url, height=640)
 
-    with _col_right:
-        st.markdown("""<div style='font-size:8px;color:#2dd4bf;font-weight:700;
-            letter-spacing:.15em;margin-bottom:4px;'>
-            📺 NOTICIAS EN VIVO</div>""", unsafe_allow_html=True)
-        _components.iframe(_yt_url, height=320)
+    with _cr:
+        st.markdown("<div style='font-size:8px;color:#2dd4bf;font-weight:700;letter-spacing:.15em;margin-bottom:4px;'>📺 NOTICIAS EN VIVO</div>", unsafe_allow_html=True)
+        _components.iframe(_yt_url, height=310)
 
-        if _show_feed:
-            st.markdown("""<div style='font-size:8px;color:#ef4444;font-weight:700;
-                letter-spacing:.15em;margin:8px 0 4px;'>
-                ⚡ ALERTAS GDELT · TIEMPO REAL</div>""", unsafe_allow_html=True)
+        st.markdown("<div style='font-size:8px;color:#f97316;font-weight:700;letter-spacing:.15em;margin:8px 0 4px;'>⚡ ALERTAS GDELT</div>", unsafe_allow_html=True)
 
-            @st.cache_data(ttl=300)
-            def _fetch_monitor_feed():
-                try:
-                    _r = _rq2.get(
-                        "https://api.gdeltproject.org/api/v2/doc/doc"
-                        "?query=war+conflict+sanctions+military+attack"
-                        "&mode=artlist&format=json&maxrecords=20&sort=DateDesc&timespan=12h",
-                        timeout=15)
-                    if _r.status_code == 200:
-                        return _r.json().get("articles", [])
-                except:
-                    pass
-                return []
+        @st.cache_data(ttl=300)
+        def _mon_gdelt():
+            try:
+                _gr = _rq2.get(
+                    "https://api.gdeltproject.org/api/v2/doc/doc"
+                    "?query=war+conflict+sanctions+military+attack"
+                    "&mode=artlist&format=json&maxrecords=15&sort=DateDesc&timespan=12h",
+                    timeout=12)
+                if _gr.status_code == 200:
+                    return _gr.json().get("articles", [])
+            except:
+                pass
+            return []
 
-            _feed_arts = _fetch_monitor_feed()
-            _cat_c = {
-                "conflict":"#ef4444","war":"#ef4444","attack":"#ef4444",
-                "military":"#f97316","sanction":"#f97316",
-                "oil":"#eab308","gas":"#eab308",
-                "iran":"#ef4444","russia":"#f97316","ukraine":"#f97316",
-                "china":"#a855f7","nuclear":"#a855f7",
-            }
-            def _get_color(t):
-                t = (t or "").lower()
-                for k, c in _cat_c.items():
-                    if k in t: return c
-                return "#475569"
-            def _time_ago(s):
-                try:
-                    _d = _dt2(int(s[:4]),int(s[4:6]),int(s[6:8]),int(s[9:11]),int(s[11:13]),tzinfo=_tz2.utc)
-                    h = int((_dt2.now(_tz2.utc)-_d).total_seconds()/3600)
-                    return "Ahora" if h <= 0 else f"{h}h"
-                except:
-                    return ""
+        _arts = _mon_gdelt()
+        _cc = {"conflict":"#ef4444","war":"#ef4444","attack":"#ef4444",
+               "military":"#f97316","sanction":"#f97316","oil":"#eab308",
+               "iran":"#ef4444","russia":"#f97316","ukraine":"#f97316","china":"#a855f7"}
+        def _gc(t):
+            t=(t or "").lower()
+            for k,c in _cc.items():
+                if k in t: return c
+            return "#475569"
+        def _ta(s):
+            try:
+                _d=_dt2(int(s[:4]),int(s[4:6]),int(s[6:8]),int(s[9:11]),int(s[11:13]),tzinfo=_tz2.utc)
+                h=int((_dt2.now(_tz2.utc)-_d).total_seconds()/3600)
+                return "Ahora" if h<=0 else f"{h}h"
+            except: return ""
 
-            _feed_container = st.container(height=320)
-            with _feed_container:
-                if not _feed_arts:
-                    st.caption("Sin alertas recientes.")
-                for _fa in _feed_arts:
-                    _fc = _get_color(_fa.get("title",""))
-                    _fa_ago = _time_ago(_fa.get("seendate",""))
-                    st.markdown(f"""
-<div style="padding:7px 10px;margin-bottom:5px;background:#0a1020;
-     border-radius:5px;border-left:2px solid {_fc};">
-  <a href="{_fa.get('url','#')}" target="_blank"
-     style="font-size:11px;color:#cbd5e1;text-decoration:none;line-height:1.4;">
-    {_fa.get('title','')}</a>
-  <div style="font-size:9px;color:#334155;margin-top:3px;">
-    <span style="background:{_fc}22;color:{_fc};font-size:8px;font-weight:700;
-          padding:1px 4px;border-radius:2px;">{(_fa.get('sourcecountry','??') or '??')[:2].upper()}</span>
-    &nbsp;{_fa.get('domain','')}&nbsp;·&nbsp;{_fa_ago}
-  </div>
-</div>""", unsafe_allow_html=True)
+        _feed_html = "<div style='max-height:310px;overflow-y:auto;padding-right:4px;'>"
+        if not _arts:
+            _feed_html += "<p style='color:#334155;font-size:11px;'>Sin alertas recientes.</p>"
+        for _a in _arts:
+            _c = _gc(_a.get("title",""))
+            _feed_html += f"""<div style='padding:7px 10px;margin-bottom:5px;background:#0a1020;
+border-radius:5px;border-left:2px solid {_c};'>
+<a href='{_a.get("url","#")}' target='_blank'
+style='font-size:11px;color:#cbd5e1;text-decoration:none;line-height:1.4;display:block;'>
+{_a.get("title","")}</a>
+<div style='font-size:9px;color:#334155;margin-top:3px;'>
+<span style='background:{_c}22;color:{_c};font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px;'>
+{(_a.get("sourcecountry","??") or "??")[:2].upper()}</span>
+&nbsp;{_a.get("domain","")}&nbsp;·&nbsp;{_ta(_a.get("seendate",""))}
+</div></div>"""
+        _feed_html += "</div>"
+        st.markdown(_feed_html, unsafe_allow_html=True)
