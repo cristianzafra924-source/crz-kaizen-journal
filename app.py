@@ -2566,3 +2566,30 @@ if _nav == "monitor":
     _link = _live_links[_sel_ch]
     st.markdown(f"<div style='margin-top:8px;text-align:center;'><a href='{_link}' target='_blank' style='font-size:11px;color:#2dd4bf;'>🔗 Abrir {_sel_ch} en YouTube</a> &nbsp;·&nbsp; <span style='font-size:10px;color:#334155;'>Si no carga aquí, usa el enlace directo</span></div>", unsafe_allow_html=True)
 
+    # ── Mapa de Conflictos en Vivo ──────────────────────────────────────────
+    st.markdown("""<div style='margin-top:32px;margin-bottom:12px;'>
+<div style='font-size:9px;color:#ef4444;font-weight:700;letter-spacing:.15em;text-transform:uppercase;'>
+🔴 Mapa de Conflictos · Liveuamap en tiempo real
+</div></div>""", unsafe_allow_html=True)
+
+    _map_regions = {
+        "🌍 Global / Ucrania":  "https://liveuamap.com",
+        "🇸🇾 Siria":            "https://syria.liveuamap.com",
+        "🇱🇧 Líbano":           "https://lebanon.liveuamap.com",
+        "🇮🇷 Irán":             "https://iran.liveuamap.com",
+        "🇮🇱 Israel / Gaza":    "https://israel.liveuamap.com",
+        "🌏 Asia":              "https://asia.liveuamap.com",
+    }
+    _sel_region = st.selectbox("Región", list(_map_regions.keys()), key="monitor_region")
+    _map_url = _map_regions[_sel_region]
+
+    _components.html(f"""
+    <iframe src="{_map_url}"
+        width="100%" height="600"
+        frameborder="0"
+        style="border-radius:10px;border:1px solid #1e2a3a;">
+    </iframe>
+    """, height=615)
+
+    st.markdown(f"<div style='margin-top:6px;text-align:center;'><a href='{_map_url}' target='_blank' style='font-size:11px;color:#ef4444;'>🔗 Abrir mapa completo en nueva pestaña</a></div>", unsafe_allow_html=True)
+
