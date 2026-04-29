@@ -1132,6 +1132,7 @@ with st.sidebar:
         ("⊕",  "Horario",     "hora"),
         ("△",  "Kaizen",      "kaizen"),
         ("◎",  "Kaizen AI",   "ai"),
+        ("◈",  "Noticias",     "news"),
     ]
     for _ni, _nl, _nk in _NAV_SIDEBAR:
         _active = (_cur_nav == _nk)
@@ -2290,4 +2291,89 @@ Responde en formato markdown cuando sea útil (listas, negrita)."""
 if _nav == "live":
     show_live_tab()
 
+if _nav == "news":
+    import requests as _rq
+    from datetime import date, timedelta
+
+    st.markdown("""
+<div style='font-size:9px;color:#2dd4bf;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:16px;'>
+◈ Calendario Económico · Datos en tiempo real
+</div>""", unsafe_allow_html=True)
+
+    _fh_key = st.secrets.get("FINNHUB_API_KEY", "")
+    if not _fh_key:
+        st.error("Añade FINNHUB_API_KEY en Streamlit Secrets.")
+        st.stop()
+
+    _today = date.today()
+    _col1, _col2, _col3 = st.columns(3)
+    with _col1:
+        _from = st.date_input("Desde", value=_today, key="news_from")
+    with _col2:
+        _to   = st.date_input("Hasta", value=_today + timedelta(days=3), key="news_to")
+    with _col3:
+        _impact_filter = st.selectbox("Impacto", ["Todos", "high", "medium", "low"], key="news_impact")
+
+    @st.cache_data(ttl=900)
+    def _fetch_calendar(from_dt, to_dt, api_key):
+        url = f"https://finnhub.io/api/v1/calendar/economic?from={from_dt}&to={to_dt}&token={api_key}"
+        r = _rq.get(url, timeout=15)
+        if r.status_code == 200:
+            return r.json().get("economicCalendar", [])
+        return []
+
+    _events = _fetch_calendar(str(_from), str(_to), _fh_key)
+
+    if _impact_filter != "Todos":
+        _events = [e for e in _events if e.get("impact") == _impact_filter]
+
+    _impact_colors = {"high": "#ef4444", "medium": "#f59e0b", "low": "#22c55e"}
+    _impact_labels = {"high": "ALTO", "medium": "MEDIO", "low": "BAJO"}
+
+    if not _events:
+        st.info("No hay eventos para el período seleccionado.")
+    else:
+        st.markdown(f"<div style='font-size:11px;color:#475569;margin-bottom:12px;'>{len(_events)} eventos encontrados</div>", unsafe_allow_html=True)
+        for ev in sorted(_events, key=lambda x: x.get("time","")):
+            _imp   = ev.get("impact", "low")
+            _color = _impact_colors.get(_imp, "#475569")
+            _label = _impact_labels.get(_imp, _imp.upper())
+            _actual  = ev.get("actual",  "-")
+            _est     = ev.get("estimate","-")
+            _prev    = ev.get("prev",    "-")
+            _unit    = ev.get("unit",    "")
+            _country = ev.get("country", "")
+            _time    = ev.get("time",    "")
+            _event   = ev.get("event",   "")
+
+            def _fmt(v):
+                if v is None or v == "": return "—"
+                try: return f"{float(v):+.2f}{_unit}"
+                except: return str(v)
+
+            st.markdown(f"""
+<div style='background:#111520;border:1px solid #182035;border-left:3px solid {_color};
+     border-radius:8px;padding:12px 16px;margin-bottom:6px;
+     display:flex;align-items:center;gap:16px;flex-wrap:wrap;'>
+  <div style='min-width:90px;font-family:JetBrains Mono,monospace;font-size:11px;color:#475569;'>{_time}</div>
+  <div style='min-width:36px;background:{_color}22;border:1px solid {_color}44;border-radius:4px;
+       padding:2px 6px;font-size:9px;font-weight:700;color:{_color};text-align:center;'>{_country}</div>
+  <div style='flex:1;font-size:13px;font-weight:600;color:#e2e8f0;'>{_event}</div>
+  <div style='min-width:40px;text-align:center;'>
+    <div style='font-size:9px;color:#475569;'>IMPACTO</div>
+    <div style='font-size:10px;font-weight:700;color:{_color};'>{_label}</div>
+  </div>
+  <div style='min-width:60px;text-align:center;'>
+    <div style='font-size:9px;color:#475569;'>ACTUAL</div>
+    <div style='font-family:JetBrains Mono;font-size:12px;color:#2dd4bf;font-weight:700;'>{_fmt(_actual)}</div>
+  </div>
+  <div style='min-width:60px;text-align:center;'>
+    <div style='font-size:9px;color:#475569;'>PREVISIÓN</div>
+    <div style='font-family:JetBrains Mono;font-size:12px;color:#94a3b8;'>{_fmt(_est)}</div>
+  </div>
+  <div style='min-width:60px;text-align:center;'>
+    <div style='font-size:9px;color:#475569;'>ANTERIOR</div>
+    <div style='font-family:JetBrains Mono;font-size:12px;color:#64748b;'>{_fmt(_prev)}</div>
+  </div>
+</div>""", unsafe_allow_html=True)
 
