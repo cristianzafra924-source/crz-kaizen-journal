@@ -2387,21 +2387,32 @@ if _nav == "news":
                     _groq_key = st.secrets.get("GROQ_API_KEY", "")
                     if _groq_key:
                         with st.spinner("Generando descripción..."):
+                            import time as _time
+                            _groq_payload = {
+                                "model": "llama-3.3-70b-versatile",
+                                "max_tokens": 300,
+                                "messages": [{"role":"user","content":
+                                    f"Explica en español, en 3-4 frases claras y concisas, qué es el indicador económico '{_event}' ({_country}), "
+                                    f"qué mide, por qué es importante para los mercados financieros y cómo afecta al trading. "
+                                    f"Sé directo y práctico. Sin introducción ni conclusión."}]
+                            }
                             try:
                                 _resp = _rq.post(
                                     "https://api.groq.com/openai/v1/chat/completions",
                                     headers={"Content-Type":"application/json","Authorization":f"Bearer {_groq_key}"},
-                                    json={
-                                        "model": "llama-3.3-70b-versatile",
-                                        "max_tokens": 300,
-                                        "messages": [{"role":"user","content":
-                                            f"Explica en español, en 3-4 frases claras y concisas, qué es el indicador económico '{_event}' ({_country}), "
-                                            f"qué mide, por qué es importante para los mercados financieros y cómo afecta al trading. "
-                                            f"Sé directo y práctico. Sin introducción ni conclusión."}]
-                                    }, timeout=15
+                                    json=_groq_payload, timeout=15
                                 )
+                                if _resp.status_code == 429:
+                                    _time.sleep(3)
+                                    _resp = _rq.post(
+                                        "https://api.groq.com/openai/v1/chat/completions",
+                                        headers={"Content-Type":"application/json","Authorization":f"Bearer {_groq_key}"},
+                                        json=_groq_payload, timeout=15
+                                    )
                                 if _resp.status_code == 200:
                                     st.session_state[_cache_key] = _resp.json()["choices"][0]["message"]["content"]
+                                elif _resp.status_code == 429:
+                                    st.markdown("<div style='font-size:12px;color:#f59e0b;'>⏳ Límite de peticiones alcanzado. Cierra y vuelve a abrir en unos segundos.</div>", unsafe_allow_html=True)
                                 else:
                                     st.markdown(f"<div style='font-size:12px;color:#ef4444;'>Error {_resp.status_code} al obtener descripción.</div>", unsafe_allow_html=True)
                             except Exception as _ex:
