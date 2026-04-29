@@ -1060,8 +1060,8 @@ with col_toggle:
 
 if light_mode:
     st.markdown("""<style>
-    .stApp { background: #1a2030 !important; } .block-container { padding:1.2rem 2rem 3rem !important; }
-    .crz-header { background: #1e2a3a !important; border-color: #2d3748 !important; }
+    .stApp { background: #e8edf2 !important; } .block-container { padding:1.2rem 2rem 3rem !important; }
+    .crz-header { background: #ffffff !important; border-color: #cbd5e1 !important; }
     .crz-logo {
     font-family: 'Space Grotesk', sans-serif; color: #0f172a !important; }
     .crz-tagline { color: #64748b !important; }
@@ -1076,7 +1076,7 @@ if light_mode:
     .stTabs [aria-selected="true"] p,
     .stTabs [aria-selected="true"] span,
     .stTabs [aria-selected="true"] div { color: #0d9488 !important; }
-    p, span, label, div { color: #e2e8f0 !important; }
+    p, span, label, div { color: #1e293b !important; }
     h1, h2, h3, h4 { color: #0f172a !important; }
     [data-testid="stMarkdownContainer"] p { color: #0f172a !important; }
     [data-testid="stMarkdownContainer"] span { color: #0f172a !important; }
