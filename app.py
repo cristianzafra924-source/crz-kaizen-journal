@@ -279,13 +279,20 @@ div[data-testid="stMarkdownContainer"] span { color:#c8d4e0 !important; }
 
 /* ── Light mode ──────────────────────────────────────────── */
 /* ── Light/dark toggle — gris cuando esta apagado ────────── */
-[data-testid="stToggle"] > label > div {
+[data-testid="stToggle"] [role="switch"] {
     background-color:#374151 !important;
     border-color:#4b5563 !important;
+    outline:none !important;
 }
-[data-testid="stToggle"] > label > div[aria-checked="true"] {
+[data-testid="stToggle"] [role="switch"][aria-checked="true"] {
     background-color:#2dd4bf !important;
     border-color:#2dd4bf !important;
+}
+[data-testid="stToggle"] [role="switch"] div {
+    background-color:#9ca3af !important;
+}
+[data-testid="stToggle"] [role="switch"][aria-checked="true"] div {
+    background-color:#0a0f1a !important;
 }
 </style>
 """, unsafe_allow_html=True)
