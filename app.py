@@ -1221,7 +1221,7 @@ stats["max_dd"] = float(dd_r.min()) if len(dd_r) > 0 else 0
 
 # ── Trader bar ─────────────────────────────────────────────────────────────────
 pnl_color = GREEN if stats["pnl_net"] >= 0 else RED
-_lm = st.session_state.light_mode
+_lm = False
 _bar_bg = "#ffffff" if _lm else "#0d1117"
 _bar_border = "#e2e8f0" if _lm else "#1e2a3a"
 _bar_title = "#0f172a" if _lm else "#f1f5f9"
@@ -1296,7 +1296,7 @@ if _nav == "dash":
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ── EQUITY CURVE DARWINEX ─────────────────────────────────────────────────
-    _lm = st.session_state.get("light_mode", False)
+    _lm = False
     _sec_bg = "#ffffff" if _lm else "#0d1117"
     _sec_border = "#e2e8f0" if _lm else "#1e2a3a"
     st.markdown(f"""
@@ -1628,7 +1628,7 @@ if _nav == "cal":
     with nav5:
         if st.button("▶▶"): st.session_state.cal_idx = len(months_str) - 1
 
-    light_mode = st.session_state.light_mode
+    light_mode = False
     sel_month  = months_str[st.session_state.cal_idx]
 
     if light_mode:
