@@ -1133,6 +1133,7 @@ with st.sidebar:
         ("△",  "Kaizen",      "kaizen"),
         ("◎",  "Kaizen AI",   "ai"),
         ("◈",  "Noticias",     "news"),
+        ("📡", "Monitor",      "monitor"),
     ]
     for _ni, _nl, _nk in _NAV_SIDEBAR:
         _active = (_cur_nav == _nk)
@@ -2465,16 +2466,17 @@ if _nav == "news":
     @st.cache_data(ttl=600)
     def _fetch_gdelt(query, lang):
         import urllib.parse
-        lang_map = {"Español": "Spanish", "English": "English", "Todos": ""}
-        lang_param = lang_map.get(lang, "")
         q = urllib.parse.quote(query)
-        url = f"https://api.gdeltproject.org/api/v2/doc/doc?query={q}&mode=artlist&format=json&maxrecords=15&sort=DateDesc"
-        if lang_param:
-            url += f"&sourcelang={lang_param}"
+        url = f"https://api.gdeltproject.org/api/v2/doc/doc?query={q}&mode=artlist&format=json&maxrecords=15&sort=DateDesc&timespan=1d"
         try:
             res = _rq.get(url, timeout=15)
             if res.status_code == 200:
-                return res.json().get("articles", [])
+                arts = res.json().get("articles", [])
+                if lang == "Español":
+                    arts = [a for a in arts if a.get("language","").lower() in ("spanish","espanol","es")]
+                elif lang == "English":
+                    arts = [a for a in arts if a.get("language","").lower() in ("english","en")]
+                return arts
         except:
             pass
         return []
@@ -2519,3 +2521,45 @@ if _nav == "news":
     &nbsp;·&nbsp;{_domain}&nbsp;·&nbsp;{_time_str}
   </div>
 </div>""", unsafe_allow_html=True)
+
+if _nav == "monitor":
+    import streamlit.components.v1 as _components
+
+    st.markdown("""<div style='font-size:9px;color:#2dd4bf;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:16px;'>
+📡 Monitor · Noticias en vivo
+</div>""", unsafe_allow_html=True)
+
+    _live_channels = {
+        "📺 Al Jazeera English":  "FtZoPn-kHMw",
+        "📺 Sky News":            "9Auq9mYxFEE",
+        "📺 France 24 English":   "l8pmfNyEsqw",
+        "📺 Euronews English":    "7qCECv0gGaM",
+        "📺 DW News":             "live_stream?channel=UCknLrEdhRCp1aegoMqRaCZg",
+        "📺 Bloomberg TV":        "live_stream?channel=UCIALMKvObZNtJ6AmdCLP7Lg",
+        "📺 CNBC International":  "live_stream?channel=UCvJJ_dzjViJCoLf5uKUTwoA",
+    }
+
+    _ch_col, _mute_col = st.columns([4, 1])
+    with _ch_col:
+        _sel_ch = st.selectbox("Canal", list(_live_channels.keys()), key="monitor_ch")
+    with _mute_col:
+        _autoplay = st.toggle("Autoplay", value=False, key="monitor_autoplay")
+
+    _vid = _live_channels[_sel_ch]
+    if _vid.startswith("live_stream"):
+        _embed_url = f"https://www.youtube-nocookie.com/embed/{_vid}&rel=0"
+    else:
+        _ap = "1" if _autoplay else "0"
+        _embed_url = f"https://www.youtube-nocookie.com/embed/{_vid}?autoplay={_ap}&rel=0&modestbranding=1"
+
+    _components.html(f"""
+    <iframe width="100%" height="520"
+        src="{_embed_url}"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen style="border-radius:10px;">
+    </iframe>
+    """, height=530)
+
+    st.markdown("<div style='margin-top:8px;font-size:10px;color:#334155;text-align:center;'>Si el canal no carga, prueba otro. Los streams de YouTube pueden estar pausados temporalmente.</div>", unsafe_allow_html=True)
+
