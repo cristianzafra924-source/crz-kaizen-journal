@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-29 23:26:14",
+  "timestamp": "2026-04-29 23:26:24",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 197026.52,
-    "equity": 195825.77,
-    "margin": 22327.34,
-    "margin_libre": 173498.43,
-    "margin_nivel": 877.07,
-    "profit_abierto": -1200.75,
+    "equity": 195761.96,
+    "margin": 40408.46,
+    "margin_libre": 155353.5,
+    "margin_nivel": 484.46,
+    "profit_abierto": -1264.56,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4544.99,
+      "price_current": 4544.69,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -638.4,
+      "profit": -642,
       "swap": -11.98,
-      "pnl_net": -650.38,
+      "pnl_net": -653.98,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4544.99,
+      "price_current": 4544.69,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -469.68,
+      "profit": -473.28,
       "swap": -11.98,
-      "pnl_net": -481.66,
+      "pnl_net": -485.26,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,13 +50,27 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 75390.41,
-      "price_current": 75619.45,
+      "price_current": 75621.49,
       "sl": 76693.66,
       "tp": 0,
-      "profit": -68.71,
+      "profit": -69.32,
       "swap": 0,
-      "pnl_net": -68.71,
+      "pnl_net": -69.32,
       "time_open": "2026-04-29 22:05:35"
+    },
+    {
+      "ticket": 14853535,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 10,
+      "price_open": 27108.12,
+      "price_current": 27102.52,
+      "sl": 27074.7,
+      "tp": 0,
+      "profit": -56,
+      "swap": 0,
+      "pnl_net": -56,
+      "time_open": "2026-04-29 23:26:20"
     }
   ],
   "deals_hoy": [
@@ -263,6 +277,18 @@
       "swap": 0,
       "pnl_net": 453.3,
       "time": "23:25:38"
+    },
+    {
+      "ticket": 13864624,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 10,
+      "price": 27108.12,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "23:26:20"
     }
   ],
   "pnl_dia": 2309.22,
@@ -1241,6 +1267,19 @@
       "pnl_net": 453.3,
       "win": true,
       "time": "2026-04-29 23:25:38"
+    },
+    {
+      "ticket": 13864624,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 10,
+      "price": 27108.12,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-04-29 23:26:20"
     }
   ],
   "equity_series": [
@@ -1318,7 +1357,8 @@
     -2790.08,
     -3426.78,
     -3426.78,
+    -2973.48,
     -2973.48
   ],
-  "n_trades": 75
+  "n_trades": 76
 }
