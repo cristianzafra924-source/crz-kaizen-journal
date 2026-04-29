@@ -47,14 +47,17 @@ html,body,[class*="css"] { font-family:'Space Grotesk','Inter',sans-serif; }
 #MainMenu,footer,header { visibility:hidden; }
 .block-container { padding:1.2rem 2rem 3rem; max-width:100%; }
 
-/* ── Sidebar toggle: visible, teal ───────────────────────── */
-[data-testid="stSidebarCollapseButton"] button,
-[data-testid="stSidebarCollapsedControl"] button {
-    background:#2dd4bf !important; border-radius:50% !important;
-    color:#0a0f1a !important; border:none !important;
-    width:28px !important; height:28px !important;
-    box-shadow:0 0 12px rgba(45,212,191,.5) !important;
-    opacity:1 !important; visibility:visible !important;
+/* ── Sidebar siempre visible — ocultar botón cerrar ─────── */
+section[data-testid="stSidebar"] {
+    transform:none !important;
+    visibility:visible !important;
+    display:flex !important;
+}
+[data-testid="stSidebarCollapseButton"] {
+    display:none !important;
+}
+[data-testid="stSidebarCollapsedControl"] {
+    display:none !important;
 }
 
 /* ── Sidebar panel ───────────────────────────────────────── */
