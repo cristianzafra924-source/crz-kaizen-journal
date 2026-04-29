@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-29 19:39:23",
+  "timestamp": "2026-04-29 19:39:33",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4549.85,
+      "price_current": 4550.07,
       "sl": 4485.69,
       "tp": 5417.5,
-      "profit": -580.08,
+      "profit": -577.44,
       "swap": -11.98,
-      "pnl_net": -592.06,
+      "pnl_net": -589.42,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4549.85,
+      "price_current": 4550.07,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -411.36,
+      "profit": -408.72,
       "swap": -11.98,
-      "pnl_net": -423.34,
+      "pnl_net": -420.7,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.5,
       "price_open": 77508.96,
-      "price_current": 75798.47,
+      "price_current": 75802.53,
       "sl": 77498.48,
       "tp": 0,
-      "profit": 855.25,
+      "profit": 853.22,
       "swap": 0,
-      "pnl_net": 855.25,
+      "pnl_net": 853.22,
       "time_open": "2026-04-29 14:22:21"
     },
     {
@@ -64,12 +64,12 @@
       "type": "sell",
       "volume": 0.5,
       "price_open": 77345.48,
-      "price_current": 75798.47,
+      "price_current": 75802.53,
       "sl": 77330.47,
       "tp": 0,
-      "profit": 773.51,
+      "profit": 771.48,
       "swap": 0,
-      "pnl_net": 773.51,
+      "pnl_net": 771.48,
       "time_open": "2026-04-29 15:18:34"
     },
     {
@@ -78,12 +78,12 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 77116.4,
-      "price_current": 75798.47,
+      "price_current": 75802.53,
       "sl": 77086.51,
       "tp": 0,
-      "profit": 395.38,
+      "profit": 394.16,
       "swap": 0,
-      "pnl_net": 395.38,
+      "pnl_net": 394.16,
       "time_open": "2026-04-29 15:24:34"
     }
   ],
