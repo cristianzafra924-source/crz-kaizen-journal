@@ -2331,7 +2331,7 @@ if _nav == "news":
     _impact_labels = {"high": "ALTO", "medium": "MEDIO", "low": "BAJO"}
 
     if not _events:
-        st.info("No hay eventos para el período seleccionado. Prueba a ampliar las fechas o cambia el filtro de impacto a "Todos".")
+        st.info('No hay eventos para el periodo seleccionado. Prueba a ampliar las fechas o cambia el filtro de impacto a Todos.')
     else:
         st.markdown(f"<div style='font-size:11px;color:#475569;margin-bottom:12px;'>{len(_events)} eventos encontrados</div>", unsafe_allow_html=True)
         for ev in sorted(_events, key=lambda x: x.get("time","")):
