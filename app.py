@@ -88,22 +88,29 @@ section[data-testid="stSidebar"] {
 /* Expand button (shown when sidebar is collapsed) */
 [data-testid="stSidebarCollapsedControl"] {
     visibility:visible !important;
+    display:block !important;
     opacity:1 !important;
     position:fixed !important;
     left:0 !important; top:50% !important;
     transform:translateY(-50%) !important;
-    z-index:9999 !important;
+    z-index:99999 !important;
 }
 [data-testid="stSidebarCollapsedControl"] button {
     background:#2dd4bf !important;
-    border-radius:0 8px 8px 0 !important;
+    border-radius:0 10px 10px 0 !important;
     color:#0a0f1a !important;
     border:none !important;
-    width:24px !important; height:48px !important;
-    box-shadow:4px 0 16px rgba(45,212,191,.4) !important;
+    width:28px !important; height:56px !important;
+    box-shadow:4px 0 20px rgba(45,212,191,.6) !important;
     cursor:pointer !important;
-    visibility:visible !important; opacity:1 !important;
-    font-size:16px !important;
+    visibility:visible !important;
+    display:flex !important;
+    opacity:1 !important;
+    font-size:18px !important;
+}
+[data-testid="stSidebarCollapsedControl"] button svg {
+    fill:#0a0f1a !important;
+    color:#0a0f1a !important;
 }
 [data-testid="stSidebar"] * { font-family:'Space Grotesk','Inter',sans-serif !important; }
 [data-testid="stSidebar"] hr { border-color:#171e30 !important; margin:6px 0 !important; }
