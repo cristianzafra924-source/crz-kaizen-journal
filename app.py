@@ -2554,14 +2554,7 @@ if _nav == "monitor":
     _ch_id = _live_channels[_sel_ch]
     _embed_url = f"https://www.youtube-nocookie.com/embed/live_stream?channel={_ch_id}&rel=0&modestbranding=1"
 
-    _components.html(f"""
-    <iframe width="100%" height="520"
-        src="{_embed_url}"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen style="border-radius:10px;">
-    </iframe>
-    """, height=530)
+    _components.iframe(_embed_url, height=530)
 
     _link = _live_links[_sel_ch]
     st.markdown(f"<div style='margin-top:8px;text-align:center;'><a href='{_link}' target='_blank' style='font-size:11px;color:#2dd4bf;'>🔗 Abrir {_sel_ch} en YouTube</a> &nbsp;·&nbsp; <span style='font-size:10px;color:#334155;'>Si no carga aquí, usa el enlace directo</span></div>", unsafe_allow_html=True)
@@ -2583,13 +2576,7 @@ if _nav == "monitor":
     _sel_region = st.selectbox("Región", list(_map_regions.keys()), key="monitor_region")
     _map_url = _map_regions[_sel_region]
 
-    _components.html(f"""
-    <iframe src="{_map_url}"
-        width="100%" height="600"
-        frameborder="0"
-        style="border-radius:10px;border:1px solid #1e2a3a;">
-    </iframe>
-    """, height=615)
+    _components.iframe(_map_url, height=620)
 
     st.markdown(f"<div style='margin-top:6px;text-align:center;'><a href='{_map_url}' target='_blank' style='font-size:11px;color:#ef4444;'>🔗 Abrir mapa completo en nueva pestaña</a></div>", unsafe_allow_html=True)
 
