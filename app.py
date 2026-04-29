@@ -2353,7 +2353,7 @@ if _nav == "news":
 
             st.markdown(f"""
 <div style='background:#111520;border:1px solid #182035;border-left:3px solid {_color};
-     border-radius:8px;padding:12px 16px;margin-bottom:6px;
+     border-radius:8px;padding:12px 16px;margin-bottom:2px;
      display:flex;align-items:center;gap:16px;flex-wrap:wrap;'>
   <div style='min-width:90px;font-family:JetBrains Mono,monospace;font-size:11px;color:#475569;'>{_time}</div>
   <div style='min-width:36px;background:{_color}22;border:1px solid {_color}44;border-radius:4px;
@@ -2376,4 +2376,35 @@ if _nav == "news":
     <div style='font-family:JetBrains Mono;font-size:12px;color:#64748b;'>{_fmt(_prev)}</div>
   </div>
 </div>""", unsafe_allow_html=True)
+
+            with st.expander(f"📖 ¿Qué es '{_event}'?", expanded=False):
+                _cache_key = f"news_desc_{_event}"
+                if _cache_key not in st.session_state:
+                    _groq_key = st.secrets.get("GROQ_API_KEY", "")
+                    if _groq_key:
+                        with st.spinner("Generando descripción..."):
+                            try:
+                                _resp = _rq.post(
+                                    "https://api.groq.com/openai/v1/chat/completions",
+                                    headers={"Content-Type":"application/json","Authorization":f"Bearer {_groq_key}"},
+                                    json={
+                                        "model": "llama-3.3-70b-versatile",
+                                        "max_tokens": 300,
+                                        "messages": [{"role":"user","content":
+                                            f"Explica en español, en 3-4 frases claras y concisas, qué es el indicador económico '{_event}' ({_country}), "
+                                            f"qué mide, por qué es importante para los mercados financieros y cómo afecta al trading. "
+                                            f"Sé directo y práctico. Sin introducción ni conclusión."}]
+                                    }, timeout=15
+                                )
+                                if _resp.status_code == 200:
+                                    st.session_state[_cache_key] = _resp.json()["choices"][0]["message"]["content"]
+                                else:
+                                    st.session_state[_cache_key] = "No se pudo obtener la descripción."
+                            except:
+                                st.session_state[_cache_key] = "Error al conectar con el servicio."
+                    else:
+                        st.session_state[_cache_key] = "Añade GROQ_API_KEY en Streamlit Secrets."
+                st.markdown(f"<div style='font-size:13px;color:#94a3b8;line-height:1.7;padding:4px 0;'>{st.session_state.get(_cache_key,'...')}</div>", unsafe_allow_html=True)
+
+            st.markdown("<div style='margin-bottom:6px;'></div>", unsafe_allow_html=True)
 
