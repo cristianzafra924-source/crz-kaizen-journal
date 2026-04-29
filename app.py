@@ -2306,13 +2306,28 @@ if _nav == "news":
         st.stop()
 
     _today = date.today()
-    _col1, _col2, _col3 = st.columns(3)
+    _col1, _col2, _col3, _col4 = st.columns(4)
     with _col1:
         _from = st.date_input("Desde", value=_today, key="news_from")
     with _col2:
         _to   = st.date_input("Hasta", value=_today + timedelta(days=7), key="news_to")
     with _col3:
         _impact_filter = st.selectbox("Impacto", ["Todos", "high", "medium", "low"], index=0, key="news_impact")
+    with _col4:
+        _country_options = {
+            "Todos": None,
+            "🇺🇸 USD": "US",
+            "🇪🇺 EUR": "EU",
+            "🇩🇪 EUR/DE": "DE",
+            "🇬🇧 GBP": "GB",
+            "🇯🇵 JPY": "JP",
+            "🇨🇦 CAD": "CA",
+            "🇦🇺 AUD": "AU",
+            "🇨🇭 CHF": "CH",
+            "🇳🇿 NZD": "NZ",
+        }
+        _country_label = st.selectbox("País", list(_country_options.keys()), index=0, key="news_country")
+        _country_filter = _country_options[_country_label]
 
     @st.cache_data(ttl=300)
     def _fetch_calendar(from_dt, to_dt, api_key):
@@ -2330,6 +2345,8 @@ if _nav == "news":
 
     if _impact_filter != "Todos":
         _events = [e for e in _events if e.get("impact") == _impact_filter]
+    if _country_filter:
+        _events = [e for e in _events if e.get("country", "").upper() == _country_filter]
 
     _impact_colors = {"high": "#ef4444", "medium": "#f59e0b", "low": "#22c55e"}
     _impact_labels = {"high": "ALTO", "medium": "MEDIO", "low": "BAJO"}
