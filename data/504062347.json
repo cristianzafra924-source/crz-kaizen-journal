@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-04-29 15:18:27",
+  "timestamp": "2026-04-29 15:18:37",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
     "nombre": " Cristian Zafra gomez",
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
-    "balance": 195018.08,
-    "equity": 194520.68,
-    "margin": 30396.02,
-    "margin_libre": 164124.66,
-    "margin_nivel": 639.95,
-    "profit_abierto": -497.4,
+    "balance": 195008.41,
+    "equity": 194519.16,
+    "margin": 49732.39,
+    "margin_libre": 144786.77,
+    "margin_nivel": 391.13,
+    "profit_abierto": -489.25,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4568.09,
+      "price_current": 4568.45,
       "sl": 4485.69,
       "tp": 5417.5,
-      "profit": -361.2,
+      "profit": -356.88,
       "swap": -11.98,
-      "pnl_net": -373.18,
+      "pnl_net": -368.86,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4568.09,
+      "price_current": 4568.45,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -192.48,
+      "profit": -188.16,
       "swap": -11.98,
-      "pnl_net": -204.46,
+      "pnl_net": -200.14,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,13 +50,27 @@
       "type": "sell",
       "volume": 0.5,
       "price_open": 77508.96,
-      "price_current": 77348.49,
-      "sl": 77980.82,
+      "price_current": 77347.47,
+      "sl": 77498.48,
       "tp": 0,
-      "profit": 80.24,
+      "profit": 80.75,
       "swap": 0,
-      "pnl_net": 80.24,
+      "pnl_net": 80.75,
       "time_open": "2026-04-29 14:22:21"
+    },
+    {
+      "ticket": 14826439,
+      "symbol": "BTCUSD",
+      "type": "sell",
+      "volume": 0.5,
+      "price_open": 77345.48,
+      "price_current": 77347.47,
+      "sl": 0,
+      "tp": 0,
+      "profit": -1,
+      "swap": 0,
+      "pnl_net": -1,
+      "time_open": "2026-04-29 15:18:34"
     }
   ],
   "deals_hoy": [
@@ -143,9 +157,21 @@
       "swap": 0,
       "pnl_net": -10.72,
       "time": "14:33:54"
+    },
+    {
+      "ticket": 13839779,
+      "symbol": "BTCUSD",
+      "type": "sell",
+      "volume": 0.5,
+      "price": 77345.48,
+      "profit": 0,
+      "commission": -9.67,
+      "swap": 0,
+      "pnl_net": -9.67,
+      "time": "15:18:34"
     }
   ],
-  "pnl_dia": 300.78,
+  "pnl_dia": 291.11,
   "historial": [
     {
       "ticket": 13708343,
@@ -991,6 +1017,19 @@
       "pnl_net": -10.72,
       "win": false,
       "time": "2026-04-29 14:33:54"
+    },
+    {
+      "ticket": 13839779,
+      "symbol": "BTCUSD",
+      "type": "sell",
+      "volume": 0.5,
+      "price": 77345.48,
+      "profit": 0,
+      "commission": -9.67,
+      "swap": 0,
+      "pnl_net": -9.67,
+      "win": false,
+      "time": "2026-04-29 15:18:34"
     }
   ],
   "equity_series": [
@@ -1058,7 +1097,8 @@
     -4951.81,
     -4961.51,
     -4971.2,
-    -4981.92
+    -4981.92,
+    -4991.59
   ],
-  "n_trades": 65
+  "n_trades": 66
 }
