@@ -2399,12 +2399,13 @@ if _nav == "news":
                                 if _resp.status_code == 200:
                                     st.session_state[_cache_key] = _resp.json()["choices"][0]["message"]["content"]
                                 else:
-                                    st.session_state[_cache_key] = "No se pudo obtener la descripción."
-                            except:
-                                st.session_state[_cache_key] = "Error al conectar con el servicio."
+                                    st.markdown(f"<div style='font-size:12px;color:#ef4444;'>Error {_resp.status_code} al obtener descripción.</div>", unsafe_allow_html=True)
+                            except Exception as _ex:
+                                st.markdown(f"<div style='font-size:12px;color:#ef4444;'>Error de conexión: {_ex}</div>", unsafe_allow_html=True)
                     else:
-                        st.session_state[_cache_key] = "Añade GROQ_API_KEY en Streamlit Secrets."
-                st.markdown(f"<div style='font-size:13px;color:#94a3b8;line-height:1.7;padding:4px 0;'>{st.session_state.get(_cache_key,'...')}</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='font-size:12px;color:#64748b;'>Añade <b>GROQ_API_KEY</b> en Streamlit Cloud → Settings → Secrets para ver la descripción.</div>", unsafe_allow_html=True)
+                if _cache_key in st.session_state:
+                    st.markdown(f"<div style='font-size:13px;color:#94a3b8;line-height:1.7;padding:4px 0;'>{st.session_state[_cache_key]}</div>", unsafe_allow_html=True)
 
             st.markdown("<div style='margin-bottom:6px;'></div>", unsafe_allow_html=True)
 
