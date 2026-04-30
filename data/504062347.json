@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-30 14:04:29",
+  "timestamp": "2026-04-30 14:04:39",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 197136.57,
-    "equity": 200197.73,
+    "equity": 200224.77,
     "margin": 59249.51,
-    "margin_libre": 140948.22,
-    "margin_nivel": 337.89,
-    "profit_abierto": 3061.16,
+    "margin_libre": 140975.26,
+    "margin_nivel": 337.93,
+    "profit_abierto": 3088.2,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4642.17,
+      "price_current": 4642.43,
       "sl": 4598.94,
       "tp": 0,
-      "profit": 527.76,
+      "profit": 530.88,
       "swap": -47.92,
-      "pnl_net": 479.84,
+      "pnl_net": 482.96,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4642.17,
+      "price_current": 4642.43,
       "sl": 4584.41,
       "tp": 0,
-      "profit": 696.48,
+      "profit": 699.6,
       "swap": -47.92,
-      "pnl_net": 648.56,
+      "pnl_net": 651.68,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.3,
       "price_open": 4601.14,
-      "price_current": 4642.17,
+      "price_current": 4642.43,
       "sl": 4602.45,
       "tp": 0,
-      "profit": 1230.9,
+      "profit": 1238.7,
       "swap": 0,
-      "pnl_net": 1230.9,
+      "pnl_net": 1238.7,
       "time_open": "2026-04-30 10:54:29"
     },
     {
@@ -78,12 +78,12 @@
       "type": "buy",
       "volume": 0.5,
       "price_open": 4623.75,
-      "price_current": 4642.17,
+      "price_current": 4642.43,
       "sl": 4591.68,
       "tp": 0,
-      "profit": 921,
+      "profit": 934,
       "swap": 0,
-      "pnl_net": 921,
+      "pnl_net": 934,
       "time_open": "2026-04-30 11:06:35"
     }
   ],
