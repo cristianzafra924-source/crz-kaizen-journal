@@ -2646,6 +2646,7 @@ if _nav == "news":
 if _nav == "monitor":
     import streamlit.components.v1 as _comp
     import json as _json
+    import time as _time_m
     from datetime import datetime as _dtnow, timezone as _utc
 
     _ch_defs = [
@@ -2660,52 +2661,56 @@ if _nav == "monitor":
         ("Al Arabiya", "UCi_lr_ysQEFA46MKKmKMtOg", "#a855f7"),
     ]
 
-    @st.cache_data(ttl=1800)
-    def _get_live_id_yt(ch_id, yt_key):
-        """Obtiene video ID del stream en vivo actual via YouTube Data API v3."""
-        try:
-            _r = requests.get(
-                "https://www.googleapis.com/youtube/v3/search",
-                params={
-                    "part": "id",
-                    "channelId": ch_id,
-                    "type": "video",
-                    "eventType": "live",
-                    "key": yt_key,
-                    "maxResults": 1,
-                },
-                timeout=10,
-            )
-            if _r.status_code == 200:
-                _items = _r.json().get("items", [])
-                if _items:
-                    return _items[0]["id"]["videoId"]
-        except Exception:
-            pass
-        return ""
-
+    # ── YouTube live IDs via API (session_state cache 30 min) ────────────────
     _yt_key = st.secrets.get("YOUTUBE_API_KEY", "")
-    _ch_list = []
-    for _cn, _cid, _cc in _ch_defs:
-        _vid = _get_live_id_yt(_cid, _yt_key) if _yt_key else ""
-        _ch_list.append({"name": _cn, "channelId": _cid, "videoId": _vid, "color": _cc})
+    _now_ts = _time_m.time()
+    if "yt_ch_cache" not in st.session_state or _now_ts - st.session_state.get("yt_ch_ts", 0) > 1800:
+        _ch_ids_fresh = {}
+        for _cn, _cid, _cc in _ch_defs:
+            if _yt_key:
+                try:
+                    _yr = requests.get(
+                        "https://www.googleapis.com/youtube/v3/search",
+                        params={"part":"id","channelId":_cid,"type":"video",
+                                "eventType":"live","key":_yt_key,"maxResults":1},
+                        timeout=8)
+                    if _yr.status_code == 200:
+                        _it = _yr.json().get("items", [])
+                        _ch_ids_fresh[_cid] = _it[0]["id"]["videoId"] if _it else ""
+                    else:
+                        _ch_ids_fresh[_cid] = ""
+                except Exception:
+                    _ch_ids_fresh[_cid] = ""
+            else:
+                _ch_ids_fresh[_cid] = ""
+        st.session_state["yt_ch_cache"] = _ch_ids_fresh
+        st.session_state["yt_ch_ts"] = _now_ts
 
-    @st.cache_data(ttl=600)
-    def _get_gdelt_mon():
+    _vid_map = st.session_state.get("yt_ch_cache", {})
+    _ch_list = [{"name":_cn,"channelId":_cid,"videoId":_vid_map.get(_cid,""),"color":_cc}
+                for _cn, _cid, _cc in _ch_defs]
+
+    # ── GDELT via session_state cache (10 min) ───────────────────────────────
+    if "gdelt_mon" not in st.session_state or _now_ts - st.session_state.get("gdelt_mon_ts", 0) > 600:
         try:
-            _r = requests.get(
+            _gr = requests.get(
                 "https://api.gdeltproject.org/api/v2/doc/doc"
                 "?query=war+conflict+military+attack+sanctions+ukraine+iran+israel+gaza"
                 "&mode=artlist&format=json&maxrecords=30&sort=DateDesc&timespan=14d",
                 timeout=20)
-            if _r.status_code == 200:
-                return _r.json().get("articles", [])
-        except Exception:
-            pass
-        return []
+            if _gr.status_code == 200:
+                _g_arts = _gr.json().get("articles", [])
+                st.session_state["gdelt_mon"] = _g_arts
+                st.session_state["gdelt_mon_ts"] = _now_ts
+                st.session_state["gdelt_mon_status"] = f"OK ({len(_g_arts)} arts)"
+            else:
+                st.session_state["gdelt_mon_status"] = f"HTTP {_gr.status_code}"
+        except Exception as _ge:
+            st.session_state["gdelt_mon_status"] = f"ERR: {_ge}"
 
-    _gdelt_arts = _get_gdelt_mon()
+    _gdelt_arts = st.session_state.get("gdelt_mon", [])
 
+    # ── Header ───────────────────────────────────────────────────────────────
     _utc_str = _dtnow.now(_utc.utc).strftime("%a %d %b %Y  %H:%M UTC")
     st.markdown(f"""
 <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;
@@ -2714,7 +2719,7 @@ if _nav == "monitor":
        box-shadow:0 0 8px #ef4444;"></div>
   <span style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;">MONITOR GLOBAL</span>
   <span style="color:#1e2a3a;">|</span>
-  <span style="font-size:9px;color:#334155;">GDELT · LiveUAMap · YouTube Live</span>
+  <span style="font-size:9px;color:#334155;">GDELT: {st.session_state.get('gdelt_mon_status','—')} · YT API: {'OK' if _yt_key else 'sin key'}</span>
   <span style="font-size:10px;color:#475569;margin-left:auto;">{_utc_str}</span>
 </div>""", unsafe_allow_html=True)
 
@@ -2740,11 +2745,11 @@ if _nav == "monitor":
     with _col_right:
         _ch_json  = _json.dumps(_ch_list, ensure_ascii=True)
         _art_json = _json.dumps([{
-            "title":   _a.get("title", "")[:120],
-            "url":     _a.get("url", "#"),
-            "domain":  _a.get("domain", ""),
+            "title":   _a.get("title","")[:120],
+            "url":     _a.get("url","#"),
+            "domain":  _a.get("domain",""),
             "country": (_a.get("sourcecountry") or "??")[:2].upper(),
-            "seen":    _a.get("seendate", ""),
+            "seen":    _a.get("seendate",""),
         } for _a in _gdelt_arts], ensure_ascii=True)
 
         _panel_html = (
@@ -2759,8 +2764,14 @@ if _nav == "monitor":
             'transition:all .12s;white-space:nowrap}'
             '.tab:hover{color:#e2e8f0;border-color:#475569}'
             '.tab.active{color:#060d1a;border-color:var(--c);background:var(--c)}'
-            '.player{width:100%;height:235px;background:#000;flex-shrink:0}'
+            '.player{width:100%;height:235px;background:#000;flex-shrink:0;position:relative}'
             '.player iframe{width:100%;height:235px;border:none;display:block}'
+            '.yt-link{position:absolute;inset:0;display:none;flex-direction:column;'
+            'align-items:center;justify-content:center;background:#0a1020;gap:8px}'
+            '.yt-link a{display:inline-block;padding:8px 18px;background:#ef4444;'
+            'color:#fff;font-size:11px;font-weight:700;border-radius:6px;'
+            'text-decoration:none;letter-spacing:.05em}'
+            '.yt-link span{font-size:10px;color:#475569}'
             '.note{font-size:9px;color:#475569;padding:3px 9px;flex-shrink:0;'
             'border-bottom:1px solid #0f1f35;min-height:18px;background:#060d1a}'
             '.fhdr{font-size:8px;color:#f97316;font-weight:700;letter-spacing:.14em;'
@@ -2779,9 +2790,16 @@ if _nav == "monitor":
             '.ago{font-size:9px;color:#1e3a5f;margin-left:auto;flex-shrink:0}'
             '</style></head><body>'
             '<div class="tabs" id="tabs"></div>'
-            '<div class="player"><iframe id="yt" allowfullscreen '
-            'allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture">'
-            '</iframe></div>'
+            '<div class="player">'
+            '  <iframe id="yt" allowfullscreen '
+            '    allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture">'
+            '  </iframe>'
+            '  <div class="yt-link" id="yt-link">'
+            '    <span id="yt-ch-name"></span>'
+            '    <a id="yt-open" href="#" target="_blank">Ver en YouTube</a>'
+            '    <span>Este canal no permite embed — se abre en nueva pestaña</span>'
+            '  </div>'
+            '</div>'
             '<div class="note" id="note"></div>'
             '<div class="fhdr">NOTICIAS GLOBALES EN TIEMPO REAL</div>'
             '<div class="feed" id="feed"></div>'
@@ -2789,23 +2807,22 @@ if _nav == "monitor":
             'var CHS=' + _ch_json + ';'
             'var ARTS=' + _art_json + ';'
             'var KW={'
-            'guerra:"#ef4444",conflicto:"#ef4444",ataque:"#ef4444",bombardeo:"#ef4444",'
-            'war:"#ef4444",conflict:"#ef4444",attack:"#ef4444",kill:"#ef4444",strike:"#ef4444",'
-            'militar:"#f97316",sancion:"#f97316",military:"#f97316",sanction:"#f97316",missile:"#f97316",'
-            'petroleo:"#eab308",oil:"#eab308",gas:"#eab308",energy:"#eab308",'
+            'guerra:"#ef4444",conflicto:"#ef4444",ataque:"#ef4444",'
+            'war:"#ef4444",conflict:"#ef4444",attack:"#ef4444",strike:"#ef4444",'
+            'militar:"#f97316",sancion:"#f97316",military:"#f97316",sanction:"#f97316",'
+            'oil:"#eab308",gas:"#eab308",energy:"#eab308",petroleo:"#eab308",'
             'iran:"#ef4444",rusia:"#f97316",ukraine:"#f97316",ucrania:"#f97316",'
             'israel:"#f97316",gaza:"#ef4444",china:"#a855f7",nuclear:"#a855f7"'
             '};'
             'function getC(t){t=(t||"").toLowerCase();for(var k in KW){if(t.indexOf(k)>=0)return KW[k];}return "#475569";}'
             'function ago(s){'
             '  if(!s||s.length<13)return "";'
-            '  try{'
-            '    var d=new Date(s.slice(0,4)+"-"+s.slice(4,6)+"-"+s.slice(6,8)+"T"+s.slice(9,11)+":"+s.slice(11,13)+":00Z");'
-            '    var h=Math.round((Date.now()-d)/3600000);'
-            '    if(h<=0)return "Ahora";if(h<24)return h+"h";return Math.round(h/24)+"d";'
-            '  }catch(e){return "";}'
+            '  try{var d=new Date(s.slice(0,4)+"-"+s.slice(4,6)+"-"+s.slice(6,8)+"T"+s.slice(9,11)+":"+s.slice(11,13)+":00Z");'
+            '  var h=Math.round((Date.now()-d)/3600000);'
+            '  if(h<=0)return "Ahora";if(h<24)return h+"h";return Math.round(h/24)+"d";}catch(e){return "";}'
             '}'
             'var tabsEl=document.getElementById("tabs");'
+            'var _curCh=null;'
             'CHS.forEach(function(ch,i){'
             '  var t=document.createElement("div");'
             '  t.className="tab"+(i===0?" active":"");'
@@ -2813,25 +2830,35 @@ if _nav == "monitor":
             '  t.style.setProperty("--c",ch.color);'
             '  t.onclick=function(){'
             '    document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});'
-            '    t.classList.add("active");loadVideo(ch);'
+            '    t.classList.add("active");_curCh=ch;loadVideo(ch);'
             '  };'
             '  tabsEl.appendChild(t);'
             '});'
+            'function showFallback(ch){'
+            '  var lk=document.getElementById("yt-link");'
+            '  lk.style.display="flex";'
+            '  document.getElementById("yt-ch-name").textContent=ch.name+" • EN VIVO";'
+            '  document.getElementById("yt-open").href="https://www.youtube.com/channel/"+ch.channelId+"/live";'
+            '}'
             'function loadVideo(ch){'
             '  var yt=document.getElementById("yt");'
             '  var note=document.getElementById("note");'
+            '  document.getElementById("yt-link").style.display="none";'
             '  if(ch.videoId&&ch.videoId.length===11){'
             '    yt.src="https://www.youtube-nocookie.com/embed/"+ch.videoId+"?rel=0&modestbranding=1";'
-            '    note.textContent="EN VIVO";'
+            '    note.textContent="● EN VIVO";'
             '  }else{'
             '    yt.src="https://www.youtube-nocookie.com/embed/live_stream?channel="+ch.channelId+"&rel=0&modestbranding=1";'
-            '    note.textContent="Stream directo del canal";'
+            '    note.textContent="Stream directo";'
             '  }'
             '}'
-            'if(CHS.length>0)loadVideo(CHS[0]);'
+            'if(CHS.length>0){_curCh=CHS[0];loadVideo(CHS[0]);}'
+            'window.addEventListener("message",function(e){'
+            '  if(e.data&&e.data.event==="onError"&&_curCh)showFallback(_curCh);'
+            '});'
             'var feedEl=document.getElementById("feed");'
             'if(!ARTS||ARTS.length===0){'
-            '  feedEl.innerHTML=\'<div style="color:#334155;font-size:11px;padding:16px;">Cargando noticias...</div>\';'
+            '  feedEl.innerHTML=\'<div style="color:#334155;font-size:11px;padding:16px;">Sin noticias aun. Recarga en 1 min.</div>\';'
             '}else{'
             '  var h="";'
             '  ARTS.forEach(function(a){'
@@ -2841,8 +2868,8 @@ if _nav == "monitor":
             '      +\'<div class="meta">\''
             '      +\'<span class="badge" style="background:\'+c+\'22;color:\'+c+\'">\'+a.country+\'</span>\''
             '      +\'<span class="src">\'+a.domain+\'</span>\''
-            '      +(tm?\'<span class="ago">\'+tm+\'</span>\':"")+'
-            '      \'</div></div>\';'
+            '      +(tm?\'<span class="ago">\'+tm+\'</span>\':"")'
+            '      +\'</div></div>\';'
             '  });'
             '  feedEl.innerHTML=h;'
             '}'
