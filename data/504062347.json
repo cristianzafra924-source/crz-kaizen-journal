@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-30 10:55:35",
+  "timestamp": "2026-04-30 10:55:45",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 197138.19,
-    "equity": 196935.09,
+    "equity": 196934.11,
     "margin": 36130.76,
-    "margin_libre": 160804.33,
+    "margin_libre": 160803.35,
     "margin_nivel": 545.06,
-    "profit_abierto": -203.1,
+    "profit_abierto": -204.08,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4599.04,
+      "price_current": 4599.05,
       "sl": 4485.69,
       "tp": 0,
-      "profit": 10.2,
+      "profit": 10.32,
       "swap": -47.92,
-      "pnl_net": -37.72,
+      "pnl_net": -37.6,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4599.04,
+      "price_current": 4599.05,
       "sl": 4584.41,
       "tp": 0,
-      "profit": 178.92,
+      "profit": 179.04,
       "swap": -47.92,
-      "pnl_net": 131,
+      "pnl_net": 131.12,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 75390.41,
-      "price_current": 76109.48,
+      "price_current": 76114.54,
       "sl": 76693.66,
       "tp": 0,
-      "profit": -215.72,
+      "profit": -217.24,
       "swap": -17.66,
-      "pnl_net": -233.38,
+      "pnl_net": -234.9,
       "time_open": "2026-04-29 22:05:35"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.3,
       "price_open": 4601.14,
-      "price_current": 4599.04,
+      "price_current": 4599.05,
       "sl": 4588.6,
       "tp": 0,
-      "profit": -63,
+      "profit": -62.7,
       "swap": 0,
-      "pnl_net": -63,
+      "pnl_net": -62.7,
       "time_open": "2026-04-30 10:54:29"
     }
   ],
