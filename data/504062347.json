@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-30 16:19:48",
+  "timestamp": "2026-04-30 16:19:58",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 197010.19,
-    "equity": 199584.98,
+    "equity": 199639.84,
     "margin": 62900.75,
-    "margin_libre": 136684.23,
-    "margin_nivel": 317.3,
-    "profit_abierto": 2574.79,
+    "margin_libre": 136739.09,
+    "margin_nivel": 317.39,
+    "profit_abierto": 2629.65,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4638.29,
+      "price_current": 4638.8,
       "sl": 4598.94,
       "tp": 0,
-      "profit": 481.2,
+      "profit": 487.32,
       "swap": -47.92,
-      "pnl_net": 433.28,
+      "pnl_net": 439.4,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4638.29,
+      "price_current": 4638.8,
       "sl": 4584.41,
       "tp": 0,
-      "profit": 649.92,
+      "profit": 656.04,
       "swap": -47.92,
-      "pnl_net": 602,
+      "pnl_net": 608.12,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 75390.41,
-      "price_current": 76299.97,
+      "price_current": 76301.96,
       "sl": 76693.66,
       "tp": 0,
-      "profit": -272.87,
+      "profit": -273.47,
       "swap": -17.66,
-      "pnl_net": -290.53,
+      "pnl_net": -291.13,
       "time_open": "2026-04-29 22:05:35"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.3,
       "price_open": 4601.14,
-      "price_current": 4638.29,
+      "price_current": 4638.8,
       "sl": 4602.45,
       "tp": 0,
-      "profit": 1114.5,
+      "profit": 1129.8,
       "swap": 0,
-      "pnl_net": 1114.5,
+      "pnl_net": 1129.8,
       "time_open": "2026-04-30 10:54:29"
     },
     {
@@ -78,12 +78,12 @@
       "type": "buy",
       "volume": 0.5,
       "price_open": 4623.75,
-      "price_current": 4638.29,
+      "price_current": 4638.8,
       "sl": 4591.68,
       "tp": 0,
-      "profit": 727,
+      "profit": 752.5,
       "swap": 0,
-      "pnl_net": 727,
+      "pnl_net": 752.5,
       "time_open": "2026-04-30 11:06:35"
     },
     {
@@ -92,12 +92,12 @@
       "type": "sell",
       "volume": 2,
       "price_open": 27370.59,
-      "price_current": 27376.32,
+      "price_current": 27375.11,
       "sl": 27535.82,
       "tp": 0,
-      "profit": -11.46,
+      "profit": -9.04,
       "swap": 0,
-      "pnl_net": -11.46,
+      "pnl_net": -9.04,
       "time_open": "2026-04-30 16:14:21"
     }
   ],
