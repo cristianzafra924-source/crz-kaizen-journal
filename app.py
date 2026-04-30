@@ -2649,19 +2649,15 @@ if _nav == "monitor":
     import time as _time_m
     from datetime import datetime as _dtnow, timezone as _utc
 
+    # Solo canales que permiten embedding
     _ch_defs = [
-        ("Bloomberg",  "UCIALMKvObZNtJ6AmdCLP7Lg", "#f59e0b"),
-        ("Sky News",   "UCoMdktPbSTixAyNGwb-UYkQ", "#0ea5e9"),
         ("Euronews",   "UCSrZ3UV4jOidv8ppoVuvW9Q", "#3b82f6"),
         ("DW News",    "UCknLrEdhRCp1aegoMqRaCZg", "#6366f1"),
         ("CNBC",       "UCrp_UI8XA1V2T9T7bitAZKA", "#22c55e"),
-        ("CNN Intl",   "UCupvZG-5ko_eiXAupbDfxWw", "#ef4444"),
-        ("France 24",  "UCQfwfsi5VrQ8yKZ-UWmAEFg", "#f97316"),
         ("Al Jazeera", "UCNye-wNBqNL5ZzHSJdpkDEA", "#2dd4bf"),
         ("Al Arabiya", "UCi_lr_ysQEFA46MKKmKMtOg", "#a855f7"),
     ]
 
-    # ── YouTube live IDs via API (session_state cache 30 min) ────────────────
     _yt_key = st.secrets.get("YOUTUBE_API_KEY", "")
     _now_ts = _time_m.time()
     if "yt_ch_cache" not in st.session_state or _now_ts - st.session_state.get("yt_ch_ts", 0) > 1800:
@@ -2690,7 +2686,6 @@ if _nav == "monitor":
     _ch_list = [{"name":_cn,"channelId":_cid,"videoId":_vid_map.get(_cid,""),"color":_cc}
                 for _cn, _cid, _cc in _ch_defs]
 
-    # ── GDELT via session_state cache (10 min) ───────────────────────────────
     if "gdelt_mon" not in st.session_state or _now_ts - st.session_state.get("gdelt_mon_ts", 0) > 600:
         try:
             _gr = requests.get(
@@ -2710,7 +2705,6 @@ if _nav == "monitor":
 
     _gdelt_arts = st.session_state.get("gdelt_mon", [])
 
-    # ── Header ───────────────────────────────────────────────────────────────
     _utc_str = _dtnow.now(_utc.utc).strftime("%a %d %b %Y  %H:%M UTC")
     st.markdown(f"""
 <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;
@@ -2759,19 +2753,13 @@ if _nav == "monitor":
             'height:705px;overflow:hidden;display:flex;flex-direction:column}'
             '.tabs{display:flex;flex-wrap:wrap;gap:3px;padding:7px;background:#060d1a;'
             'flex-shrink:0;border-bottom:1px solid #0f1f35}'
-            '.tab{padding:4px 8px;font-size:9px;font-weight:700;border-radius:4px;'
+            '.tab{padding:4px 10px;font-size:9px;font-weight:700;border-radius:4px;'
             'cursor:pointer;border:1px solid #1e2a3a;color:#475569;background:#0a1020;'
             'transition:all .12s;white-space:nowrap}'
             '.tab:hover{color:#e2e8f0;border-color:#475569}'
             '.tab.active{color:#060d1a;border-color:var(--c);background:var(--c)}'
-            '.player{width:100%;height:235px;background:#000;flex-shrink:0;position:relative}'
-            '.player iframe{width:100%;height:235px;border:none;display:block}'
-            '.yt-link{position:absolute;inset:0;display:none;flex-direction:column;'
-            'align-items:center;justify-content:center;background:#0a1020;gap:8px}'
-            '.yt-link a{display:inline-block;padding:8px 18px;background:#ef4444;'
-            'color:#fff;font-size:11px;font-weight:700;border-radius:6px;'
-            'text-decoration:none;letter-spacing:.05em}'
-            '.yt-link span{font-size:10px;color:#475569}'
+            '.player{width:100%;height:245px;background:#000;flex-shrink:0}'
+            '.player iframe{width:100%;height:245px;border:none;display:block}'
             '.note{font-size:9px;color:#475569;padding:3px 9px;flex-shrink:0;'
             'border-bottom:1px solid #0f1f35;min-height:18px;background:#060d1a}'
             '.fhdr{font-size:8px;color:#f97316;font-weight:700;letter-spacing:.14em;'
@@ -2790,16 +2778,9 @@ if _nav == "monitor":
             '.ago{font-size:9px;color:#1e3a5f;margin-left:auto;flex-shrink:0}'
             '</style></head><body>'
             '<div class="tabs" id="tabs"></div>'
-            '<div class="player">'
-            '  <iframe id="yt" allowfullscreen '
-            '    allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture">'
-            '  </iframe>'
-            '  <div class="yt-link" id="yt-link">'
-            '    <span id="yt-ch-name"></span>'
-            '    <a id="yt-open" href="#" target="_blank">Ver en YouTube</a>'
-            '    <span>Este canal no permite embed — se abre en nueva pestaña</span>'
-            '  </div>'
-            '</div>'
+            '<div class="player"><iframe id="yt" allowfullscreen '
+            'allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture">'
+            '</iframe></div>'
             '<div class="note" id="note"></div>'
             '<div class="fhdr">NOTICIAS GLOBALES EN TIEMPO REAL</div>'
             '<div class="feed" id="feed"></div>'
@@ -2822,7 +2803,6 @@ if _nav == "monitor":
             '  if(h<=0)return "Ahora";if(h<24)return h+"h";return Math.round(h/24)+"d";}catch(e){return "";}'
             '}'
             'var tabsEl=document.getElementById("tabs");'
-            'var _curCh=null;'
             'CHS.forEach(function(ch,i){'
             '  var t=document.createElement("div");'
             '  t.className="tab"+(i===0?" active":"");'
@@ -2830,32 +2810,22 @@ if _nav == "monitor":
             '  t.style.setProperty("--c",ch.color);'
             '  t.onclick=function(){'
             '    document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});'
-            '    t.classList.add("active");_curCh=ch;loadVideo(ch);'
+            '    t.classList.add("active");loadVideo(ch);'
             '  };'
             '  tabsEl.appendChild(t);'
             '});'
-            'function showFallback(ch){'
-            '  var lk=document.getElementById("yt-link");'
-            '  lk.style.display="flex";'
-            '  document.getElementById("yt-ch-name").textContent=ch.name+" • EN VIVO";'
-            '  document.getElementById("yt-open").href="https://www.youtube.com/channel/"+ch.channelId+"/live";'
-            '}'
             'function loadVideo(ch){'
             '  var yt=document.getElementById("yt");'
             '  var note=document.getElementById("note");'
-            '  document.getElementById("yt-link").style.display="none";'
             '  if(ch.videoId&&ch.videoId.length===11){'
-            '    yt.src="https://www.youtube-nocookie.com/embed/"+ch.videoId+"?rel=0&modestbranding=1";'
-            '    note.textContent="● EN VIVO";'
+            '    yt.src="https://www.youtube-nocookie.com/embed/"+ch.videoId+"?autoplay=1&rel=0&modestbranding=1";'
+            '    note.textContent="EN VIVO";'
             '  }else{'
-            '    yt.src="https://www.youtube-nocookie.com/embed/live_stream?channel="+ch.channelId+"&rel=0&modestbranding=1";'
+            '    yt.src="https://www.youtube-nocookie.com/embed/live_stream?channel="+ch.channelId+"&autoplay=1&rel=0&modestbranding=1";'
             '    note.textContent="Stream directo";'
             '  }'
             '}'
-            'if(CHS.length>0){_curCh=CHS[0];loadVideo(CHS[0]);}'
-            'window.addEventListener("message",function(e){'
-            '  if(e.data&&e.data.event==="onError"&&_curCh)showFallback(_curCh);'
-            '});'
+            'if(CHS.length>0)loadVideo(CHS[0]);'
             'var feedEl=document.getElementById("feed");'
             'if(!ARTS||ARTS.length===0){'
             '  feedEl.innerHTML=\'<div style="color:#334155;font-size:11px;padding:16px;">Sin noticias aun. Recarga en 1 min.</div>\';'
