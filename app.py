@@ -2649,13 +2649,13 @@ if _nav == "monitor":
     import time as _time_m
     from datetime import datetime as _dtnow, timezone as _utc
 
-    # Solo canales que permiten embedding
     _ch_defs = [
         ("Euronews",   "UCSrZ3UV4jOidv8ppoVuvW9Q", "#3b82f6"),
         ("DW News",    "UCknLrEdhRCp1aegoMqRaCZg", "#6366f1"),
-        ("CNBC",       "UCrp_UI8XA1V2T9T7bitAZKA", "#22c55e"),
-        ("Al Jazeera", "UCNye-wNBqNL5ZzHSJdpkDEA", "#2dd4bf"),
-        ("Al Arabiya", "UCi_lr_ysQEFA46MKKmKMtOg", "#a855f7"),
+        ("NHK World",  "UCO7jFPFMEFj2o62zY3QXuaw", "#ef4444"),
+        ("TRT World",  "UC7_sQhCEqSVA7AKNW8RuI1Q", "#f97316"),
+        ("i24 News",   "UCG3oQLurMgBGtPBf_aNFNRg", "#2dd4bf"),
+        ("Wion",       "UCjGLFiMkGGdVC2y3uqpNAkA", "#a855f7"),
     ]
 
     _yt_key = st.secrets.get("YOUTUBE_API_KEY", "")
