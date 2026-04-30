@@ -2649,12 +2649,9 @@ if _nav == "monitor":
     import time as _time_m
     from datetime import datetime as _dtnow, timezone as _utc
 
-    # Canales con embed permitido (confirmados)
     _ch_defs = [
         ("Euronews",  "UCSrZ3UV4jOidv8ppoVuvW9Q", "#3b82f6"),
         ("DW News",   "UCknLrEdhRCp1aegoMqRaCZg", "#6366f1"),
-        ("NHK World", "UCO7jFPFMEFj2o62zY3QXuaw", "#ef4444"),
-        ("TRT World", "UC7_sQhCEqSVA7AKNW8RuI1Q", "#f97316"),
     ]
 
     _yt_key = st.secrets.get("YOUTUBE_API_KEY", "")
@@ -2719,11 +2716,9 @@ if _nav == "monitor":
 
     with _col_right:
         _ch_json = _json.dumps(_ch_list, ensure_ascii=True)
-
-        # RSS query para Google News
         _rss_url = ("https://news.google.com/rss/search"
                     "?q=war+conflict+ukraine+israel+iran+military+sanctions+attack"
-                    "&hl=en&gl=US&ceid=US:en")
+                    "%26hl=en%26gl=US%26ceid=US:en")
 
         _panel_html = (
             '<!DOCTYPE html><html><head><meta charset="utf-8"><style>'
@@ -2732,13 +2727,13 @@ if _nav == "monitor":
             'height:705px;overflow:hidden;display:flex;flex-direction:column}'
             '.tabs{display:flex;flex-wrap:wrap;gap:3px;padding:7px;background:#060d1a;'
             'flex-shrink:0;border-bottom:1px solid #0f1f35}'
-            '.tab{padding:4px 10px;font-size:9px;font-weight:700;border-radius:4px;'
+            '.tab{padding:4px 14px;font-size:9px;font-weight:700;border-radius:4px;'
             'cursor:pointer;border:1px solid #1e2a3a;color:#475569;background:#0a1020;'
             'transition:all .12s;white-space:nowrap}'
             '.tab:hover{color:#e2e8f0;border-color:#475569}'
             '.tab.active{color:#060d1a;border-color:var(--c);background:var(--c)}'
-            '.player{width:100%;height:240px;background:#000;flex-shrink:0}'
-            '.player iframe{width:100%;height:240px;border:none;display:block}'
+            '.player{width:100%;height:250px;background:#000;flex-shrink:0}'
+            '.player iframe{width:100%;height:250px;border:none;display:block}'
             '.note{font-size:9px;color:#475569;padding:3px 9px;flex-shrink:0;'
             'border-bottom:1px solid #0f1f35;min-height:18px;background:#060d1a}'
             '.fhdr{font-size:8px;color:#f97316;font-weight:700;letter-spacing:.14em;'
@@ -2766,17 +2761,15 @@ if _nav == "monitor":
             '<script>'
             'var CHS=' + _ch_json + ';'
             'var KW={'
-            'guerra:"#ef4444",war:"#ef4444",conflict:"#ef4444",attack:"#ef4444",strike:"#ef4444",kill:"#ef4444",'
-            'militar:"#f97316",military:"#f97316",sanction:"#f97316",missile:"#f97316",'
+            'war:"#ef4444",conflict:"#ef4444",attack:"#ef4444",strike:"#ef4444",kill:"#ef4444",'
+            'military:"#f97316",sanction:"#f97316",missile:"#f97316",'
             'oil:"#eab308",gas:"#eab308",energy:"#eab308",'
             'iran:"#ef4444",russia:"#f97316",ukraine:"#f97316",'
             'israel:"#f97316",gaza:"#ef4444",china:"#a855f7",nuclear:"#a855f7",trump:"#22c55e"'
             '};'
             'function getC(t){t=(t||"").toLowerCase();for(var k in KW)if(t.indexOf(k)>=0)return KW[k];return "#475569";}'
-            'function ago(ds){'
-            '  try{var d=new Date(ds),h=Math.round((Date.now()-d)/3600000);'
-            '  if(h<=0)return "Ahora";if(h<24)return h+"h";return Math.round(h/24)+"d";}catch(e){return "";}'
-            '}'
+            'function ago(ds){try{var d=new Date(ds),h=Math.round((Date.now()-d)/3600000);'
+            'if(h<=0)return "Ahora";if(h<24)return h+"h";return Math.round(h/24)+"d";}catch(e){return "";}}'
             'var tabsEl=document.getElementById("tabs");'
             'CHS.forEach(function(ch,i){'
             '  var t=document.createElement("div");'
@@ -2784,8 +2777,7 @@ if _nav == "monitor":
             '  t.textContent=ch.name;t.style.setProperty("--c",ch.color);'
             '  t.onclick=function(){'
             '    document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});'
-            '    t.classList.add("active");loadVideo(ch);'
-            '  };tabsEl.appendChild(t);'
+            '    t.classList.add("active");loadVideo(ch);};tabsEl.appendChild(t);'
             '});'
             'function loadVideo(ch){'
             '  var yt=document.getElementById("yt"),note=document.getElementById("note");'
@@ -2799,16 +2791,15 @@ if _nav == "monitor":
             '}'
             'if(CHS.length>0)loadVideo(CHS[0]);'
             'var feedEl=document.getElementById("feed");'
-            'var RSS_API="https://api.rss2json.com/v1/api.json?rss_url=' + _rss_url.replace('&', '%26') + '&count=40";'
-            'fetch(RSS_API)'
+            'fetch("https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fnews.google.com%2Frss%2Fsearch%3Fq%3Dwar%2Bconflict%2Bukraine%2Bisrael%2Biran%2Bmilitary%26hl%3Den%26gl%3DUS%26ceid%3DUS%3Aen&count=40")'
             '.then(function(r){return r.json();})'
-            '.then(function(data){'
-            '  if(data.status!=="ok"||!data.items||!data.items.length){'
+            '.then(function(d){'
+            '  if(d.status!=="ok"||!d.items||!d.items.length){'
             '    feedEl.innerHTML=\'<div style="color:#334155;font-size:10px;padding:12px;">Sin noticias</div>\';return;'
             '  }'
             '  var h="";'
-            '  data.items.forEach(function(a){'
-            '    var c=getC(a.title),tm=ago(a.pubDate),src=(a.author||"").split(",")[0].trim()||"";'
+            '  d.items.forEach(function(a){'
+            '    var c=getC(a.title),tm=ago(a.pubDate),src=(a.author||"").trim();'
             '    h+=\'<div class="card" style="border-left-color:\'+c+\'">\''
             '      +\'<a href="\'+a.link+\'" target="_blank">\'+a.title+\'</a>\''
             '      +\'<div class="meta"><div class="dot" style="background:\'+c+\'"></div>\''
@@ -2818,9 +2809,7 @@ if _nav == "monitor":
             '  });'
             '  feedEl.innerHTML=h;'
             '})'
-            '.catch(function(){'
-            '  feedEl.innerHTML=\'<div style="color:#334155;font-size:10px;padding:12px;">Error al cargar noticias</div>\';'
-            '});'
+            '.catch(function(){feedEl.innerHTML=\'<div style="color:#334155;font-size:10px;padding:12px;">Error al cargar</div>\';});'
             '</script></body></html>'
         )
 
