@@ -2647,9 +2647,7 @@ if _nav == "monitor":
     import streamlit.components.v1 as _comp
     import json as _json
     import time as _time_m
-    import re as _re
     from datetime import datetime as _dtnow, timezone as _utc
-    from email.utils import parsedate_to_datetime as _pdt
 
     _ch_defs = [
         ("Euronews", "UCSrZ3UV4jOidv8ppoVuvW9Q", "#3b82f6"),
@@ -2658,9 +2656,7 @@ if _nav == "monitor":
 
     _yt_key = st.secrets.get("YOUTUBE_API_KEY", "")
     _now_ts = _time_m.time()
-    _now_dt = _dtnow.now(_utc.utc)
 
-    # YouTube IDs (30 min)
     if "yt_ch_cache" not in st.session_state or _now_ts - st.session_state.get("yt_ch_ts", 0) > 1800:
         _ids = {}
         for _cn, _cid, _cc in _ch_defs:
@@ -2676,58 +2672,20 @@ if _nav == "monitor":
                 except Exception:
                     pass
         st.session_state["yt_ch_cache"] = _ids
-        st.session_state["yt_ch_ts"]    = _now_ts
+        st.session_state["yt_ch_ts"] = _now_ts
 
     _vid_map = st.session_state.get("yt_ch_cache", {})
     _ch_list = [{"name":_cn,"channelId":_cid,"videoId":_vid_map.get(_cid,""),"color":_cc}
                 for _cn, _cid, _cc in _ch_defs]
 
-    # Noticias RSS en español (10 min) — regex parse, sin XML
-    if "news_arts" not in st.session_state or _now_ts - st.session_state.get("news_ts", 0) > 600:
-        _arts = []
-        try:
-            _rr = requests.get(
-                "https://news.google.com/rss/search"
-                "?q=guerra+conflicto+ucrania+israel+iran+sanciones+ataque+militar"
-                "&hl=es&gl=ES&ceid=ES:es",
-                headers={"User-Agent":"Mozilla/5.0"}, timeout=15)
-            if _rr.status_code == 200:
-                for _item in _re.findall(r'<item>(.*?)</item>', _rr.text, _re.DOTALL):
-                    _t = _re.search(r'<title>(.*?)</title>', _item)
-                    _l = _re.search(r'<link>(.*?)</link>', _item)
-                    _s = _re.search(r'<source[^>]*>(.*?)</source>', _item)
-                    _p = _re.search(r'<pubDate>(.*?)</pubDate>', _item)
-                    if not _t: continue
-                    _pub = _p.group(1).strip() if _p else ""
-                    try:
-                        _dt   = _pdt(_pub)
-                        _diff = round((_now_dt - _dt).total_seconds() / 60)
-                        if _diff < 1:     _ago = "ahora"
-                        elif _diff < 60:  _ago = f"{_diff}min"
-                        elif _diff < 1440: _ago = _dt.strftime("%H:%M")
-                        else:             _ago = f"hace {round(_diff/1440)}d"
-                    except Exception:
-                        _ago = ""
-                    _arts.append({"title": _t.group(1).strip()[:120],
-                                  "url":   _l.group(1).strip() if _l else "#",
-                                  "src":   _s.group(1).strip()[:40] if _s else "",
-                                  "ago":   _ago})
-        except Exception:
-            pass
-        st.session_state["news_arts"] = _arts
-        st.session_state["news_ts"]   = _now_ts
-
-    _articles = st.session_state.get("news_arts", [])
-
-    # Header
-    _utc_str = _now_dt.strftime("%a %d %b %Y  %H:%M UTC")
+    _utc_str = _dtnow.now(_utc.utc).strftime("%a %d %b %Y  %H:%M UTC")
     st.markdown(f"""
 <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;
      background:#060d1a;border:1px solid #0f1f35;border-radius:8px;margin-bottom:12px;">
   <div style="width:8px;height:8px;background:#ef4444;border-radius:50%;box-shadow:0 0 8px #ef4444;"></div>
   <span style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;">MONITOR GLOBAL</span>
   <span style="color:#1e2a3a;">|</span>
-  <span style="font-size:9px;color:#334155;">Noticias: {len(_articles)} · YT: {'OK' if _yt_key else 'sin key'}</span>
+  <span style="font-size:9px;color:#334155;">YT: {'OK' if _yt_key else 'sin key'}</span>
   <span style="font-size:10px;color:#475569;margin-left:auto;">{_utc_str}</span>
 </div>""", unsafe_allow_html=True)
 
@@ -2751,8 +2709,9 @@ if _nav == "monitor":
         _comp.iframe(_map_url, height=680)
 
     with _col_right:
-        _ch_json  = _json.dumps(_ch_list,  ensure_ascii=True)
-        _art_json = _json.dumps(_articles, ensure_ascii=True)
+        _ch_json = _json.dumps(_ch_list, ensure_ascii=True)
+
+        _art_json = '[{"title": "La condici\\u00f3n que Donald Trump le puso a Vladimir Putin en medio de la guerra en Ucrania y la crisis con Ir\\u00e1n - MDZ Onlin", "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNZmp1WThwaVc4Q3UtVklwRGE3YnRBQ3M5aTNJdDNBVlRjOEdJclNmRFBZWUV5V082ZjBCUnJaRVpjSGhtQ0ZVTWVkYzYtZWFBZTZFd1JtbGllMENkdDczZUZ1cEd2a253NzlnNVhJNjhYYWpGUXBGdXc2VTI1LVJJWGlZaVpUQWNIeW43REZJU3luU2NZWVE0NEYwSzFqQ2dWSUs5SnZBTVZ5di1EVE1OZVdDV2lkNjNRc2lFdnh1MFR2RVBhbktxVU5R0gHPAUFVX3lxTE02VC1FX0FIWmhSaTZRYW5Bb3B2Sno3YzFaZ01qXzZkaUg5eXBMVDg2MGo1TW84LUhnQUppMjdFYlhvUy1ydEt0NDRJN2Z6aE9BUGRvMzhZbEt4aFZ6TXFobmVfTDJuLXB6Mzc5S1FSM19TbDZUVlFyb3JRSW9rTG9RMWs5OGNmN0RtUnBodm1YTDhxZDEzQV8zeF9BcUR2U01uMlZQamtfUTFIYkpieks2UmVRbVVabFJtSG45ZmJXSDdRbXZWTlp5cnJpaEJQNA?oc=5", "src": "MDZ Online", "ago": "21:15"}, {"title": "\\u00bfPor qu\\u00e9 Rusia est\\u00e1 ganando la guerra en Ir\\u00e1n? - Real Instituto Elcano", "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQMkJ1Wnc0OXVubnU4VXdmN05qcWx6NlFfM05oMEIyZTVScFFKRE0zd0tqOG5oT2xPbFZZWVgyaXNqTy1qQWpQaDI4d2YxRFIwYXpxbUVvWHlnNDJJa00xZlcybnNHcEdXZloxbDBFWGliZC10Nlg3RkFiNEhNaGpTNnk4YXQzRzFvZU9zNGd5ekU2c2ZrOHZveQ?oc=5", "src": "Real Instituto Elcano", "ago": "hace 55d"}, {"title": "\\"Para Putin, una guerra larga en Ir\\u00e1n es una ventaja\\": Zelensky, en entrevista exclusiva con la BBC - BBC", "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9lc2J2bWZOejNOMmctZjJMRkZJVEt0ZXJuR19DdndUVHQ2cmNUR3FzQkxMeEY1WHdfZGFITDdQVk9JbzJraTZiclFtTmhXaHVrWk5TUnJnckhFc2_SAWBBVV95cUxNcFQ0bkFELUZ2a0t3eFNLem5HY2VFRXF6aW8wZlNGUXo2a09FbVhiaGZrZzdyWVM0NExkN2RfTGZSLXN5VjcxeWhEU3ZEVnNld1hmMFZ1enRocHBpejZyd28?oc=5", "src": "BBC", "ago": "hace 43d"}, {"title": "Trump y Putin mantuvieron una conversaci\\u00f3n telef\\u00f3nica sobre las guerras en Ir\\u00e1n y Ucrania - Diario El Norte", "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNR0VhRHRxNHJBaENUQUxSMEI4UTdfWmNMYzktZzVEUDNyczBkR016Z3ZmRTBTOFZFMzA0RGhQY3FBdUxEMFZ2RHFvOWdwa2Vjb242VDllWHFuOFZMeHJwR1loRDNQTGkxQnpwS0p6UWYyYkpfamJINlBPSFl3SF9rTHY0REpaXzFaSUFwYjY5Nm52dzZtVmI3RW5pWjdmRzZhdmE3Tzl2Q1B6dUtFeEdkQ1R4aTlJQnQ5U3U0?oc=5", "src": "Diario El Norte", "ago": "21:37"}, {"title": "C\\u00f3mo afecta a Ucrania la guerra de Israel y EEUU contra Ir\\u00e1n - elDiario.es", "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNWWlSZjc2MFAzekY1MVZtZElZOGx6YjJVbVpvQ2U0UFVBUGN5NG9mVXJ3cEh2alZjdEdEeXNfZmN5d0JLMzNmSDVVcl9iYUpuaEdIQzdwbjRKbU5lTVhVcVBva1lEV1dfUE1XMWZoSnkzNjk0V3VYSDNkOWJNS3pVQklmb21nSlVmMV9ZNGNCa1JtQUVrTkF5Sm1R0gGfAUFVX3lxTFBaNjhsVTlodFVwYlBIUmtoQXVYUFNGQmhHTHhpZjhSSlJSVnFGQUhfckZ2WkpJRWkwWkRUaXUxN21SYnBkQ1lka0NsZkE4eGxNVWxpbnNlV2Z0T2ZpT01VTGo5WTFSWG41VFFwaHZKUGM1MFl2dkhMbUJLaTc1dVNBcXVGbDQyamliSDA5bzZsbVRWeGFtcWtjVk91Ujh4MA?oc=5", "src": "elDiario.es", "ago": "hace 44d"}, {"title": "Zelenski pide apoyo a cambio de su experiencia para la guerra contra Ir\\u00e1n, un conflicto que aleja la paz en Ucrania - RT", "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPaVdBeklscXUwbTFyZGcyRmVaeEtWY2x2WF9obmc1UFBpTHpCVnFRbGxhdGxKTVh3X0FQVkZxX1U5RlRLdmdXNnlHTFR6V0pYdVJaejRKNklrQzg2XzIzeXhIajl1eFBuSkJrdU55bXM3MTJ0a0ZOZm8wRFY2SktZaTA4d2FmMFB3eV94cE9VaENiWGRxZFYzNmpJSGpEUjFvVzJzY2JRRWxQYk9vcTFfWmRRVm9OR3lsclVQUlJKa27SAcABQVVfeXFMT3ZBZ0hncGx0RUdnZURkX1hXUzNRUGMwbTFkNEMtNHlOeHdyRk0tSWJ2aDBBSDhZUFlDVTE2dVZmQ3lTZWFYc1V4T19KUUk5X1ctaWtQSDEwV3hVWk5lR09qSWxRSWxrbDBycS1xVjQ3cE9Ia2o3TG9IQnlJQ3lTNGItWVh1T21QRjFkR21MYWkzOEs4UnFaaXRyS3VTc0Jrc3YyUjRrZVFzZFFmaUU1aHlTcEtCMllRNE5aUnUzOVZ6?oc=5", "src": "RTVE.es", "ago": "hace 46d"}, {"title": "Bruselas ultima medidas contra la crisis energ\\u00e9tica por la guerra de Ir\\u00e1n - EL PA\\u00cdS", "url": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPakFiUDVVTWlMRkNnbnBBS3NrclhuQ1MxZnJJLW13N3pkejVOWXZFWTB6Z2RJQjhsTmhzb0pJbmRoTklyX2dXQzNEYWlHY3l5cmFIUmZjNnJTaFF2RjBIeHNwdFMzYl9ZTE5DSDRYbEtTWkJhdDl5WjVmNGcxci1fSzJiOUMtLWZDeEJTRXY2Nk5EZUxXbU8tODF0WHdmdjl2TFl3Zi1IUVNaNGpYMVoxaGRZa1J5VTZDYWVBZW1sVdIB0wFBVV95cUxQSGloenZ3d19IY3h2alRObHJhcVFQUzE2SVo3SHJEM09KMXFpWGpha1NwQ016M3FlRmttMjBMR2FFNEd1c0ZHd2FaeDVsYXJ6WnZzSVdZajNmLVpTamxIT3gwNlRPN1JUWFprd285Y2UwaDhCYWtiUndRSDNIYUd5R2gtbmVnWGRQcDFQekVRTXlEcGF0RkQtdDMzTFFEMllLMXNaTDVJakpHajNGMUpZQ0tkeTVEMHRnY1lfRjJSS3lJcXk3bkoyR2hCUUMxa0pCaWNF?oc=5", "src": "EL PA\\u00cdS", "ago": "hace 25d"}, {"title": "Por qu\\u00e9 la guerra de Ir\\u00e1n es una oportunidad para Putin y Rusia - BBC", "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBxbTRSaHpkTlB1UFUxelV3NHVBMlhxYXRGZ0hWTTkwWlFueC0zT3kwV29idllUMTR2S0JTcUlPWWd0blBQNEdvUzdkbV80c21qYkszSUtmMnpKQ2_SAWBBVV95cUxOVW9NUnlLa0F6MmZCV3dOMWZxcmVZTWJPOHlkVXdYdFhMUGtXVnZiYzctcHdOdENIdU54dkFYdGF1T3pnNERrT21La0d4cldNYlhUaHNfcFY1ZHNXVkVyYUs?oc=5", "src": "BBC", "ago": "hace 50d"}, {"title": "La simbiosis estrat\\u00e9gica de Rusia e Ir\\u00e1n: inteligencia a cambio de drones en una alianza que complica la ofensiva de EE.", "url": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxNODhRLVZvdVFZSktlbF9EVmJGckdBMzJrYnVpQ3FMQ2ktUmttLXZoMW83ZGhMUUdqTzRQZW5MN2JFSWxmS0dZMzVhUDRBUzktQ1U5cHVuZGhDMnRBSmotUlpRNFBrYkw5NFg2U0dNZzA4RXVPOHZIZzBZMHJ0cTA5dDA3NnlhbG1ER2tsRW92ZEhCUUNQTUktR1FhRzU1SXpVd3JGelctUVNaVVk2X3FlcHIwM0hjdnNaZGhDdGhST2twQ3BpSWw0czZYdmZqZXladGM4Q1ZWRnVWY0XSAdsBQVVfeXFMTmFwWUJCTHNWQkQtZ0JFT2VUSnBzRWJtS0c5MjNZNXROZDF0bDExWHhwNmVhSlJEUEdPUUNNd0dJTW9GV0QyenJTQndsTC1lRXQ1QjExYlMtRnpVSW9SZ2k2U0VmNGVBMWRRbnhpUHVfS2ZkWHpyMDcwV2V0dEYxeVlqYmlRcDh0SmJOVG1NaVJxZE9tU0VXRU1MQ19QWWYtaWNCZHdMTGhLaFhlZ0cxWkFwQlVMT01sTGZidHJhQ2NGY05ab0pIV3lKem1wODdhcWlFOWJEVmQtcU9v?oc=5", "src": "RTVE.es", "ago": "hace 50d"}, {"title": "Guerra de EE.UU. e Israel contra Ir\\u00e1n | C\\u00f3mo la disminuci\\u00f3n de las reservas de armas puede afectar al conflicto en Medio", "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE11Q0JHaGZyOFBkekZiZ1ZTSTNnZWlPX0ctZXYwTEc4YzlqZnVYOWRRNWZObkI5ZnlMcS1vdDRLeDlXQ0p3UUVWMHEyV2E5TGZ0cWtHeUJrbmhxWHPSAWBBVV95cUxNY3RXeG12UXQ5MlRKUy0zSXZ6bDcwenF5VEI4clh3c0stZG9rTnFfMWRwQ3JfSDBVMjU3ODNIcWFabFdPNi05UUpZR3h3YmJlWmF4U25KWklNaU55Q3o1Nl8?oc=5", "src": "BBC", "ago": "hace 55d"}, {"title": "Europa rechaza la guerra contra Ir\\u00e1n, pero sufre sus consecuencias - RTVE.es", "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQdXdLajl4c0xFYmNoRkFsNFI1MEE3SE5RVTc1c2JUQzdTU1hRVGExYVg4NG8ycEFYYVVHUHFTa3JJdEVnY0w1ci0zLUYyMnE0dDZrWXdKRlB2ZGpSQk9pVk0tWHlPcVplbkl3eUVDRW9TR0lHYmFtOFlVVU1zd3JPNllmYUZoUkJxX2RJMzFndFdUcDJuN29uZ1k2Y0JSaEFz0gGgAUFVX3lxTE1HamdabGFUQ2oxSGlJdS0zS1hScXpmSjNlTzZBQ3VEXzlxdzh5dnNnMjBidmllWW1RbUlpT19VLXlnM0I4Q2MyX284alhBZEs0Mmh6NlpOYS1xMWxOLUc5X01yeHJNTTNuYjkzMmdYYlZnS1J4dExiVFBkczVrbU52T083WUU2bjNDQk1xUWtlLW8zREFQMmc2dzBJaHFUSDM?oc=5", "src": "RTVE.es", "ago": "hace 40d"}, {"title": "La crisis en Oriente Medio y su \\"insignificante\\" impacto en Ucrania - Euronews.com", "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxQRVY2YkpPV2s4Y2FMbTFyT3RZZ0x1a0VHNXZ0VDNYRURmWjB3VlNQOWZjQk91QUtxLVpkUkF4R0Fubld4clMwWlVWa1NYTmdDWF9JUjluXzBNNnl5dm4zWGMtSnlqdjFKLUVlN1pKZTZjNTFmTEI0VXA1by1zekFBbVZXMGZLNnVOX0JSUGVtcnRxQ3RfbEVoU1B3MEhWTmowMW9z?oc=5", "src": "Euronews.com", "ago": "hace 58d"}, {"title": "Trump y Putin hablan sobre Ir\\u00e1n, Ucrania, Venezuela y el mercado del petr\\u00f3leo en su primera conversaci\\u00f3n en 2026 - RTVE.", "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxPdHJxT3ljNmdPU1FFZXBvcWxFdl9iS29tVVlZTllBMEhhT0d3U25ZTF83bzlCUWFtQU1JWlBEYkY4UTdjQWVsV05MTjh2dkFCRGVJNTV4S0lTWFdWNHUzSFk3ZDJZYmFna3p3WUIxYXk3ZnlPYks1aGs4amc3elpVRmVYQXlZV2M4aFlpbVlUcVVYMWtBUFZQNGhlLWdKVWVfYXZwc1FGRkxxUmtlTFo5dEtzbmp0YzNpV202YlJuVUl6VXVOVXR5TWYzUURYcjVGRDdrblBSOFhtYjliY2pLQjFjTmfSAeQBQVVfeXFMTzhWTmRYZWctb1ZmRTUyT2c2dU9OTkZiX3dIdEd5MTlld3ducXVBV3pXNWJPQThWQmQ0LWNmeDNtVDVwUDFYeWlSUzRPeEVSS2FmVjJwZlpGUGVISUlxSGlTNkpMMi1pbnVQRjVxaVRPcTVtdlR1ZXV3NzhJUWlRbnlaYXE2T2ZFRGhURmFFM0psNm1Oak94R0NqQkJlazZ2RnJMa2d3UWRuRTlkQWNiSHo5MkNYVXRsQ1I3VWhEV0k0UVNYN1dqY0lXbE9OUDluTHNWRnRDR3hSN0ptem4xNnZmTFFr?oc=5", "src": "RTVE.es", "ago": "hace 51d"}, {"title": "Vladimir Putin ayuda a Ir\\u00e1n con drones para alargar la guerra y sacar a Ucrania de la agenda de Donald Trump - El Mundo", "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQVDI2cnFNNXA2Q3lSMG9mOHBqMzcwbmhTRnhLbS02VF82SWhKejJ1aDBPWGhiandEMnBfYjJKdXNGME9RMW11V3hKalZDMVd3ZnNXREJaeTBZZ2NDbkU3aHVmQUN3NkliZUluN3JnTDgxdnFmcUZnM04yMWUySkxJbWlWQdIBgwFBVV95cUxPbTFZN2s5SV9obVZvTmRWTzJBNEZfODAyUl9VYkJwV21URXBJVWlYTmxaTnk5VTRXM2NsM0pzMXB6VnVMbE52S0c2RXd5a2VqYzYxY1ZhSmNRMEZieEZqLWthVURpb2ZXSldLWk5aWk9SdXFlNkMwSzR6a3JpalE3LTRFYw?oc=5", "src": "El Mundo", "ago": "hace 35d"}, {"title": "\'Hoy por ti, ma\\u00f1ana por m\\u00ed\': la conexi\\u00f3n entre Ir\\u00e1n y Rusia por el Caspio para el env\\u00edo de armas en las - LaSexta", "url": "https://news.google.com/rss/articles/CBMi9wFBVV95cUxQcWhENHVZVHBkMkhaMGV5cm56V1BzU0I2UnZoRUFMZC1vZVdYeXVMaGhJLThmdjRseWZkRFBmai1oNUdVTEdwTHdabl9rT3pscFNQa01QNnBlZ0Z2X2pBaU1lSS1fN1p1eDItYWZrWDRsX2tfT1d6d0lqbW4wVHFxS0txYWxscVo1OGY0Znd1Q3ZhSkk1MGo2eTFreG9EVjhKNHJSdHNTY0pEcl80OVBsZ2RLdHlVdFV5MlBCeHVCakJwUE5GeGtrU2xIVHM3eV9YakxwQmpLN0JOQWQwQ1QzMlRYOGE1NGhwUE5RRmlVZExhbFZVSTh30gH3AUFVX3lxTE15ck9idC1fZ2ZyLUNSUjhCTVBndDZvUkYxeTctaVRUN2FmUnZMYmNuOFpkaGtGaHBhWFR6eVVDYmMxd2ljdkdUdVREeFR3XzdoVjAzNTFEZUFGNjBHV1hDUGF6V3lXZjMtc0JxbjNhbk5xUTRSWXp5cjRvTHFLSllHTTVqYV9xYmdwNk5rRGhrMlhGX0diVjZXTFFjU2xWa3NLWVdXQVBvbTZvUExfQ2ZmazZlZ0xZNmNGM2lXNFBXNHE0SXRCUUtIOElJSExWdmxMcGNqNGNadVB0WnRkSHdJbFpXS2t1QURQYVNLT3owM1FLMWd0cmM?oc=5", "src": "LaSexta", "ago": "hace 33d"}, {"title": "Zelenski asegura que EU \\"no tiene tiempo para Ucrania\\" por la guerra de Ir\\u00e1n - El Economista", "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxOMDhpNUdHeUdNaURacElGWlZ6dmpSVEc0YnZGWGg2eTMxMzNEanlocFBaUXBpaVFMVHYyQm02QzRMSUYzTEJTcUVVMGt2aHBGQ2lQT0dZajlWN2ZTZ0pXcV9hSEV1LTdTbXB1cnU1OUxYNW5wVXZocUtHamdzQmZDVFI5Z2RWQ0hleDVTVlAwQXlyODlQb04ydy1UZW0wTmttWDY4NG9Jdk83cnlO0gGyAUFVX3lxTE1MS3J0MXBGMFphLUpqaHBoVTJYSkhkZVNwbzM5aFVKdEhBLUVkc0hVUmZjZkltOUNZZnlOd0NiLXo5eXFONkNNWGF0SkxXdEtkT2ppdGNab2pMT2xIUVhEQ29wSVRGMWh1Nmo3bnFITUkyWHVGMVRtYnhOZWVGXzZjUklYX3JabWpTWkFFcEQ0MUNzbHJ6ME9zYmVNa0pONGs0ZnlwV0k0UldDYUlOQ3pVbmc?oc=5", "src": "El Economista", "ago": "hace 16d"}, {"title": "La guerra en Ir\\u00e1n frena en seco las negociaciones en Ucrania y Gaza y complica la resoluci\\u00f3n de ambos conflictos - El Pe", "url": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxPanBHeGNLT2xjcnE5dnlhRTZjNm1NeUYzX1ZsTXI1eWVjc2ltRlF6WFFHOUVuelI3UG1qcUNSdl9RRzgtMnhrUUk2UWdvUGtiVlVta29BMUVqbDU0cVhXX2FKUk5yS0ItTEJ6VV95OEozNXNKVWZlMy05NThOOTI1WFNuajFSbm9Ga1htdndsWU9YMF9nendDYnRsTFZYMWhMMFJrNTF4SDM0aGo3LWtBN1ZINmF6eGZobnZiRUp2UnlrLS1lcHhJdkFKdjJPclRBdU1CdXhxeFVXTzc3c2dRSVNCSXNNWkxZWFHSAeoBQVVfeXFMT2tlSTRqMkRrd1VwRU5LT3h4T1lyUy1DVVlpb0wtNGFpVXk5SG42dkZqVVZNOEloVzFsTUNVVTdxcVEtQTNtNFNmLWl3REZtczc2cWM5N1FfNWlmMFROQ1NkSWItUDZpeV96elg3YkVrYm50S252b2JCcmZXRjhSS0R1dTlvNzB3bXNCUzhJazE4VVpPRkRTRDNnaV9RUDU4SEVNVmpXeEJ6RzRPazZuTzJMbTUwN0RySVg3aXNHbnZ0Z1EzTEZxakhTR3QxM2lnNkd5OFpyNU42OGxiWFpES1lUdWdxWWF3aEdB?oc=5", "src": "El Peri\\u00f3dico", "ago": "hace 49d"}, {"title": "Guerra en Ir\\u00e1n: \\"Un regalo estrat\\u00e9gico para Rusia y China\\" - DW.com", "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQMWVXa2toZUlmQW1OYU92dldma09mQ3lLcEl5cmZ6N3hxcm1IbkZGdWhkV0xjblNFeVF3ODBvUENhamFITndselk4VDN2N2JOa3FNbVI3cGRsaUJDNzlta0F0MEZZNnJ6RFhEaE5jN0daUlhIY3pGME1lUEhCLVlIYndRMjlVaHRSMGNwdGtTWFBXRjkwNEpyclE3cDhuLU3SAZ8BQVVfeXFMTXNBOFY5M1R2WGlFN1VLZHRJWEdPR1pjbUNWc1RMZ1pGZzlUaGpaVS0xWjFzS2dTaXYzTzlscXRyVXVoNG1EX3pnOGRlS2N6TzhaZkRkQ29OSjM4TjNTOU8tNHg1WWpIV2p6RkdhcVc3Qm5hcmxuRWVzR2hid0RaZTFyTHAyUDhwM2tlSFYwSDBLeVRRQjIyZ0dYdTA5SUdz?oc=5", "src": "DW.com", "ago": "hace 56d"}, {"title": "\\u201cHay un riesgo de guerra regional muy serio. Y los que han iniciado el ataque a Ir\\u00e1n tambi\\u00e9n pueden salir escaldados\\u201d - ", "url": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxONHhrNDRWaVlOX1R4LUw4djV1OTByTUV3eG1KUm1kZk9CQ1hmcll4M0pzUGlTa0ZEQXdzY0xVc2FQbm1WQXd2OUE2WWJFY3ZVNHRpbGlyMW9jaGkyc281ckRueGxua2l4T0h4UEE4amMwa2RKWlc1MWFwbEh6SzRiM1EzS3RXV2JkRmFQUzBXSmZ5ZXM5ZHNIZ2MxMFhwOEFPU1ZEdW1KR2lFVHZGUF9GRnMzOVFuWUJaWWZ6OW1LVlBydWMyVVcwVmY4a2ZfOW16VGhIaDAzQ096TG1Iall2X3FKTE9oT2d1XzBpRk9tMXdCb2pndncxLXNOdGhYOUE?oc=5", "src": "Cr\\u00edtic", "ago": "hace 59d"}, {"title": "Ucrania ayudar\\u00e1 a EE. UU. a combatir los drones iran\\u00edes en Medio Oriente - France 24", "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxOWmR2RGhNbTZncDdmZW1RVllnajRPUUJqbFdwNjJyb19jaDg2NDBjTm5XZFZuOHpielhBOGdxZl90WXhtT1RIa2laRGVXRWNMaUw2V3Z2RjlCRFpCXzk1UVA4YzdCQ0JiYm0zYzFodzBpNW5kc2VQSEtwNEJsSnZKVkpLQjczRVpQMHBNcTVKRkROeGdpV2FucnB3cTZ1NXMxcTZqWS1Kc2dTVlNZWUVsRlM4aExCUmd6Tk1RLUxPRlNVWmVrZ0tTNXBkTQ?oc=5", "src": "France 24", "ago": "hace 55d"}, {"title": "Rubio intenta convencer a los aliados de la estrategia de Trump en la guerra contra Ir\\u00e1n, debate clave del G7 - France 2", "url": "https://news.google.com/rss/articles/CBMi8AFBVV95cUxNemFmWFVGRGl3anZrYk95RGREc0EwcHppVldVcWZpQlFsaEVoTUYtbWQ3X0hjbG5NU0JONlQ4alZjQVZ4WnBtcnZubUplRFBkRjNOZmRmUExfbmtRc21jX0dvaFlTempBUGJKNXdGUng4eWJYTkxLN2l1QWJITl9fTDR3N3NvWFRTanBrVThhTUdGUFZIenpqRER4aWxGdHVWSjVfbnRtQmVGdHBucWZDSXo1RUh0eGVLZHM1Z2tVNEQtZF92Snk3UkJQLXYyOVlLd0lkQ0ZGSTZmb0JPYTZOcTl5cE8xcWpENkFWUHZjdmQ?oc=5", "src": "France 24", "ago": "hace 34d"}, {"title": "Exl\\u00edderes europeos alertan del riesgo de una guerra mundial por Ir\\u00e1n - Euronews.com", "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxPQWFxNVAyYUttaGhPRGxQbHpJTnJiTFlhb1M3MVdGN1BPUUMtYUZUXzVZOWY0MWg4elR0X2NTelFPdWhjTlVkeVQwd0hWTHhtQU1IeFgxVE5BVFd0S3VUQWNNMnRzS1dzUW9XNHpSX3JpN3loQkM0OEREQkhWaDdqV0ZVNXlTYXdtMDktaHY0SmxZZUJYcGpZUnZmc3RpdXA1bks4NFR1ZUtlME1WN3JJN2ZJS3p0aVQzcjBNTTM3UEtJUFk?oc=5", "src": "Euronews.com", "ago": "hace 47d"}, {"title": "Pedro S\\u00e1nchez, sobre la ofensiva de EE UU e Israel sobre Ir\\u00e1n: \\u201cEsta guerra es un error que vamos a pagar\\u201d - EL PA\\u00cdS", "url": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxQdTl2eWZuMFByOVcwck5GaGt1aDc5bkVPSnc2Q3JPcVNSamFXNW1kd3Zhd3N6WURJZ2E2ZkVySDEyMEgtejBSNTFGS1BpeGtldTVxVVNLWHZFLWdLcElwZXNGVExlZXRZT1JDUnVvVjdVMHRyaXh3RVRRQ3BFRFkybG5Sa09kV19jSnpTQ2xHXzJpX3RPSy1IcW5WZjFIQ1JoT19QRUVaaWdGZWZlTlpMamlhVnRrLWw1aW1Xa1N1Z2RzTFVEOXBYdWNvVkd1M2ROcHdrdkJua1dPd9IB7gFBVV95cUxPZWV3bGdydlN3dHNodXhmb3NHejI3eFdXcENoS3lfdUlGSG5ZV2FPWEI2SzRydjcwN1U0OFkzdWs0cm9QakFRNjhpQ1FDaG1kbWZFUHBLSzB1SUdsZUlNdkxBZnY0RTJvQVhTMTVid1BlYWNFWm5QSXJ4X09aUF9lMTZkMy15TFNtRUNMRWNvVHJIRld5aXpHdDVJZC1CQXlYdU0xVkpGNFZ6Z3A1ZDNCRmRXcS1iVklFZXNHUkNHQmN3bjdGUG9kUzFyRzE1Z3dOUzBsdUVWVG5nc3R4RTdzOHk3YXlOTGlEcGJ6RklR?oc=5", "src": "EL PA\\u00cdS", "ago": "hace 55d"}, {"title": "Guerra en Ir\\u00e1n | Directo: Los ataques de Israel contra L\\u00edbano dejan ya m\\u00e1s de 900 muertos, incluidos 111 ni\\u00f1os - Europa ", "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxObHBBTE1zcFJWR3NGd3dDaWhhZFhyVmJrQzFJVllCZ0dFV3hScy1ZS1UxV19FZkdGeUh0SGRmblk4U0xOWWhyd0xUZmJ3dDdQQWpzNk91QlBNSGM0b2hkWTIwZ1pSSVNpYVI5Q3hSUl9QWUZFZzdTcnoyZlhkb3NZQVNmVzdOTzNVUHA2dFhDOVV3SkNwUjBwc1NHU2dUU3pHQXkyMHg2aVVYOGVTNVVOZ0ZhUXI2NWM2bW0tWVJ6WS0tTTl6c2NZODJR?oc=5", "src": "Europa Press", "ago": "hace 44d"}, {"title": "\\u00bfY Rusia, qu\\u00e9? Lo que se juega Putin en la guerra en Oriente Medio - elDiario.es", "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxNSFpYeU5uY1ZzNnJLZEpVdzY5SGJHVUpTSk9ieTI3S3lDSHRUVWVvOHJzbTRYcUNQOTBqOTZiOVhtbGZJM3M4SzI2S3N1ZVRramt6RGdlNHBBSEpsbTFwRlVkOWxLX0RhZk1QNHRUZEloSHZxN2MydEZCTWYwV1M2RmxFM1VJQUV5QVRzTFRiZFJIc0MybEtz0gGcAUFVX3lxTE1OVm92UFgxcFRTXy1oUlV4T1FTTmlESUQzNnhpWHhSTlhLSC1WNjVpWGU0YjJxVWozYVhfVjE4TE9aWTVyV0RLakE1dXVNcUVRV2FKSnRoUy0ya0kyeUZyZWxJc2U5U1FYYWNCREMtNE12NFQ5enJHNTdibE12UlpvMUJfay12bE9RaklaUEFaWWViVzEzT2U2TERkNQ?oc=5", "src": "elDiario.es", "ago": "hace 52d"}, {"title": "Trump y Putin buscan una soluci\\u00f3n r\\u00e1pida a la guerra en Ir\\u00e1n mientras Zelenski denuncia que Rusia intenta - LaSexta", "url": "https://news.google.com/rss/articles/CBMiqgJBVV95cUxOQUJzYzZhd0Q3RzRncm13bW80dnNEXzlLV21qOEd1a3Y1eGI4U3BMaTFhdDV1ZElnZ1dnZTZraG9EYTM3WFJ0X1dRaVBKLWxnT3d0cTUzbFI2dkxPSVIxWndnWmhjS2FUQ1ZTd0VuR1RsRzNna2xUV1RsQnotbzB6Rk5ySEo1ejczbmVwTkk5YjdrcW1seGdIUG9YYlF2am5lNHh3VDNzcWtOdm9HODFBWWQxQ09hdjNxSWkzcExKRmFBOE0yd1R6WHB2ZkFXODBKRGQ3czRaeGJ5MEg4RnBNakxXTDdNRnItdGJ6aVZEckx5eDBTWjJXdTRJVmJsajg0QXJxVGQ2UVVZSTh3eFVsNGlyeXhYaXlqbUZtYnhBYmhDa296R0xZbzRR0gGqAkFVX3lxTE5nTGlFRFRQTnRWUGtDYkM1alVFbGUzdFNEZS1reDlJNHlRVmlkQjYweWNlOHFCRENyMFBuRzZDRTJiRU9IaGxJZ2FqMU1PQ0FiWWEtdGFZWWlHNXU3MzFhNTl0bzlYc21mdFZEOUp5YTg3UkZBMGZfUzA0Qzc2VFJ2YW1GTWxHUkN6amlGNnZkcEdaUDVINVZFWDA2WDZla0hMd21KMFNIMGxfNXUxaDdiZkR3QzlIVk1oZ2Rramg5ek1ta05SRzg0S2lLUFJJbDljOHdNNWlXWVlyVjJOaVRQWEp0RTJKY0VhcjJHQmtfamtsNlZ3VHVCZEgzSEQweTktT0dXMjZHTF8tSzRnc3hqdTU4R1FMbV9uUG5STmVHcmpFc180RlZya3c?oc=5", "src": "LaSexta", "ago": "hace 52d"}, {"title": "As\\u00ed cambi\\u00f3 la guerra de Ucrania el dron Shahed 136, el arma creada por Ir\\u00e1n y que ahora usa en su propio conflicto - EL ", "url": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxNQ1pfUE9yM2hKNGxEdTZ0NmdkZy0xSFVHOXNxRTdyRGx0TWFZU0M2TEdXbXUtLUpsWWdEQ3VsbXFhaS03VVU5Nl9oVDJLSl9malYydXFrcjVUeDd3eElHVWY2cUZ3V3ZuZlBwNHRNM1ZIaDVMbHVhOUw3am1OVlRoaGU2dm1heG9zTU9sY1VSMDJ4MmhuY2hEWHFwTVdtRmROcDFaSjUtV0dQOXM0eDV3S3M5ZGoyNHctWGMwWUdOM1ZMS3Z2WDZ3alE2VHo1UlpXb25pbVNhWFVLY0VhMGpzd0JOTER0Zy1CbWJ30gH_AUFVX3lxTE5McXV0S3VDSFQyZV96V01IdmFEWjR5b1ZUR3hKbVZ6SWhpUk1UZjV0M28xWUxkMXRMRXRGeF9GS19SZlRYUVpsaGZVNXlRbmluajhzY2hWZnBmUG5EWEQwNUhYblRBMW84S2V4Qm5mNDFkbzZSTlJGVjlnaEdYNjZDRE90MXY1WER0a1NxTGlOUFpFZHNhNVJEbTY1aEduVTNILWVnX0I2alNfV1BPVm1qSllMNy1lWk12WXpaTUFIYjFPU0J3cmRscFI5djNvdFRoNU14VW5OWTFnbmpCM1hVQkV1OFF4WXZmeWktMXFTMmpKNFduU3hzY3ZzbW1nbw?oc=5", "src": "EL PA\\u00cdS", "ago": "hace 55d"}, {"title": "Guerra de Ir\\u00e1n y \\u00faltima hora del precio de petr\\u00f3leo, en directo | EEUU bombardea el principal centro petrolero de Ir\\u00e1n e", "url": "https://news.google.com/rss/articles/CBMijgFBVV95cUxOQkRLMWt4d183UzJyTFMwODRFR2poSVpzMzhkR2ZPZmgwdnN4b2V5TGFfNW5QVU1yQmRnTlVVNGo3SkVDWXF3RGlUUGhzQmFDWUZ0NmJMa2tfd1p0SjhFTTUtM3pXZ0kyOXlRVGhHRHJuTUYxNGFRTm5CSXZ2QktrT0x0LTBiOWlVU1k5Ymt30gGOAUFVX3lxTE9rTTZvM3dFUW1ETHlDbDdDQ1h6NHBmZ3duOHkwM3h6bGY3N3duaGV3T1FwYTh0UHp1OGwwQm5KOFdfX2gxX2JUUFJPd0RyOWg0aGdCV2h1RUpyRVpPVDVxZnM2Y2FUQWRyMFFGTmRKc0FsZG1FRmhITWlIbHUxMklEQU5KcUhGZDFxSktGTFE?oc=5", "src": "El Mundo", "ago": "hace 47d"}, {"title": "El casi inexistente papel de Rusia en la guerra de Oriente Medio: Putin, sin medios para ayudar a sus aliados - LaSexta", "url": "https://news.google.com/rss/articles/CBMi-gFBVV95cUxQOWVQWnBuc1RDX2ZibDlUcHZtYy1iWmY2QWk0YThjVmVrMnplckpRSTZvQ3dDRGFLQ0xDcFp0dDMtdlRpMC04dFY2eWVqQVdhV3ZvaDhWU09XcldkZ0RwcW5nbV9KSmxaUlVKQ1dKV19xRk1GTDF1MDBNUXVyd2J0V1VXQWxmaE41MWJZbDZSVWtId2QxSm5Qd2ZOYWFsT2k4NzFVdTNOcGtpQkItOFRzLXI1TEdjR0FzMjBRU09fbTJpSTdPYWY4WnBRZFUwNDRpd3RNcm9HZlZ2OF84VHZwX05uak9YV2tWdTM4cHh1N1V4R29UT2ZPMkJB0gH6AUFVX3lxTE5jeE1IWGxqREVuaGV3UlI4akhKakltalB6bi1oV3FteGh3cXpZb21sZmJNV3JjSXZVMlFGQmVMSGFBMlljWm5SSHA2alkzdFpnMFo4aUtMUGR1Z25BNHcwVHpJTTQ4Uk9EZXNRQVd5Wk1EWENLNGwydUlQcDFnRy1KZ3JQNFhDcU5UclZfM19TUzNTbHlMVkhkbVIzM2IxXzFWUzhmM00zaTRaR2FrN180UzVDMWdRTVRuV1JHNWgzd3FxVXFhVGpRZUt2cDFhRURlczA1cDhzdUdFMmJpTEJYV2ItM1hNUndtWDVEM3JWMHJDU3RUelNLZUE?oc=5", "src": "LaSexta", "ago": "hace 60d"}, {"title": "De depender del gas ruso a necesitar a EE.UU.: el conflicto en Oriente Medio muestra las costuras de la UE por la energ\\u00ed", "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxQNWdseTktYk5nWUR6OXlJLV95UWNwOWFHdDF3TGV0dV9aWXhTQmJOQUtQWHNDR29MaXBzUnl6RDdFSlYtdi1MVFhZTklJTnh6MXNrQXhjZWpqUk9lZXpJdXhqTGl0RldWdUVnOXBfSFdwMzl4ZE1xaGhCNXp6YURNcUMxUUNPSXpRSzF2NDFwOFJhWkVuaUN3VFpIZXNFcXg2YTR1SmtRT0jSAagBQVVfeXFMT3k3Rm1hQ2hYN3RaTlFnMFBCRjQwVzkyM2lvUEtDdGNfSDRZTndPOTRkWHBsNEJYQnBQSFlyNkxXalJmWm0wZTZoeHJaSFdtZ0pNbXUyTnBFTmh4Y0QwVTNHSWctZWc3VEZRSVVZX0UyV1doOEpLYXl3ZmV5LTdhanAxbENIZjZkN2ZuNWVZYjdXTU9zbXR2U2dOU0NqUDkxcjdZQ2JYbDJD?oc=5", "src": "RTVE.es", "ago": "hace 55d"}, {"title": "El peor escenario: los platos de la guerra en Ir\\u00e1n los va a pagar, una vez m\\u00e1s, Ucrania - El Confidencial", "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPNnFPemxKWkEwMTNrOFV4UnBma3lIYkd3bEZIQnluMUhMTFVJM013R2Vjanc0aWlhQWd6emRWV253OU9Bd2VkTnpaQ0VmWlRxeklSNHY5WGQxZUJIdEM2QlRwOGRVTW5XRU45ZS1sT0RfY3B5bXpSenM0RFN1X0daSWJTSjVfUlE5TkJvSmIxWjVIRFp2cEZfSTFWWVhNRFlvZjZuRFNEdw?oc=5", "src": "El Confidencial", "ago": "hace 47d"}, {"title": "Ataque a Ir\\u00e1n. Nuevo episodio de un conflicto mundial - VientoSur", "url": "https://news.google.com/rss/articles/CBMiggFBVV95cUxOMFZZSVRWZXJrTGJlckZiTXRwTUQ3S1JlS1JYRVczMUVPczZsbnNfUzdVaGRyUUlId3BFVTBpN3B5dXpOZGdwd1ZtY2FRZVFwNjRmMXVOVWgtaDR0UVMwT2dEemcySmpvTkVqTWZkVVprTzEzNlpfMkg5dVptWTY5cUJB?oc=5", "src": "VientoSur", "ago": "hace 58d"}, {"title": "Guerra contra el reloj en Ir\\u00e1n: el tiempo corre para salvar la econom\\u00eda de una crisis - EL PA\\u00cdS", "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxQVDZLSnR0RmpNcWxYdUVmSk9lOVNEbHhVRVRSYktybUllNTNYZUhoX1RreHNCN2R6X3BGQmV1N2t1SE1NSEhoNVVzX211Q2J1V1NxQ0dUSW9zVGU5TWlZdFp2c0lnTlNJRVZNRms0akppWF95dkkzY0l1Zm5LOVhEakFjaEJmZFVlNXQxNVJLZFNPYmwxOUVacXhZVDVyel9NQ3ZsQ042WXNsak1SSDZPSTZKWHJMVDVkVUhJWTdVYllpN3pZd1FZ0gHbAUFVX3lxTE9xU1VhRk94U1ZLTF9MUHRmcF9PNjBzaFcwTElZcnRsQUpEZFU4NFdiY3RhWnVPRnZrX1poMVVEOWlkd0hxTWpXbVpRZ25uM0g2YmlJNXBmb2w0RmVLWXZ6eVZGUmZjdjdBTmRQdEVrVXVyaWZnaHFVUGRGWERraFljQTBWcUYtZ0hBQ3hZNWNKMVVDQU5iWEtCNlFWS3daYXhTeDRyZlhzNEptazJXOUFNa0RZdl9CLTEtOVp2QmxfeWJVem8xRzNhNERpN2plYTFGOHUtSjNhbDItTQ?oc=5", "src": "EL PA\\u00cdS", "ago": "hace 54d"}, {"title": "Trump da por \\u201ccasi terminada\\u201d la guerra ante la escalada del petr\\u00f3leo - EL PA\\u00cdS", "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxOMHF2Wi1NbFhIMTAzeFM2QllWRGx6Y3U2M2RjV25FWjhmWnhZdVFRWTVEUlF2M1ZzZEtYV1dEcUp0VDktNTllT0llVDhRVW5GR3BhLWo5cndyS3VGMmlWUmRkWnI2bHRzVExYQVNJZW1QMXhGc0RjdU55WXcxbDgtcHV6YjM5ZmJNSGFzYWhvWlh0ekFQb2NhX3kzWTRtX1dOdzM4SmZrczI1UFQzNGtqN2I3OHd0dW1VYTRSVnJGcVYwbjRQdm5R0gHbAUFVX3lxTE43eHJ6YXZycmotZXZSM0tsRGUxanhrV1hIbTFMUkdtQ3AzWThCSGtldjhiQ3NqX1JveG5wMW5yWWFYaDBkQjF3dGJTVnY0ODVuSWFFT2ZRMWtXSWpVMUdlUDRWNlpxNFgwRDlycTdmVFdaUWY5THFGU25qLXo5SUNSM1hsczhfX0dyV25YQjBDM0YxYVZleU95aTVRb3RPdnpSdjNLMHd4enhoWXRqVFBoYVhpWjlLX0ZESWlPOFZqOFVZUFlnYTh0by1fVmpSS21HQkQ0TWhfVmFobw?oc=5", "src": "EL PA\\u00cdS", "ago": "hace 52d"}, {"title": "El conflicto en Ir\\u00e1n vuelve a relegar la guerra de Ucrania en la agenda internacional - ABC", "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPVzdBNTNlZGNmdE1OVVJwT1ZpelcySklCRGhYN3hDa3FVRUtjektrSTJ3RXhSb05vYVhsczVzZi1ibFo0N2l4dUllZlVYUzFCNk03UTYzU1JpWDBvN01aM0MyT214VUhOV2lHNkVocFAtdldFekxNVEFhb0FFbURHcmQyd3Y1LUs4X0Jnbnp1dklVUXdZejNrTF9oaHR0TDRnOFEyTjNYMUIyRDdseUdSV3JRU3nSAboBQVVfeXFMTlNTWUxMTkxwS1FMVHdGNmVBa0FRbUR2YmR0WllxLUY0ZlZ3eVF0VE9taDVMNkJFZGdsMkp2TlVEVEJfOXUwcnRzd0szMTZxY043cGc1REcycnFlZHA4d0hMcnB1Z2VsYTUxdTBOa2NaczZWcFd1Ql9fUE54QjdGMUl2SVBjekpoWDZDX1Z3aHdzZ2FZeHpGZlFEVlotRFU2SGptNlpzb0NiOWV0TmJvWVMzbEpibVNvTVpn?oc=5", "src": "ABC", "ago": "hace 51d"}, {"title": "La nueva triple alianza entre EE.UU., Israel y Ucrania enciende el mar Caspio - Escudo Digital", "url": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxPZDVUNnJqN2JrazVWSHFBcktJTGpqVktDcDlyY3pRNTNTUmV4cUhRT0E3MC1kUDVMU2szLXRMR1huTmdiSV9JMHRWZVlGM1k2V2xVRFhNaG81dm9ZN3daWnZVOUd2VUI0UDhlVVdwbHRHb05oc2Q4NFRJeHV6clBQN3otSG5PVzdLSU5OUTFEOG00cXo1QnFCeUhqeTNDOV8tOEFNRmtURjRWdlJ3V2cwT2lCeU5BZEJOZlUtRWRjTVZoclNOMXFHcE44NnpXMmpqY0dr?oc=5", "src": "Escudo Digital", "ago": "hace 36d"}, {"title": "Trump y Merz abordan por tel\\u00e9fono la crisis en Ir\\u00e1n, Israel y Ucrania - Dem\\u00f3crata", "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQekhDNEYwQnFqb0x6U1R6akN3NU5SbWVlWndRQjFjdmF1dlREdERVQ2piZW94OEt5LTN0U0kxeXc2eG5QTmtqMFZlRnM2MVAyMTNwMXZkaUlTSUE0QlVnYXBFS0M2ZHVLZXBod0lMZHFEclFDQWl1eUZJRHVyMlhTS3BDTGlPWjhHREhDMVZFZmlMa2x3LUVrdFVpV3dwRVh4RlU2LUNJRzFjRDNn0gGyAUFVX3lxTE1CZmp3dzBwemZmcUd5NDdDT19LMmNpdGUyblpxYWFndkw3YTU2Vm1RS2phNnJGMGNScVZxSGx0LUNmcVZjNm1VcTQzRWJHSXd2RVdsQ1c5V3BfdGpmRkNMOWZKbEJ4MFFEMXBVWXdPVDhDRGVQVF82VGZyWko4Wk5iaVc0bVhELVlUeE5waDA1eDJnUEhoNmJDWV8tVjVQd2NCWFZlcUlRQU9JcTAxX0ZKREE?oc=5", "src": "Dem\\u00f3crata", "ago": "hace 39d"}, {"title": "Zelenski lamenta el abandono de Ucrania frente al conflicto de Ir\\u00e1n - Cadena SER", "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxOd3kwYnZZcDVwU01qbWpFRU9qY1d2bjhVQ0ZGdjd4N0VmWjZ6SmpVYjNOT0RmakpTNHZ2NkxoWThIQUhNTTNwS05aWDJKUU9vTFMxR1o4dmJkMU84MzFmcS1TSTFaNVZ6QWp5bV8yV21rNnU1TkVTSHhpYjBmZUZvbGtwQmcyTWlCLThkZVB6TlZUT2YyMTZqTDB5UEJjMnlvWXR1a0NvU09URXNTaF8xQ0poTHR3aG9FcmJOTkJpemVleGvSAdcBQVVfeXFMTkVRSmhjNWpLRXpKTUZKSXg4R0pBSEpJYWtkR09NY1BtdUVzRUxGNUpnWlZ0SFF5d2RNWkNhZl9hUGFlRDRZcG8xME0tb0paaUtxLWVKblhTRE1QVXdnak1VdmhVVllpdlNGVURoY3k4OUtTYnViY3dBSjFDWHFoV3NUMWV3NGpxM0hEa3o0a01xWDBFbEZBOFFxS0dwUXBJMk9lWW5kck5YckgzWFUwT0RpUmtFTXdHT3JMTmtTVE5MdzN1bzRPemd5eTkyNnhGd19CZktPaE0?oc=5", "src": "Cadena SER", "ago": "hace 49d"}, {"title": "El conflicto en Ir\\u00e1n se eleva: Israel ataca dep\\u00f3sitos de petr\\u00f3leo por primera vez desde el inicio de la guerra - LaSexta", "url": "https://news.google.com/rss/articles/CBMihAJBVV95cUxPcDNfenJZeHhhTVRhSVlNLUFxN2U0SkRjZjVYQXZBSTNqMVZndEZKdlJ3TklRZ0c3SG40a1ViN0hZbmRSZ2FTcUM4V2dlRVF2dGo3cmN0Tkx0VFpsbEtNSVpfUHIzUUJHVTViQXdOVERRUTQ1UGhEd095UjZHdHU1TXExMkJDN1N1OUdybzhJdWFwelNQdWszeGJvNUlxSEJtcXpmSVF3VkZYVVBYMjlKNG1HRFJJdmZWTmtNUE52NFlVUW9Cb2lBa3dVX2M3MVdPTHJIUTdGLWlmM2NuRHF2QmhXYUxTRGkyMXJxdWZfNlNvbjZUaFhGV0JfeThTRWVPSHFrSNIBhAJBVV95cUxPMHBJT1djN1F6Y1Z3N2tLT1JwaDdzMnVyd0VseDZ4dy1QMUxoOTN1MWR4OUdRUzBUa20tUVBQcGN5bjVoQ2JSemI1N2tkdTNhTzlGVjlCUktmQUlEcjB4dVlYdVB1anMxV1YxZlVtbzRMZVNYWWZhMkxjS241MFVMWU1kLWt2dUh6SThhOURkdWZkeGNvSVBIWlg3T2VZQWRud0tMSVNmTmVSNGRrQ0hCRGdUcjlGZUpBMmYxY2d6WWpobEt4UFMtbldqdjk1Y1I2N0FVVk1CNGN2NmstbmliQnA1b25ibHZ3Y25JOVhWLUNaVzB6LUU5QVhXdTQwek5VeW5mUg?oc=5", "src": "LaSexta", "ago": "hace 54d"}, {"title": "La guerra elegida por Trump en Ir\\u00e1n le da una oportunidad a Putin - CNN en Espa\\u00f1ol", "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNckVDNzlNdS0yb2RHM2xfazdLLWNHS3h2ZzRzZ1c3aTBSQ3FGSU9zS0tRRUo3ZGZXTXBVeGctemZtUlhGRkhFOWtMdEFKcGJUdndIOGdfMjAtOUdtR255dXAtQ2hGV3JsV2VvS0g2WVdSbVRTWVo5b2I3aEFXNlYybWdiYUt1WGlCM21SdU56NlJYWVBJ?oc=5", "src": "CNN en Espa\\u00f1ol", "ago": "hace 50d"}, {"title": "Ir\\u00e1n y Rusia llevaban meses intercambiando drones y material en silencio por el Mar Caspio: Israel acaba de destaparlo -", "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxQU25DZ1AzVDNWRTRXdlU3cU04RzhSLUVGYXZkWUFXZTJ2OWxCVlNBdVE2cXdYVDhMbHdCck1mMVV1dmZhOVozNFB6R2hPeDl0ejJfN0R3eGwtbVdQbFdVNXh0dF9UbUhPdWkyaHRUanI2dmNob2w0cFVmS1NHR2NaZ3BLY19wX0ZJNG5zWTU3bWhBSkVDQkthNXlXcXhvMXM1UE80SzRwWEZZbElHX2cyZGwwMEhWMUEtTmhpYldR0gHDAUFVX3lxTE5OVG9sUmZJN3dST0hpQl9Ja1JFRXJXYmhsM09KSWFNVTJXVzItUGc0ZGNYNHlEMnVTQVFQV2Y4WHNuSEdmOVZwejhtd2xRSzlTbjZpa2pKaU5sZ2dVZDU1aFVTUFAxb2l0OWIyQ0IwbXlXYm1zbzRkMUt4OHpQa2ZwZ0h2Q212OWFhQm1peXFVOTdLWVczcjBBU1VIRXFTaWM2TjZzQU9adTh0ODg3M0ZSV0FFS2tLMlZtanhZV1o2bjRaRQ?oc=5", "src": "Xataka", "ago": "hace 35d"}, {"title": "Putin gana el primer asalto en la guerra de Trump contra Ir\\u00e1n - El Independiente", "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNMUYyX2lsai1PYWVCc0V0bFFlSzNMQkJZdnV0dHZBMHJKNHpyaEcwRlZrVjNiMGJjV2EtTnBBWlYxb0lEYXlGUG9JSm5LUkgtcjJQOGxGMGIwUUJud25TdTZZTndhUUk4WXFDZzRET2ZYMTZpZjJBSFFNT1JRWTJDR3lxSTlJbFlHZWlsMHBEMlRkNVFfNzBsc19odW1GMDRfV1BtLW5IcEZnblhsQUhRbjdnT211VXlVZHJJ0gHAAUFVX3lxTE1FS3lxdHE4cHlrblpEemg4MnVJLVFsVUt4VGhQLVZZcFZqRlkxUDJNYmdlNXFjSE8tNU8xLUk5dWptOFkwdklRR19pUU9vd2hSOEVoUzNWVHFNMzdzY0lNTDRGWUlGdlZYWXNlZUVaOTFGcDlrQjhHVXdzSFh3d0tIa08zc0dRNEhPU1FCbUlNbzFPd1JFTHY2OUwtbGhtbzJsSVc5RlVJcDJrWk80OTFlMWhMM2JpOW8xbWZwSkZUMA?oc=5", "src": "El Independiente", "ago": "hace 47d"}, {"title": "\\u00bfQu\\u00e9 impacto tendr\\u00e1 la guerra en Ir\\u00e1n en los bolsillos? Analizamos tres escenarios econ\\u00f3micos - LaSexta", "url": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxPTWUwc0dxZFVUdGlWUWExNldWeEx6MURKNkpWM0FoZWNuVGQtQzRDbTNZei1CU2NMWjZ4ckZrMFliVTAzRXQ4NU1mYWF0WFB3UVNlMXFuYVJPMHdwT0huTjZ2OGZpSFdSaFo5YXY2dnhMX3lRU25ZcWo1WV82QzBQQjJYWEo5Q09VcTdDVGxDSGgtcmdsc1BlX1E3ejBaNUk5Y2dpTURuU3JHNTVLX2Q4eThaM0JadHVuWVNCYlhKQzMxdDlydUwwT3FqSGxaYng2NW9wcVJRVVpIYmFnWTV3dWw1TWliYzdPYUJtVTR4TjZ4VnU4VHfSAfYBQVVfeXFMTjRNVE5RblZYVnNvRzNQV3lnWjhMSllYczEyVHJJMG1KSXFwVmJ6WkNsM0gxZ1dHYVU1VnF2eVJob0RnekRCZ2dvNVg0OHdIR0dDbm1HUlpWOGJTVVc2UV82WEZFSFBvRnhvaUZqMS1Wd09haGoxVU1rZEh6ZVQ4WlptZEhvcm9ua0xHc0M1YV9tc2gzYjBSSDRTVGgyeHZaTTVHbzlaYUpTeWVxeUh3WTZQa2hJWnZmOTctOWtYM1c0Z0dHN1Njb2hjb05tUmZLQTJQaWVjRmZrMzRtRVNLZnNPY29qUnc5QTNIcDhKNUJNZEs0Ml9R?oc=5", "src": "LaSexta", "ago": "hace 59d"}, {"title": "Rusia ayuda a Ir\\u00e1n con inteligencia para sus ataques a EEUU, seg\\u00fan el \'Washington Post\' - LaSexta", "url": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxQMTdHY3ZMTGZKbVBSVUxUN0ZLWlVuVTFEY2xvQzZLMlAyb2hkQUJtT09hNlZDcEkydkVaLWl2TnNOTUl1RlVXR2lXSDVHZGFMVWU2bW5hNExZSDduVTY5Q0t3ZnpIWE9MMGEtV1B0VjA4cmZ5MW80b0tvUHFnbV9zTk41Q2VrVTRHbUdGX3BEb2ttckF3S2s4YkFBX1RRa1laOWJpQXFvTVBRZnN1bVJQVVM5cGk4aWwzbVJaeFB4Z1AtQjFRSmt5UXY5aElHYlFXMldQYXc0cW5YYnp2eWVIbHE4eEdMb19Y0gHoAUFVX3lxTE01T0NQSmo4ZTh5T2JFeHplYjFzV19XZVRXaTZjSTE1bmp0NkFlMm40cWRQcExYU2llTGp1Y21ONFdVbWhTdl95Rkx2VkYzNW9jSjd2Sl9NZVp2RHp6Y1VnMU5CdW9LQ1dCMlRYeHRiWkVXdVZVVXZCUm5wbERId3ZlOUVoTGhXRzNnN0hZbWstSC01NG8wM2xFUnZlZk43OFRQa1hLSTZQUlFKTXVYN1FVc2g4d3hCa0ZLVk8wclA3ZzdwamFkOG5Sa2x0S1Z2SHh0VUdaU3FNMVotVXhCelRPamRTZmNld2c?oc=5", "src": "LaSexta", "ago": "hace 55d"}, {"title": "Las consecuencias en Ucrania de la ofensiva contra Ir\\u00e1n: la dependencia exterior de ambos bandos tensiona la guerra - El", "url": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxPckxmTTdTOWF5N0prVVRGQ0k5SXVyc3ZRZW15R2Y3bFdLMk5sLXY3SG9VSENPUVNSUXh5ek9zMXZoZFktRGRJam1BcWxCUjZfWDFkTjdTaGFwbjBvY0hrbXFCY2pVRWdVQk11b0dLb2dCWkZYMUJNd3ZEbVpVMlUwNlRjS3lyVVN5OGdnMDdrdnpMQTlWOEE1ZzJOc2ZScHA3aERITFlIaV9aYV84cWhtODlDOHQ2M0tvSElla21fVE1tOGV3OFJoT2thcm1iSkJwQVpOREhOSEhtVXp3MzJOTmRoSVQyWkZqS1BKS2pBMDhrUUNf0gH6AUFVX3lxTE5IUmpscE1NYnhXM2V0SFd0UWlxSnVIX0dGTW1ybnY5VXhaVVBpZzZEOUtRamxlYkJ5VWVCTU5nWVR5X1hWWTNRY3BSSzEtV3ItbEFDWkdmTlpweElhRU11UFVMUFlrWDdLVW5MS2JrLTdYdGh2NnpyOTJ3TGF6b3Zha21RYThpOGZxTFZkUkQ1Z096enFJWUpyMFRocW9DQ0dDc01qOHhyN2R1MEx6MXBmRTF0VFM4VzdvdGtLT09iMFFQbnZyMDROa2RJSTFXenUwcjJLYnpEOGI2aXVsZDhpR0F5SFJaMWR6MndfUjB0LTVfaUxSZVhhOXc?oc=5", "src": "El Espa\\u00f1ol", "ago": "hace 57d"}, {"title": "Resumen de la guerra de Ir\\u00e1n del d\\u00eda 10 de marzo | EE.UU. afirma que ha destruido 16 barcos minadores iran\\u00edes - RTVE.es", "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNRG53dG5iU3BrWXV2SFRJdGlMX2pJUHo5UEFJd3p2UG45Z3pxQ0MwV2tKUWluZjhfUnNyVFFJcTcxMmthbC1SRjdnTmFsWjFtZmlVUjFvMWxYSXNZWlRTTkp6bHpXRm8tWkMzeUo3UWt3S2NBX3FWWVg0ODZKc19tM1F5b3M1dXQyS2xURU5WN0NyOW1aS0drUjRSUXNXLVhKTjJNRzNKQdIBpwFBVV95cUxQYkppS3o1dzNYQkUxcHU2ZHZHbUp3SDBSVDliTHJTS0M0SjhTMUU1UTBTdnA1VGR6MlpuTlNrTkhQci03ckpQZVpjeHRGc2NuTU9TWkMzWlo3RHdGOUJPaFRoT19sLXhjdDl2eGRtTWRnNnpOUlFacmFFNHlwUW9GZzJhUTVLbTl6VWh1emVqZnliRzZzb2lWX3ZoaDdaaVVjUERHNFBjMA?oc=5", "src": "RTVE.es", "ago": "hace 51d"}, {"title": "Resumen de la guerra de Ir\\u00e1n del 28 de marzo: EE.UU. ataca m\\u00e1s de 11.000 objetivos y 150 barcos en el primer mes de la g", "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNSkJHNmo5VXhJbTNHc25mdkt5NVRrLUJUUnRZOExFUXNveHl2ZVJPSEFVa2duLTViU2JMMUxDSEo1clctdk1JRGFjYzdvWVhNOUVkczVyLWhmLXd6STlTVUoxek9oNUdNX09zaFdGYVE0UW40T2RqUXhPOGFSeUJpcW8zdE5UTnVsbUpfZmZpVWdIRWtvNmtTWGs1TTI4ZVlNV2VwRDB1c9IBpwFBVV95cUxPVFhFTFhveXlTZUVwYUZROXNKVTI1ckNYM2pJUzJmVDhURmJzNlgwSldrTGt1NnBTU3RIWm95S2RaLV9qUEU2NE0xNDBmZm9ILXJ6U0ZweDJqR0hmVkNUbmtWOEN4a2szdzhybGxIMENUVV9NQ1oteDJGcUlkNGMyRlZSNkxZc0lBcVBFU3piSC0tNEZNWkFlMDAwUGdSVzZRaWtvUHhKaw?oc=5", "src": "RTVE.es", "ago": "hace 33d"}, {"title": "El experto que predijo la guerra de Ir\\u00e1n se teme lo peor: EE UU atacar\\u00e1 por tierra, un pa\\u00eds europeo entrar\\u00e1 en - La Raz\\u00f3", "url": "https://news.google.com/rss/articles/CBMiowJBVV95cUxOWkE0OXpEaGVmVVBMSnMwbktHUmkza3RHLVlybVdiZFY5Y1lyaGhXdFVjVC1weS1zYkl4b3JaQjdKZU5CU2c5YV9icC02R05XanF3Mm1BUEZwVDh1M1Y1WmFjWWRBeWo2OEtXX2V5MDlwNjRGVGFPdkJVbUZNRmpTbE9TdzZodTF6anhVNHYzRVdKWG9PMEUyZ1RzMWJ4TGk1SlVwdmtlOU4xQ2pUcnk2OC15NkpUQlpGWlNVcHJVeExvai1EYUsyd3dlSWJycXpkWTc0MEVQS0t0WkJGenIwVTlBR0JLckpyaFZIbjh6U0hOMHFvWVJqWlhyUmwtR3ltSzlyYnFGR3h4YXdfNzJYQjFQS1J3OUVxUFFpYVFRdDhtS2vSAbcCQVVfeXFMUFRxek0xNE1pSGpNbS12T256ZExUaExyMkRLcGFrWS14R21ETGNiS2ZObldtM0hvS1cwbDZad1phbTJwVUhFbDZNaFdPQlVXcThFWmo3YlA4ZlItVlhva21PZzIyRlQwZ2lXSVNvNUw5dDhCNDA5endHY1BCSzVReHljem9uUjl3MHlBbjQyanhqWDNsSk9EQTMzZlBJYlhuSG9VV1VCSUlXaWxTNmg1QVdwb0luTV9ubmx0TS1DSDJWc05OMy00UUV0a2Nob0ZDMEMzYmhkc1VDaXRMTW1TSmtYV3JqZF9IRzhsX1p2TmxEc0VldW54NXRqMmFHUjFFYWdvdDVWX3psaVFWZVVZYkRfSmpxeVJYNVpVR1R1TFA1bHBSMjVXaEhwekVpdUdBRlFOZC15Wms?oc=5", "src": "La Raz\\u00f3n", "ago": "hace 40d"}, {"title": "Para Putin, la guerra en Ir\\u00e1n lo cambi\\u00f3 todo - The New York Times", "url": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNZERwcGVZRGJhZ2JlVFNSbXh5eWpDYXNKbU1rbThMQnBPckZMWGNId0JUYmFTQ2dOZkoxeGVfcGFnYTRIdjFBOHNUTzdnZjZYNm1YN2QxRjFHcGxvaW44b0xtMkgtMW9tM1VMUjF1TldJUzVjLTcxQ1p1X0p0a2ctczlEeFhlZkc4SEE?oc=5", "src": "The New York Times", "ago": "hace 35d"}, {"title": "La guerra en Ir\\u00e1n ha confirmado lo que se intu\\u00eda en Ucrania: las batallas se ganan mucho antes de lanzar el primer misil", "url": "https://news.google.com/rss/articles/CBMiywFBVV95cUxQM05rVHZQdGZGN0FVakZfcmxJemRBTHprSndYRHBtY3BzRk1nYVZKelBnbm1GemFmTjFXMU1NWE1kWFE5LVV6RWg3aUQ0SUhkREktSXBCZXBGaDhpWkxLNktPTF91blI2blE5LUJrUnNmSXVXWDI3c1FsSG1tMDRLbjl5dEFKNjJiM3diSmEyN3hBNU1keGM3RWRkQ0lZRTlTRElUOW01Mi04Q3hBSTBhejRBbW9XY1JCUWVuNThiLXBvMEQ1cVBNSEN6SdIB0AFBVV95cUxPMjBxcHEzSnVwYTVzS1FsLVpDb29YZGRYZEJERzZRNHdCanVBb0JSdGRMdXhXbGZsSlB4RXZRVWs3eDRFTDZNQkZSUk1uelVfU2E4a0lVQUxIWEpHQXphcjEybFp3cXdXM2taYkZHWFJlb1RZaE1ydTU1SXZPdS11anBaMGYwbDJRcDQ1bks0OTBTQVVHZ2hLZFl1cGdvRlNFRlJ2Q0F0Rm9RZDNQR1BXQVdOQkhJcmRRMzlneXl1VHlOV1hfOGpDTXpQS21ZV2VM?oc=5", "src": "Xataka", "ago": "hace 52d"}]'
 
         _panel_html = (
             '<!DOCTYPE html><html><head><meta charset="utf-8"><style>'
@@ -2761,15 +2720,15 @@ if _nav == "monitor":
             '.cht{display:flex;gap:3px;padding:7px;flex-shrink:0;border-bottom:1px solid #0f1f35}'
             '.ch{padding:4px 14px;font-size:9px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #1e2a3a;color:#475569;background:#0a1020;transition:all .12s;white-space:nowrap}'
             '.ch:hover{color:#e2e8f0}.ch.on{color:#060d1a;border-color:var(--c);background:var(--c)}'
-            '.pl{width:100%;height:235px;background:#000;flex-shrink:0}'
-            '.pl iframe{width:100%;height:235px;border:none;display:block}'
-            '.nt{font-size:9px;color:#475569;padding:2px 9px;flex-shrink:0;border-bottom:1px solid #0f1f35;min-height:16px;background:#060d1a}'
-            '.st{display:flex;flex-shrink:0;border-bottom:1px solid #0f1f35}'
-            '.s{flex:1;padding:5px 0;text-align:center;font-size:9px;font-weight:700;cursor:pointer;color:#475569;background:#060d1a;border-right:1px solid #0f1f35;transition:color .12s}'
-            '.s:last-child{border-right:none}.s.on{color:#2dd4bf;border-bottom:2px solid #2dd4bf}'
-            '.fb{display:flex;flex-wrap:wrap;gap:3px;padding:5px 7px;flex-shrink:0;border-bottom:1px solid #0f1f35}'
-            '.f{padding:2px 8px;font-size:8px;font-weight:700;border-radius:99px;cursor:pointer;border:1px solid #1e2a3a;color:#475569;background:#0a1020;transition:all .1s}'
-            '.f.on{color:#060d1a;background:#2dd4bf;border-color:#2dd4bf}'
+            '.player{width:100%;height:235px;background:#000;flex-shrink:0}'
+            '.player iframe{width:100%;height:235px;border:none;display:block}'
+            '.note{font-size:9px;color:#475569;padding:2px 9px;flex-shrink:0;border-bottom:1px solid #0f1f35;min-height:16px;background:#060d1a}'
+            '.sectabs{display:flex;flex-shrink:0;border-bottom:1px solid #0f1f35}'
+            '.stab{flex:1;padding:5px 0;text-align:center;font-size:9px;font-weight:700;cursor:pointer;color:#475569;background:#060d1a;border-right:1px solid #0f1f35;transition:color .12s}'
+            '.stab:last-child{border-right:none}.stab.on{color:#2dd4bf;border-bottom:2px solid #2dd4bf}'
+            '.filters{display:flex;flex-wrap:wrap;gap:3px;padding:5px 7px;flex-shrink:0;border-bottom:1px solid #0f1f35}'
+            '.filt{padding:2px 8px;font-size:8px;font-weight:700;border-radius:99px;cursor:pointer;border:1px solid #1e2a3a;color:#475569;background:#0a1020;transition:all .1s}'
+            '.filt.on{color:#060d1a;background:#2dd4bf;border-color:#2dd4bf}'
             '.feed{flex:1;overflow-y:auto;padding:4px 8px 8px}'
             '.feed::-webkit-scrollbar{width:3px}.feed::-webkit-scrollbar-thumb{background:#1e2a3a;border-radius:99px}'
             '.card{padding:7px 9px;margin-bottom:4px;background:#0a1020;border-radius:5px;border-left:3px solid #475569}'
@@ -2779,83 +2738,83 @@ if _nav == "monitor":
             '.dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}'
             '.src{font-size:9px;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}'
             '.when{font-size:9px;color:#2dd4bf;flex-shrink:0;font-weight:600}'
-            '.tw{flex:1;overflow:hidden;display:none}'
-            '.tw iframe{width:100%;height:100%;border:none;display:block}'
+            '.twsec{flex:1;overflow:hidden;display:none}'
+            '.twsec iframe{width:100%;height:100%;border:none;display:block}'
             '</style></head><body>'
             '<div class="cht" id="cht"></div>'
-            '<div class="pl"><iframe id="yt" allowfullscreen allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture"></iframe></div>'
-            '<div class="nt" id="nt"></div>'
-            '<div class="st">'
-            '<div class="s on" id="sn" onclick="sec(\'n\')">NOTICIAS GLOBALES</div>'
-            '<div class="s" id="st" onclick="sec(\'t\')">&#120143; TRUMP LIVE</div>'
+            '<div class="player"><iframe id="yt" allowfullscreen allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture"></iframe></div>'
+            '<div class="note" id="note"></div>'
+            '<div class="sectabs">'
+            '<div class="stab on" id="stab-n" onclick="showSec(\'n\')">NOTICIAS GLOBALES</div>'
+            '<div class="stab" id="stab-t" onclick="showSec(\'t\')">&#120143; TRUMP LIVE</div>'
             '</div>'
-            '<div class="fb" id="fb">'
-            '<span class="f on" data-k="" onclick="fil(this)">Todo</span>'
-            '<span class="f" data-k="guerra,war,conflict,ataque,attack,strike,killed,muerto" onclick="fil(this)">Guerra</span>'
-            '<span class="f" data-k="ucrania,ukraine,rusia,russia,putin" onclick="fil(this)">Ucrania</span>'
-            '<span class="f" data-k="israel,gaza,palestin,libano,hamas,iran,siria" onclick="fil(this)">Or.Medio</span>'
-            '<span class="f" data-k="petroleo,oil,gas,energia,energy" onclick="fil(this)">Energía</span>'
-            '<span class="f" data-k="sancion,sanction,arancel,tariff" onclick="fil(this)">Sanciones</span>'
-            '<span class="f" data-k="trump,eeuu,estados unidos,washington,fed" onclick="fil(this)">EEUU</span>'
+            '<div class="filters" id="filts">'
+            '<span class="filt on" data-k="" onclick="doFilt(this)">Todo</span>'
+            '<span class="filt" data-k="guerra,war,conflict,ataque,attack,strike,killed" onclick="doFilt(this)">Guerra</span>'
+            '<span class="filt" data-k="ucrania,ukraine,rusia,russia,putin" onclick="doFilt(this)">Ucrania</span>'
+            '<span class="filt" data-k="israel,gaza,palestin,libano,iran,siria" onclick="doFilt(this)">Or.Medio</span>'
+            '<span class="filt" data-k="petroleo,oil,gas,energia,energy" onclick="doFilt(this)">Energía</span>'
+            '<span class="filt" data-k="sancion,sanction,arancel,tariff" onclick="doFilt(this)">Sanciones</span>'
+            '<span class="filt" data-k="trump,eeuu,washington,fed" onclick="doFilt(this)">EEUU</span>'
             '</div>'
-            '<div class="feed" id="fn"></div>'
-            '<div class="tw" id="ft">'
+            '<div class="feed" id="news-sec"></div>'
+            '<div class="twsec" id="tw-sec">'
             '<iframe src="https://syndication.twitter.com/srv/timeline-profile/screen-name/realDonaldTrump?dnt=true&theme=dark&chrome=noheader%20nofooter%20noborders%20transparent"></iframe>'
             '</div>'
             '<script>'
             'var CHS=' + _ch_json + ';'
             'var ARTS=' + _art_json + ';'
             'var CUR="";'
-            'var cht=document.getElementById("cht");'
-            'CHS.forEach(function(ch,i){'
-            '  var t=document.createElement("div");t.className="ch"+(i===0?" on":"");'
-            '  t.textContent=ch.name;t.style.setProperty("--c",ch.color);'
-            '  t.onclick=function(){document.querySelectorAll(".ch").forEach(function(x){x.classList.remove("on");});'
-            '    t.classList.add("on");play(ch);};cht.appendChild(t);});'
-            'function play(ch){'
-            '  var y=document.getElementById("yt"),n=document.getElementById("nt");'
-            '  y.src=ch.videoId&&ch.videoId.length===11'
+            'document.getElementById("cht").innerHTML=CHS.map(function(ch,i){'
+            '  return \'<div class="ch\'+(i===0?\' on\':\'\')+\'" style="--c:\'+ch.color+\'" onclick="playC(\'+i+\')">\'+ch.name+\'</div>\';'
+            '}).join("");'
+            'function playC(i){'
+            '  document.querySelectorAll(".ch").forEach(function(x){x.classList.remove("on");});'
+            '  document.querySelectorAll(".ch")[i].classList.add("on");'
+            '  var ch=CHS[i];'
+            '  document.getElementById("yt").src=ch.videoId&&ch.videoId.length===11'
             '    ?"https://www.youtube-nocookie.com/embed/"+ch.videoId+"?autoplay=1&rel=0&modestbranding=1"'
             '    :"https://www.youtube-nocookie.com/embed/live_stream?channel="+ch.channelId+"&autoplay=1&rel=0&modestbranding=1";'
-            '  n.textContent=ch.videoId&&ch.videoId.length===11?"EN VIVO":"Stream directo";}'
-            'if(CHS.length)play(CHS[0]);'
-            'function sec(s){'
-            '  var n=s==="n";'
-            '  document.getElementById("fn").style.display=n?"block":"none";'
-            '  document.getElementById("ft").style.display=n?"none":"block";'
-            '  document.getElementById("fb").style.display=n?"flex":"none";'
-            '  document.getElementById("sn").className="s"+(n?" on":"");'
-            '  document.getElementById("st").className="s"+(!n?" on":"");}'
-            'function fil(el){'
-            '  document.querySelectorAll(".f").forEach(function(x){x.classList.remove("on");});'
-            '  el.classList.add("on");CUR=el.dataset.k||"";rend();}'
-            'function col(t){'
+            '  document.getElementById("note").textContent=ch.videoId&&ch.videoId.length===11?"EN VIVO":"Stream directo";'
+            '}'
+            'if(CHS.length)playC(0);'
+            'function showSec(s){'
+            '  var isN=s==="n";'
+            '  document.getElementById("news-sec").style.display=isN?"block":"none";'
+            '  document.getElementById("tw-sec").style.display=isN?"none":"block";'
+            '  document.getElementById("filts").style.display=isN?"flex":"none";'
+            '  document.getElementById("stab-n").className="stab"+(isN?" on":"");'
+            '  document.getElementById("stab-t").className="stab"+(!isN?" on":"");'
+            '}'
+            'function doFilt(el){'
+            '  document.querySelectorAll(".filt").forEach(function(x){x.classList.remove("on");});'
+            '  el.classList.add("on");CUR=el.dataset.k||"";render();'
+            '}'
+            'function getCol(t){'
             '  t=(t||"").toLowerCase();'
-            '  var m={guerra:"#ef4444",war:"#ef4444",conflicto:"#ef4444",conflict:"#ef4444",'
-            '    ataque:"#ef4444",attack:"#ef4444",strike:"#ef4444",killed:"#ef4444",muerto:"#ef4444",'
-            '    militar:"#f97316",military:"#f97316",misil:"#f97316",missile:"#f97316",'
-            '    sancion:"#f97316",sanction:"#f97316",arancel:"#f97316",tariff:"#f97316",'
+            '  var m={guerra:"#ef4444",war:"#ef4444",conflicto:"#ef4444",conflict:"#ef4444",ataque:"#ef4444",attack:"#ef4444",strike:"#ef4444",killed:"#ef4444",'
+            '    militar:"#f97316",military:"#f97316",misil:"#f97316",missile:"#f97316",sancion:"#f97316",sanction:"#f97316",arancel:"#f97316",tariff:"#f97316",'
             '    petroleo:"#eab308",oil:"#eab308",gas:"#eab308",energia:"#eab308",energy:"#eab308",'
             '    iran:"#ef4444",rusia:"#f97316",russia:"#f97316",ukraine:"#f97316",ucrania:"#f97316",'
             '    israel:"#f97316",gaza:"#ef4444",china:"#a855f7",nuclear:"#a855f7",trump:"#22c55e"};'
-            '  for(var k in m)if(t.indexOf(k)>=0)return m[k];return "#475569";}'
-            'function rend(){'
-            '  var el=document.getElementById("fn");'
+            '  for(var k in m)if(t.indexOf(k)>=0)return m[k];return "#475569";'
+            '}'
+            'function render(){'
+            '  var el=document.getElementById("news-sec");'
             '  var ks=CUR?CUR.split(","):[];'
-            '  var arts=CUR?ARTS.filter(function(a){'
-            '    var t=(a.title||"").toLowerCase();'
-            '    return ks.some(function(k){return t.indexOf(k.trim())>=0;});}):ARTS;'
-            '  if(!arts.length){el.innerHTML=\'<div style="color:#334155;font-size:10px;padding:12px;">Sin resultados</div>\';return;}'
-            '  var h="";'
-            '  arts.forEach(function(a){'
-            '    var c=col(a.title);'
-            '    h+=\'<div class="card" style="border-left-color:\'+c+\'">\''
+            '  var arts=CUR?ARTS.filter(function(a){var t=(a.title||"").toLowerCase();return ks.some(function(k){return t.indexOf(k.trim())>=0;});}):ARTS;'
+            '  if(!arts.length){el.innerHTML=\'<div style="color:#94a3b8;font-size:11px;padding:16px;text-align:center;">Sin resultados para este filtro</div>\';return;}'
+            '  el.innerHTML=arts.map(function(a){'
+            '    var c=getCol(a.title);'
+            '    return \'<div class="card" style="border-left-color:\'+c+\'">\''
             '      +\'<a href="\'+a.url+\'" target="_blank">\'+a.title+\'</a>\''
             '      +\'<div class="meta"><div class="dot" style="background:\'+c+\'"></div>\''
             '      +\'<span class="src">\'+a.src+\'</span>\''
-            '      +(a.ago?\'<span class="when">\'+a.ago+\'</span>\':"")'
-            '      +\'</div></div>\';});el.innerHTML=h;}'
-            'rend();'
+            '      +(a.ago?\'<span class="when">\'+a.ago+\'</span>\':\'\')'
+            '      +\'</div></div>\';'
+            '  }).join("");'
+            '}'
+            'render();'
             '</script></body></html>'
         )
         _comp.html(_panel_html, height=705, scrolling=False)
