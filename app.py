@@ -2356,6 +2356,121 @@ if _nav == "news":
         st.info('No hay eventos para el periodo seleccionado. Prueba a ampliar las fechas o cambia el filtro de impacto a Todos.')
     else:
         st.markdown(f"<div style='font-size:11px;color:#475569;margin-bottom:12px;'>{len(_events)} eventos encontrados</div>", unsafe_allow_html=True)
+        _ES_NAMES = {
+            # US Employment
+            "Non-Farm Payrolls": "Nóminas No Agrícolas",
+            "Unemployment Rate": "Tasa de Desempleo",
+            "Average Hourly Earnings MoM": "Salario Medio/Hora Mensual",
+            "ADP Employment Change": "Variación Empleo ADP",
+            "JOLTS Job Openings": "Ofertas de Trabajo JOLTS",
+            "Initial Jobless Claims": "Solicitudes Iniciales de Desempleo",
+            "Continuing Jobless Claims": "Solicitudes Continuas de Desempleo",
+            # Prices
+            "CPI MoM": "IPC Mensual",
+            "CPI YoY": "IPC Anual",
+            "Core CPI MoM": "IPC Subyacente Mensual",
+            "Core CPI YoY": "IPC Subyacente Anual",
+            "PPI MoM": "IPP Mensual",
+            "PPI YoY": "IPP Anual",
+            "Core PPI MoM": "IPP Subyacente Mensual",
+            "PCE Price Index MoM": "Índice PCE Mensual",
+            "PCE Price Index YoY": "Índice PCE Anual",
+            "Core PCE Price Index MoM": "PCE Subyacente Mensual",
+            "Core PCE Price Index YoY": "PCE Subyacente Anual",
+            # GDP
+            "GDP Growth Rate QoQ Adv": "PIB Trimestral (Preliminar)",
+            "GDP Growth Rate QoQ 2nd Est": "PIB Trimestral (2ª Estimación)",
+            "GDP Growth Rate QoQ Final": "PIB Trimestral (Final)",
+            "GDP Growth Rate YoY": "PIB Anual",
+            "GDP QoQ": "PIB Trimestral",
+            "GDP YoY": "PIB Anual",
+            # Retail / Consumer
+            "Retail Sales MoM": "Ventas Minoristas Mensual",
+            "Core Retail Sales MoM": "Ventas Minoristas Subyacente Mensual",
+            "Consumer Confidence": "Confianza del Consumidor",
+            "Michigan Consumer Sentiment": "Sentimiento Consumidor Michigan",
+            "Michigan Consumer Sentiment Final": "Sentimiento Consumidor Michigan (Final)",
+            "Personal Income MoM": "Ingreso Personal Mensual",
+            "Personal Spending MoM": "Gasto Personal Mensual",
+            # Fed
+            "Fed Interest Rate Decision": "Decisión de Tipos de la Fed",
+            "Federal Funds Rate": "Tasa de Fondos Federales",
+            "FOMC Statement": "Comunicado del FOMC",
+            "FOMC Minutes": "Actas del FOMC",
+            "Fed Chair Powell Speech": "Discurso Presidente Powell (Fed)",
+            # PMI / ISM
+            "ISM Manufacturing PMI": "PMI Manufacturero ISM",
+            "ISM Non-Manufacturing PMI": "PMI de Servicios ISM",
+            "ISM Services PMI": "PMI de Servicios ISM",
+            "S&P Global Manufacturing PMI": "PMI Manufacturero S&P Global",
+            "S&P Global Services PMI": "PMI de Servicios S&P Global",
+            "S&P Global Composite PMI": "PMI Compuesto S&P Global",
+            "Manufacturing PMI": "PMI Manufacturero",
+            "Services PMI": "PMI de Servicios",
+            "Composite PMI": "PMI Compuesto",
+            # Housing
+            "Building Permits": "Permisos de Construcción",
+            "Building Permits MoM": "Permisos de Construcción Mensual",
+            "Housing Starts": "Inicio Construcción de Viviendas",
+            "Housing Starts MoM": "Inicio Construcción Mensual",
+            "Existing Home Sales": "Venta Viviendas Existentes",
+            "New Home Sales": "Venta Viviendas Nuevas",
+            "Pending Home Sales MoM": "Ventas Pendientes de Viviendas Mensual",
+            "Case-Shiller Home Price MoM": "Precios Vivienda Case-Shiller Mensual",
+            # Trade / Industry
+            "Trade Balance": "Balanza Comercial",
+            "Current Account": "Cuenta Corriente",
+            "Industrial Production MoM": "Producción Industrial Mensual",
+            "Capacity Utilization Rate": "Tasa Utilización de Capacidad",
+            "Durable Goods Orders MoM": "Pedidos Bienes Duraderos Mensual",
+            "Core Durable Goods Orders MoM": "Pedidos Bienes Duraderos (sin transp.) Mensual",
+            "Factory Orders MoM": "Pedidos de Fábricas Mensual",
+            # Treasury auctions
+            "3-Month Bill Auction": "Subasta Letras 3 Meses",
+            "6-Month Bill Auction": "Subasta Letras 6 Meses",
+            "2-Year Note Auction": "Subasta Bonos 2 Años",
+            "5-Year Note Auction": "Subasta Bonos 5 Años",
+            "7-Year Note Auction": "Subasta Bonos 7 Años",
+            "10-Year Note Auction": "Subasta Bonos 10 Años",
+            "30-Year Bond Auction": "Subasta Bonos 30 Años",
+            # Europe / ECB
+            "ECB Interest Rate Decision": "Decisión de Tipos del BCE",
+            "ECB Press Conference": "Rueda de Prensa del BCE",
+            "ECB Monetary Policy Meeting Accounts": "Actas Política Monetaria BCE",
+            "Eurozone CPI MoM": "IPC Eurozona Mensual",
+            "Eurozone CPI YoY": "IPC Eurozona Anual",
+            "Eurozone Core CPI YoY": "IPC Subyacente Eurozona Anual",
+            "Eurozone GDP Growth Rate QoQ": "PIB Eurozona Trimestral",
+            "Eurozone Unemployment Rate": "Tasa de Desempleo Eurozona",
+            "Germany CPI MoM": "IPC Alemania Mensual",
+            "Germany GDP Growth Rate QoQ": "PIB Alemania Trimestral",
+            "Germany Ifo Business Climate": "Clima Empresarial IFO Alemania",
+            "Germany ZEW Economic Sentiment": "Sentimiento Económico ZEW Alemania",
+            "Germany Manufacturing PMI": "PMI Manufacturero Alemania",
+            "Germany Services PMI": "PMI Servicios Alemania",
+            # UK
+            "BoE Interest Rate Decision": "Decisión de Tipos Banco de Inglaterra",
+            "BoE MPC Meeting Minutes": "Actas MPC (Banco de Inglaterra)",
+            "UK CPI MoM": "IPC Reino Unido Mensual",
+            "UK CPI YoY": "IPC Reino Unido Anual",
+            "UK GDP Growth Rate QoQ": "PIB Reino Unido Trimestral",
+            "UK Unemployment Rate": "Tasa de Desempleo Reino Unido",
+            # Others
+            "Japan BoJ Interest Rate Decision": "Decisión de Tipos BoJ Japón",
+            "Canada Unemployment Rate": "Tasa de Desempleo Canadá",
+            "BoC Interest Rate Decision": "Decisión de Tipos Banco de Canadá",
+            "China NBS Manufacturing PMI": "PMI Manufacturero NBS China",
+            "China Caixin Manufacturing PMI": "PMI Manufacturero Caixin China",
+        }
+        _ES_SFXS = [
+            (" MoM", " Mensual"), (" YoY", " Anual"), (" QoQ", " Trimestral"),
+            (" Adv", " (Preliminar)"), (" Prel", " (Preliminar)"),
+            (" 2nd Est", " (2ª Est.)"), (" Final", " (Final)"), (" Flash", " (Flash)"),
+        ]
+        def _translate_ev(n):
+            if n in _ES_NAMES: return _ES_NAMES[n]
+            for en, es in _ES_SFXS: n = n.replace(en, es)
+            return n
         for ev in sorted(_events, key=lambda x: x.get("time","")):
             _imp   = ev.get("impact", "low")
             _color = _impact_colors.get(_imp, "#475569")
@@ -2367,6 +2482,7 @@ if _nav == "news":
             _country = ev.get("country", "")
             _time    = ev.get("time",    "")
             _event   = ev.get("event",   "")
+            _event_es = _translate_ev(_event)
 
             def _fmt(v):
                 if v is None or v == "": return "—"
@@ -2380,7 +2496,7 @@ if _nav == "news":
   <div style='min-width:90px;font-family:JetBrains Mono,monospace;font-size:11px;color:#475569;'>{_time}</div>
   <div style='min-width:36px;background:{_color}22;border:1px solid {_color}44;border-radius:4px;
        padding:2px 6px;font-size:9px;font-weight:700;color:{_color};text-align:center;'>{_country}</div>
-  <div style='flex:1;font-size:13px;font-weight:600;color:#e2e8f0;'>{_event}</div>
+  <div style='flex:1;font-size:13px;font-weight:600;color:#e2e8f0;'>{_event_es}</div>
   <div style='min-width:40px;text-align:center;'>
     <div style='font-size:9px;color:#475569;'>IMPACTO</div>
     <div style='font-size:10px;font-weight:700;color:{_color};'>{_label}</div>
