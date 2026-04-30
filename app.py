@@ -2585,32 +2585,16 @@ if _nav == "news":
     with _geo_col2:
         _geo_lang = st.selectbox("Idioma", ["Español", "English", "Todos"], key="geo_lang")
 
-    @st.cache_data(ttl=300)
+    @st.cache_data(ttl=600)
     def _fetch_gdelt(query, lang):
         import urllib.parse
-        _lp = ""
-        if lang == "Español":
-            _lp = "&sourcelang=Spanish"
-        elif lang == "English":
-            _lp = "&sourcelang=English"
         _q = urllib.parse.quote(query)
         _url = (f"https://api.gdeltproject.org/api/v2/doc/doc?query={_q}"
-                f"&mode=artlist&format=json&maxrecords=25&sort=DateDesc&timespan=7d{_lp}")
+                f"&mode=artlist&format=json&maxrecords=30&sort=DateDesc&timespan=14d")
         try:
-            _res = _rq.get(_url, timeout=15)
+            _res = _rq.get(_url, timeout=20)
             if _res.status_code == 200:
-                _arts = _res.json().get("articles", [])
-                if _arts:
-                    return _arts
-        except:
-            pass
-        # fallback sin filtro de idioma si no hay resultados
-        try:
-            _url2 = (f"https://api.gdeltproject.org/api/v2/doc/doc?query={_q}"
-                     f"&mode=artlist&format=json&maxrecords=25&sort=DateDesc&timespan=7d")
-            _res2 = _rq.get(_url2, timeout=15)
-            if _res2.status_code == 200:
-                return _res2.json().get("articles", [])
+                return _res.json().get("articles", [])
         except:
             pass
         return []
