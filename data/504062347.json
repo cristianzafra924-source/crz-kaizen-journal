@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-30 16:30:28",
+  "timestamp": "2026-04-30 16:30:38",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 197010.19,
-    "equity": 199072.34,
-    "margin": 62900.75,
-    "margin_libre": 136171.59,
-    "margin_nivel": 316.49,
-    "profit_abierto": 2062.15,
+    "equity": 198943.68,
+    "margin": 66543.52,
+    "margin_libre": 132400.16,
+    "margin_nivel": 298.97,
+    "profit_abierto": 1933.49,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4631.57,
+      "price_current": 4630.84,
       "sl": 4598.94,
       "tp": 0,
-      "profit": 400.56,
+      "profit": 391.8,
       "swap": -47.92,
-      "pnl_net": 352.64,
+      "pnl_net": 343.88,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4631.57,
+      "price_current": 4630.84,
       "sl": 4584.41,
       "tp": 0,
-      "profit": 569.28,
+      "profit": 560.52,
       "swap": -47.92,
-      "pnl_net": 521.36,
+      "pnl_net": 512.6,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 75390.41,
-      "price_current": 76086.98,
+      "price_current": 76103.97,
       "sl": 76693.66,
       "tp": 0,
-      "profit": -208.97,
+      "profit": -214.07,
       "swap": -17.66,
-      "pnl_net": -226.63,
+      "pnl_net": -231.73,
       "time_open": "2026-04-29 22:05:35"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.3,
       "price_open": 4601.14,
-      "price_current": 4631.57,
+      "price_current": 4630.84,
       "sl": 4602.45,
       "tp": 0,
-      "profit": 912.9,
+      "profit": 891,
       "swap": 0,
-      "pnl_net": 912.9,
+      "pnl_net": 891,
       "time_open": "2026-04-30 10:54:29"
     },
     {
@@ -78,12 +78,12 @@
       "type": "buy",
       "volume": 0.5,
       "price_open": 4623.75,
-      "price_current": 4631.57,
+      "price_current": 4630.84,
       "sl": 4591.68,
       "tp": 0,
-      "profit": 391,
+      "profit": 354.5,
       "swap": 0,
-      "pnl_net": 391,
+      "pnl_net": 354.5,
       "time_open": "2026-04-30 11:06:35"
     },
     {
@@ -92,13 +92,27 @@
       "type": "sell",
       "volume": 2,
       "price_open": 27370.59,
-      "price_current": 27315.15,
+      "price_current": 27323.07,
       "sl": 27368.77,
       "tp": 0,
-      "profit": 110.88,
+      "profit": 95.04,
       "swap": 0,
-      "pnl_net": 110.88,
+      "pnl_net": 95.04,
       "time_open": "2026-04-30 16:14:21"
+    },
+    {
+      "ticket": 14886321,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 2,
+      "price_open": 27307.17,
+      "price_current": 27323.07,
+      "sl": 27360.39,
+      "tp": 0,
+      "profit": -31.8,
+      "swap": 0,
+      "pnl_net": -31.8,
+      "time_open": "2026-04-30 16:30:29"
     }
   ],
   "deals_hoy": [
@@ -329,6 +343,18 @@
       "swap": 0,
       "pnl_net": 0,
       "time": "16:14:21"
+    },
+    {
+      "ticket": 13894191,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 2,
+      "price": 27307.17,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "16:30:29"
     }
   ],
   "pnl_dia": -480.33,
@@ -1593,6 +1619,19 @@
       "pnl_net": 0,
       "win": false,
       "time": "2026-04-30 16:14:21"
+    },
+    {
+      "ticket": 13894191,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 2,
+      "price": 27307.17,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-04-30 16:30:29"
     }
   ],
   "equity_series": [
@@ -1692,7 +1731,8 @@
     -2926.83,
     -2926.83,
     -2989.81,
+    -2989.81,
     -2989.81
   ],
-  "n_trades": 97
+  "n_trades": 98
 }
