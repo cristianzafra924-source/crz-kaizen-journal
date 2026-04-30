@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-30 13:27:15",
+  "timestamp": "2026-04-30 13:27:25",
   "estado": "conectado",
   "cuenta": {
     "login": 4000068181,
@@ -7,11 +7,11 @@
     "empresa": "Tradeslide Trading Tech Limited",
     "servidor": "Darwinex-Live",
     "balance": 3282.25,
-    "equity": 3335.01,
+    "equity": 3352.96,
     "margin": 1155.38,
-    "margin_libre": 2179.63,
-    "margin_nivel": 288.65,
-    "profit_abierto": 52.76,
+    "margin_libre": 2197.58,
+    "margin_nivel": 290.2,
+    "profit_abierto": 70.71,
     "divisa": "USD",
     "apalancamiento": 200
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4624.54,
-      "price_current": 4635.35,
+      "price_current": 4638.94,
       "sl": 0,
       "tp": 0,
-      "profit": 10.81,
+      "profit": 14.4,
       "swap": -3.27,
-      "pnl_net": 7.54,
+      "pnl_net": 11.13,
       "time_open": "2026-04-28 11:01:32"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4619.94,
-      "price_current": 4635.35,
+      "price_current": 4638.94,
       "sl": 0,
       "tp": 0,
-      "profit": 15.41,
+      "profit": 19,
       "swap": -3.27,
-      "pnl_net": 12.14,
+      "pnl_net": 15.73,
       "time_open": "2026-04-28 11:05:31"
     },
     {
@@ -50,12 +50,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4620.19,
-      "price_current": 4635.35,
+      "price_current": 4638.94,
       "sl": 0,
       "tp": 0,
-      "profit": 15.16,
+      "profit": 18.75,
       "swap": -3.27,
-      "pnl_net": 11.89,
+      "pnl_net": 15.48,
       "time_open": "2026-04-28 11:05:40"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4621.48,
-      "price_current": 4635.35,
+      "price_current": 4638.94,
       "sl": 0,
       "tp": 0,
-      "profit": 13.87,
+      "profit": 17.46,
       "swap": -3.27,
-      "pnl_net": 10.6,
+      "pnl_net": 14.19,
       "time_open": "2026-04-28 11:07:13"
     },
     {
@@ -78,12 +78,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4621.49,
-      "price_current": 4635.35,
+      "price_current": 4638.94,
       "sl": 0,
       "tp": 0,
-      "profit": 13.86,
+      "profit": 17.45,
       "swap": -3.27,
-      "pnl_net": 10.59,
+      "pnl_net": 14.18,
       "time_open": "2026-04-28 11:07:21"
     }
   ],
