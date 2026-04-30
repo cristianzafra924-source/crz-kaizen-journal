@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-30 16:48:26",
+  "timestamp": "2026-04-30 16:48:36",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 198108.52,
-    "equity": 198037.29,
+    "equity": 198039.92,
     "margin": 41721.32,
-    "margin_libre": 156315.97,
+    "margin_libre": 156318.6,
     "margin_nivel": 474.67,
-    "profit_abierto": -71.23,
+    "profit_abierto": -68.6,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 75390.41,
-      "price_current": 76504.98,
+      "price_current": 76485,
       "sl": 76693.66,
       "tp": 0,
-      "profit": -334.37,
+      "profit": -328.38,
       "swap": -17.66,
-      "pnl_net": -352.03,
+      "pnl_net": -346.04,
       "time_open": "2026-04-29 22:05:35"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.5,
       "price_open": 4623.75,
-      "price_current": 4618.13,
+      "price_current": 4616.79,
       "sl": 4591.68,
       "tp": 0,
-      "profit": -281,
+      "profit": -348,
       "swap": 0,
-      "pnl_net": -281,
+      "pnl_net": -348,
       "time_open": "2026-04-30 11:06:35"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 2,
       "price_open": 27370.59,
-      "price_current": 27198.43,
+      "price_current": 27182.52,
       "sl": 27365.6,
       "tp": 24990.78,
-      "profit": 344.32,
+      "profit": 376.14,
       "swap": 0,
-      "pnl_net": 344.32,
+      "pnl_net": 376.14,
       "time_open": "2026-04-30 16:14:21"
     },
     {
@@ -64,12 +64,12 @@
       "type": "sell",
       "volume": 2,
       "price_open": 27307.17,
-      "price_current": 27198.43,
+      "price_current": 27182.52,
       "sl": 27303.14,
       "tp": 24966.2,
-      "profit": 217.48,
+      "profit": 249.3,
       "swap": 0,
-      "pnl_net": 217.48,
+      "pnl_net": 249.3,
       "time_open": "2026-04-30 16:30:29"
     }
   ],
