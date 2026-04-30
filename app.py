@@ -2725,6 +2725,7 @@ if _nav == "monitor":
             st.session_state["news_status"] = f"ERR: {_e}"
 
     _articles = st.session_state.get("news_cache", [])
+    st.caption(f"DEBUG news: status={st.session_state.get('news_status','no-status')} | arts={len(_articles)}")
 
     # ── Header ───────────────────────────────────────────────────────────────
     _utc_str = _now_dt.strftime("%a %d %b %Y  %H:%M UTC")
