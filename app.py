@@ -2647,63 +2647,58 @@ if _nav == "monitor":
     import streamlit.components.v1 as _comp
     import json as _json
     import time as _time_m
-    import xml.etree.ElementTree as _ET
+    import re as _re
     from datetime import datetime as _dtnow, timezone as _utc
     from email.utils import parsedate_to_datetime as _pdt
 
     _ch_defs = [
-        ("Euronews",  "UCSrZ3UV4jOidv8ppoVuvW9Q", "#3b82f6"),
-        ("DW News",   "UCknLrEdhRCp1aegoMqRaCZg", "#6366f1"),
+        ("Euronews", "UCSrZ3UV4jOidv8ppoVuvW9Q", "#3b82f6"),
+        ("DW News",  "UCknLrEdhRCp1aegoMqRaCZg", "#6366f1"),
     ]
 
     _yt_key = st.secrets.get("YOUTUBE_API_KEY", "")
     _now_ts = _time_m.time()
     _now_dt = _dtnow.now(_utc.utc)
 
-    # ── YouTube IDs (30 min cache) ────────────────────────────────────────────
+    # YouTube IDs (30 min)
     if "yt_ch_cache" not in st.session_state or _now_ts - st.session_state.get("yt_ch_ts", 0) > 1800:
-        _ch_ids_fresh = {}
+        _ids = {}
         for _cn, _cid, _cc in _ch_defs:
+            _ids[_cid] = ""
             if _yt_key:
                 try:
-                    _yr = requests.get(
-                        "https://www.googleapis.com/youtube/v3/search",
-                        params={"part":"id","channelId":_cid,"type":"video",
-                                "eventType":"live","key":_yt_key,"maxResults":1},
+                    _yr = requests.get("https://www.googleapis.com/youtube/v3/search",
+                        params={"part":"id","channelId":_cid,"type":"video","eventType":"live","key":_yt_key,"maxResults":1},
                         timeout=8)
                     if _yr.status_code == 200:
                         _it = _yr.json().get("items", [])
-                        _ch_ids_fresh[_cid] = _it[0]["id"]["videoId"] if _it else ""
-                    else:
-                        _ch_ids_fresh[_cid] = ""
+                        _ids[_cid] = _it[0]["id"]["videoId"] if _it else ""
                 except Exception:
-                    _ch_ids_fresh[_cid] = ""
-            else:
-                _ch_ids_fresh[_cid] = ""
-        st.session_state["yt_ch_cache"] = _ch_ids_fresh
-        st.session_state["yt_ch_ts"] = _now_ts
+                    pass
+        st.session_state["yt_ch_cache"] = _ids
+        st.session_state["yt_ch_ts"]    = _now_ts
 
     _vid_map = st.session_state.get("yt_ch_cache", {})
     _ch_list = [{"name":_cn,"channelId":_cid,"videoId":_vid_map.get(_cid,""),"color":_cc}
                 for _cn, _cid, _cc in _ch_defs]
 
-    # ── Noticias RSS en español (10 min cache, server-side) ──────────────────
-    if "news_cache" not in st.session_state or _now_ts - st.session_state.get("news_ts", 0) > 600:
+    # Noticias RSS en español (10 min) — regex parse, sin XML
+    if "news_arts" not in st.session_state or _now_ts - st.session_state.get("news_ts", 0) > 600:
+        _arts = []
         try:
-            _gr = requests.get(
+            _rr = requests.get(
                 "https://news.google.com/rss/search"
                 "?q=guerra+conflicto+ucrania+israel+iran+sanciones+ataque+militar"
                 "&hl=es&gl=ES&ceid=ES:es",
-                headers={"User-Agent": "Mozilla/5.0"},
-                timeout=15)
-            if _gr.status_code == 200:
-                _root = _ET.fromstring(_gr.text)
-                _arts = []
-                for _item in _root.iter("item"):
-                    _title = _item.findtext("title", "")
-                    _url   = _item.findtext("link",  "#")
-                    _src   = _item.findtext("source", "")
-                    _pub   = _item.findtext("pubDate", "")
+                headers={"User-Agent":"Mozilla/5.0"}, timeout=15)
+            if _rr.status_code == 200:
+                for _item in _re.findall(r'<item>(.*?)</item>', _rr.text, _re.DOTALL):
+                    _t = _re.search(r'<title>(.*?)</title>', _item)
+                    _l = _re.search(r'<link>(.*?)</link>', _item)
+                    _s = _re.search(r'<source[^>]*>(.*?)</source>', _item)
+                    _p = _re.search(r'<pubDate>(.*?)</pubDate>', _item)
+                    if not _t: continue
+                    _pub = _p.group(1).strip() if _p else ""
                     try:
                         _dt   = _pdt(_pub)
                         _diff = round((_now_dt - _dt).total_seconds() / 60)
@@ -2713,30 +2708,26 @@ if _nav == "monitor":
                         else:             _ago = f"hace {round(_diff/1440)}d"
                     except Exception:
                         _ago = ""
-                    if _title:
-                        _arts.append({"title": _title[:120], "url": _url,
-                                      "src": _src[:40], "ago": _ago})
-                st.session_state["news_cache"]  = _arts
-                st.session_state["news_ts"]     = _now_ts
-                st.session_state["news_status"] = f"OK ({len(_arts)} noticias)"
-            else:
-                st.session_state["news_status"] = f"HTTP {_gr.status_code}"
-        except Exception as _e:
-            st.session_state["news_status"] = f"ERR: {_e}"
+                    _arts.append({"title": _t.group(1).strip()[:120],
+                                  "url":   _l.group(1).strip() if _l else "#",
+                                  "src":   _s.group(1).strip()[:40] if _s else "",
+                                  "ago":   _ago})
+        except Exception:
+            pass
+        st.session_state["news_arts"] = _arts
+        st.session_state["news_ts"]   = _now_ts
 
-    _articles = st.session_state.get("news_cache", [])
-    st.caption(f"DEBUG news: status={st.session_state.get('news_status','no-status')} | arts={len(_articles)}")
+    _articles = st.session_state.get("news_arts", [])
 
-    # ── Header ───────────────────────────────────────────────────────────────
+    # Header
     _utc_str = _now_dt.strftime("%a %d %b %Y  %H:%M UTC")
     st.markdown(f"""
 <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;
      background:#060d1a;border:1px solid #0f1f35;border-radius:8px;margin-bottom:12px;">
-  <div style="width:8px;height:8px;background:#ef4444;border-radius:50%;
-       box-shadow:0 0 8px #ef4444;"></div>
+  <div style="width:8px;height:8px;background:#ef4444;border-radius:50%;box-shadow:0 0 8px #ef4444;"></div>
   <span style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;">MONITOR GLOBAL</span>
   <span style="color:#1e2a3a;">|</span>
-  <span style="font-size:9px;color:#334155;">News: {st.session_state.get('news_status','—')} · YT: {'OK' if _yt_key else 'sin key'}</span>
+  <span style="font-size:9px;color:#334155;">Noticias: {len(_articles)} · YT: {'OK' if _yt_key else 'sin key'}</span>
   <span style="font-size:10px;color:#475569;margin-left:auto;">{_utc_str}</span>
 </div>""", unsafe_allow_html=True)
 
@@ -2760,103 +2751,85 @@ if _nav == "monitor":
         _comp.iframe(_map_url, height=680)
 
     with _col_right:
-        _ch_json  = _json.dumps(_ch_list,    ensure_ascii=True)
-        _art_json = _json.dumps(_articles,   ensure_ascii=True)
+        _ch_json  = _json.dumps(_ch_list,  ensure_ascii=True)
+        _art_json = _json.dumps(_articles, ensure_ascii=True)
 
         _panel_html = (
             '<!DOCTYPE html><html><head><meta charset="utf-8"><style>'
             '*{margin:0;padding:0;box-sizing:border-box}'
-            'body{background:#060d1a;font-family:system-ui,sans-serif;color:#e2e8f0;'
-            'height:705px;overflow:hidden;display:flex;flex-direction:column}'
-            '.chtabs{display:flex;gap:3px;padding:7px;flex-shrink:0;border-bottom:1px solid #0f1f35}'
-            '.chtab{padding:4px 14px;font-size:9px;font-weight:700;border-radius:4px;cursor:pointer;'
-            'border:1px solid #1e2a3a;color:#475569;background:#0a1020;transition:all .12s;white-space:nowrap}'
-            '.chtab:hover{color:#e2e8f0;border-color:#475569}'
-            '.chtab.active{color:#060d1a;border-color:var(--c);background:var(--c)}'
-            '.player{width:100%;height:235px;background:#000;flex-shrink:0}'
-            '.player iframe{width:100%;height:235px;border:none;display:block}'
-            '.note{font-size:9px;color:#475569;padding:2px 9px;flex-shrink:0;'
-            'border-bottom:1px solid #0f1f35;min-height:16px;background:#060d1a}'
-            '.sectabs{display:flex;flex-shrink:0;border-bottom:1px solid #0f1f35}'
-            '.stab{flex:1;padding:5px 0;text-align:center;font-size:9px;font-weight:700;'
-            'cursor:pointer;color:#475569;background:#060d1a;border-right:1px solid #0f1f35;transition:color .12s}'
-            '.stab:last-child{border-right:none}'
-            '.stab.on{color:#2dd4bf;border-bottom:2px solid #2dd4bf}'
-            '.filters{display:flex;flex-wrap:wrap;gap:3px;padding:5px 7px;'
-            'flex-shrink:0;border-bottom:1px solid #0f1f35}'
-            '.filt{padding:2px 9px;font-size:8px;font-weight:700;border-radius:99px;cursor:pointer;'
-            'border:1px solid #1e2a3a;color:#475569;background:#0a1020;transition:all .1s}'
-            '.filt.on{color:#060d1a;background:#2dd4bf;border-color:#2dd4bf}'
+            'body{background:#060d1a;font-family:system-ui,sans-serif;color:#e2e8f0;height:705px;overflow:hidden;display:flex;flex-direction:column}'
+            '.cht{display:flex;gap:3px;padding:7px;flex-shrink:0;border-bottom:1px solid #0f1f35}'
+            '.ch{padding:4px 14px;font-size:9px;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #1e2a3a;color:#475569;background:#0a1020;transition:all .12s;white-space:nowrap}'
+            '.ch:hover{color:#e2e8f0}.ch.on{color:#060d1a;border-color:var(--c);background:var(--c)}'
+            '.pl{width:100%;height:235px;background:#000;flex-shrink:0}'
+            '.pl iframe{width:100%;height:235px;border:none;display:block}'
+            '.nt{font-size:9px;color:#475569;padding:2px 9px;flex-shrink:0;border-bottom:1px solid #0f1f35;min-height:16px;background:#060d1a}'
+            '.st{display:flex;flex-shrink:0;border-bottom:1px solid #0f1f35}'
+            '.s{flex:1;padding:5px 0;text-align:center;font-size:9px;font-weight:700;cursor:pointer;color:#475569;background:#060d1a;border-right:1px solid #0f1f35;transition:color .12s}'
+            '.s:last-child{border-right:none}.s.on{color:#2dd4bf;border-bottom:2px solid #2dd4bf}'
+            '.fb{display:flex;flex-wrap:wrap;gap:3px;padding:5px 7px;flex-shrink:0;border-bottom:1px solid #0f1f35}'
+            '.f{padding:2px 8px;font-size:8px;font-weight:700;border-radius:99px;cursor:pointer;border:1px solid #1e2a3a;color:#475569;background:#0a1020;transition:all .1s}'
+            '.f.on{color:#060d1a;background:#2dd4bf;border-color:#2dd4bf}'
             '.feed{flex:1;overflow-y:auto;padding:4px 8px 8px}'
-            '.feed::-webkit-scrollbar{width:3px}'
-            '.feed::-webkit-scrollbar-thumb{background:#1e2a3a;border-radius:99px}'
-            '.card{padding:7px 9px;margin-bottom:4px;background:#0a1020;'
-            'border-radius:5px;border-left:3px solid #475569}'
+            '.feed::-webkit-scrollbar{width:3px}.feed::-webkit-scrollbar-thumb{background:#1e2a3a;border-radius:99px}'
+            '.card{padding:7px 9px;margin-bottom:4px;background:#0a1020;border-radius:5px;border-left:3px solid #475569}'
             '.card a{font-size:11px;color:#cbd5e1;text-decoration:none;line-height:1.4;display:block;font-weight:500}'
             '.card a:hover{color:#38bdf8}'
             '.meta{display:flex;align-items:center;gap:5px;margin-top:4px}'
             '.dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}'
             '.src{font-size:9px;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}'
             '.when{font-size:9px;color:#2dd4bf;flex-shrink:0;font-weight:600}'
-            '.tw-sec{flex:1;overflow-y:auto;display:none;background:#060d1a}'
-            '.tw-sec iframe{width:100%;height:100%;border:none;display:block}'
+            '.tw{flex:1;overflow:hidden;display:none}'
+            '.tw iframe{width:100%;height:100%;border:none;display:block}'
             '</style></head><body>'
-            '<div class="chtabs" id="chtabs"></div>'
-            '<div class="player"><iframe id="yt" allowfullscreen '
-            'allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture"></iframe></div>'
-            '<div class="note" id="note"></div>'
-            '<div class="sectabs">'
-            '<div class="stab on" id="stab-news" onclick="showSec(\'news\')">NOTICIAS GLOBALES</div>'
-            '<div class="stab" id="stab-tw" onclick="showSec(\'tw\')">&#120143; TRUMP LIVE</div>'
+            '<div class="cht" id="cht"></div>'
+            '<div class="pl"><iframe id="yt" allowfullscreen allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture"></iframe></div>'
+            '<div class="nt" id="nt"></div>'
+            '<div class="st">'
+            '<div class="s on" id="sn" onclick="sec(\'n\')">NOTICIAS GLOBALES</div>'
+            '<div class="s" id="st" onclick="sec(\'t\')">&#120143; TRUMP LIVE</div>'
             '</div>'
-            '<div class="filters" id="filtersbar">'
-            '<span class="filt on" data-k="" onclick="filt(this)">Todo</span>'
-            '<span class="filt" data-k="guerra,war,conflict,ataque,attack,strike,killed,muerto" onclick="filt(this)">Guerra</span>'
-            '<span class="filt" data-k="ucrania,ukraine,rusia,russia,putin" onclick="filt(this)">Ucrania</span>'
-            '<span class="filt" data-k="israel,gaza,palestin,libano,hamas,iran,siria" onclick="filt(this)">Or.Medio</span>'
-            '<span class="filt" data-k="petroleo,petróleo,oil,gas,energía,energia,energy" onclick="filt(this)">Energía</span>'
-            '<span class="filt" data-k="sancion,sanción,sanction,arancel,tariff" onclick="filt(this)">Sanciones</span>'
-            '<span class="filt" data-k="trump,eeuu,estados unidos,washington,fed" onclick="filt(this)">EEUU</span>'
+            '<div class="fb" id="fb">'
+            '<span class="f on" data-k="" onclick="fil(this)">Todo</span>'
+            '<span class="f" data-k="guerra,war,conflict,ataque,attack,strike,killed,muerto" onclick="fil(this)">Guerra</span>'
+            '<span class="f" data-k="ucrania,ukraine,rusia,russia,putin" onclick="fil(this)">Ucrania</span>'
+            '<span class="f" data-k="israel,gaza,palestin,libano,hamas,iran,siria" onclick="fil(this)">Or.Medio</span>'
+            '<span class="f" data-k="petroleo,oil,gas,energia,energy" onclick="fil(this)">Energía</span>'
+            '<span class="f" data-k="sancion,sanction,arancel,tariff" onclick="fil(this)">Sanciones</span>'
+            '<span class="f" data-k="trump,eeuu,estados unidos,washington,fed" onclick="fil(this)">EEUU</span>'
             '</div>'
-            '<div class="feed" id="sec-news"></div>'
-            '<div class="tw-sec" id="sec-tw">'
-            '<iframe src="https://syndication.twitter.com/srv/timeline-profile/screen-name/realDonaldTrump'
-            '?dnt=true&theme=dark&chrome=noheader%20nofooter%20noborders%20transparent"></iframe>'
+            '<div class="feed" id="fn"></div>'
+            '<div class="tw" id="ft">'
+            '<iframe src="https://syndication.twitter.com/srv/timeline-profile/screen-name/realDonaldTrump?dnt=true&theme=dark&chrome=noheader%20nofooter%20noborders%20transparent"></iframe>'
             '</div>'
             '<script>'
-            'var CHS='  + _ch_json  + ';'
+            'var CHS=' + _ch_json + ';'
             'var ARTS=' + _art_json + ';'
             'var CUR="";'
-            'var tabsEl=document.getElementById("chtabs");'
+            'var cht=document.getElementById("cht");'
             'CHS.forEach(function(ch,i){'
-            '  var t=document.createElement("div");'
-            '  t.className="chtab"+(i===0?" active":"");'
+            '  var t=document.createElement("div");t.className="ch"+(i===0?" on":"");'
             '  t.textContent=ch.name;t.style.setProperty("--c",ch.color);'
-            '  t.onclick=function(){'
-            '    document.querySelectorAll(".chtab").forEach(function(x){x.classList.remove("active");});'
-            '    t.classList.add("active");loadVideo(ch);};tabsEl.appendChild(t);'
-            '});'
-            'function loadVideo(ch){'
-            '  var yt=document.getElementById("yt"),note=document.getElementById("note");'
-            '  yt.src=ch.videoId&&ch.videoId.length===11'
+            '  t.onclick=function(){document.querySelectorAll(".ch").forEach(function(x){x.classList.remove("on");});'
+            '    t.classList.add("on");play(ch);};cht.appendChild(t);});'
+            'function play(ch){'
+            '  var y=document.getElementById("yt"),n=document.getElementById("nt");'
+            '  y.src=ch.videoId&&ch.videoId.length===11'
             '    ?"https://www.youtube-nocookie.com/embed/"+ch.videoId+"?autoplay=1&rel=0&modestbranding=1"'
             '    :"https://www.youtube-nocookie.com/embed/live_stream?channel="+ch.channelId+"&autoplay=1&rel=0&modestbranding=1";'
-            '  note.textContent=ch.videoId&&ch.videoId.length===11?"EN VIVO":"Stream directo";'
-            '}'
-            'if(CHS.length>0)loadVideo(CHS[0]);'
-            'function showSec(s){'
-            '  var n=s==="news";'
-            '  document.getElementById("sec-news").style.display=n?"block":"none";'
-            '  document.getElementById("sec-tw").style.display=n?"none":"block";'
-            '  document.getElementById("filtersbar").style.display=n?"flex":"none";'
-            '  document.getElementById("stab-news").className="stab"+(n?" on":"");'
-            '  document.getElementById("stab-tw").className="stab"+(!n?" on":"");'
-            '}'
-            'function filt(el){'
-            '  document.querySelectorAll(".filt").forEach(function(x){x.classList.remove("on");});'
-            '  el.classList.add("on");CUR=el.dataset.k||"";render();'
-            '}'
-            'function getC(t){'
+            '  n.textContent=ch.videoId&&ch.videoId.length===11?"EN VIVO":"Stream directo";}'
+            'if(CHS.length)play(CHS[0]);'
+            'function sec(s){'
+            '  var n=s==="n";'
+            '  document.getElementById("fn").style.display=n?"block":"none";'
+            '  document.getElementById("ft").style.display=n?"none":"block";'
+            '  document.getElementById("fb").style.display=n?"flex":"none";'
+            '  document.getElementById("sn").className="s"+(n?" on":"");'
+            '  document.getElementById("st").className="s"+(!n?" on":"");}'
+            'function fil(el){'
+            '  document.querySelectorAll(".f").forEach(function(x){x.classList.remove("on");});'
+            '  el.classList.add("on");CUR=el.dataset.k||"";rend();}'
+            'function col(t){'
             '  t=(t||"").toLowerCase();'
             '  var m={guerra:"#ef4444",war:"#ef4444",conflicto:"#ef4444",conflict:"#ef4444",'
             '    ataque:"#ef4444",attack:"#ef4444",strike:"#ef4444",killed:"#ef4444",muerto:"#ef4444",'
@@ -2865,30 +2838,24 @@ if _nav == "monitor":
             '    petroleo:"#eab308",oil:"#eab308",gas:"#eab308",energia:"#eab308",energy:"#eab308",'
             '    iran:"#ef4444",rusia:"#f97316",russia:"#f97316",ukraine:"#f97316",ucrania:"#f97316",'
             '    israel:"#f97316",gaza:"#ef4444",china:"#a855f7",nuclear:"#a855f7",trump:"#22c55e"};'
-            '  for(var k in m)if(t.indexOf(k)>=0)return m[k];return "#475569";'
-            '}'
-            'function render(){'
-            '  var el=document.getElementById("sec-news");'
+            '  for(var k in m)if(t.indexOf(k)>=0)return m[k];return "#475569";}'
+            'function rend(){'
+            '  var el=document.getElementById("fn");'
             '  var ks=CUR?CUR.split(","):[];'
             '  var arts=CUR?ARTS.filter(function(a){'
             '    var t=(a.title||"").toLowerCase();'
-            '    return ks.some(function(k){return t.indexOf(k.trim())>=0;});'
-            '  }):ARTS;'
+            '    return ks.some(function(k){return t.indexOf(k.trim())>=0;});}):ARTS;'
             '  if(!arts.length){el.innerHTML=\'<div style="color:#334155;font-size:10px;padding:12px;">Sin resultados</div>\';return;}'
             '  var h="";'
             '  arts.forEach(function(a){'
-            '    var c=getC(a.title);'
+            '    var c=col(a.title);'
             '    h+=\'<div class="card" style="border-left-color:\'+c+\'">\''
             '      +\'<a href="\'+a.url+\'" target="_blank">\'+a.title+\'</a>\''
             '      +\'<div class="meta"><div class="dot" style="background:\'+c+\'"></div>\''
             '      +\'<span class="src">\'+a.src+\'</span>\''
             '      +(a.ago?\'<span class="when">\'+a.ago+\'</span>\':"")'
-            '      +\'</div></div>\';'
-            '  });el.innerHTML=h;'
-            '}'
-            'if(ARTS&&ARTS.length)render();'
-            'else document.getElementById("sec-news").innerHTML=\'<div style="color:#334155;font-size:10px;padding:12px;">Sin noticias — recarga en 1 min</div>\';'
+            '      +\'</div></div>\';});el.innerHTML=h;}'
+            'rend();'
             '</script></body></html>'
         )
-
         _comp.html(_panel_html, height=705, scrolling=False)
