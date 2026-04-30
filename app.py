@@ -2524,71 +2524,52 @@ if _nav == "news":
 
 if _nav == "monitor":
     import streamlit.components.v1 as _comp
-    import xml.etree.ElementTree as _ET
     import json as _json
     from datetime import datetime as _dtnow, timezone as _utc
 
-    # ── Canales: RSS YouTube para obtener video ID actual ────────────────────
+    # Canales con ID de stream 24/7 fijo; None = usa live_stream?channel= como fallback
     _ch_defs = [
-        ("Bloomberg",  "UCIALMKvObZNtJ6AmdCLP7Lg", "#f59e0b"),
-        ("Sky News",   "UCoMdktPbSTixAyNGwb-UYkQ", "#0ea5e9"),
-        ("Euronews",   "UCSrZ3UV4jOidv8ppoVuvW9Q", "#3b82f6"),
-        ("DW News",    "UCknLrEdhRCp1aegoMqRaCZg", "#6366f1"),
-        ("CNBC",       "UCrp_UI8XA1V2T9T7bitAZKA", "#22c55e"),
-        ("CNN Intl",   "UCupvZG-5ko_eiXAupbDfxWw", "#ef4444"),
-        ("France 24",  "UCQfwfsi5VrQ8yKZ-UWmAEFg", "#f97316"),
-        ("Al Jazeera", "UCNye-wNBqNL5ZzHSJdpkDEA", "#2dd4bf"),
-        ("Al Arabiya", "UCi_lr_ysQEFA46MKKmKMtOg", "#a855f7"),
+        ("Bloomberg",  "UCIALMKvObZNtJ6AmdCLP7Lg", "dp8PhLsUcFE",  "#f59e0b"),
+        ("Sky News",   "UCoMdktPbSTixAyNGwb-UYkQ", "9Auq9mYxFEE",  "#0ea5e9"),
+        ("Euronews",   "UCSrZ3UV4jOidv8ppoVuvW9Q", "7qCECv0gGaM",  "#3b82f6"),
+        ("DW News",    "UCknLrEdhRCp1aegoMqRaCZg", "GfpIVAXA7gE",  "#6366f1"),
+        ("CNBC",       "UCrp_UI8XA1V2T9T7bitAZKA", "6WQKp91LVCQ",  "#22c55e"),
+        ("CNN Intl",   "UCupvZG-5ko_eiXAupbDfxWw", "aXaFerFsL7o",  "#ef4444"),
+        ("France 24",  "UCQfwfsi5VrQ8yKZ-UWmAEFg", "l8pmfNyEsqw",  "#f97316"),
+        ("Al Jazeera", "UCNye-wNBqNL5ZzHSJdpkDEA", "gCNeDWCI0vo",  "#2dd4bf"),
+        ("Al Arabiya", "UCi_lr_ysQEFA46MKKmKMtOg", None,           "#a855f7"),
+    ]
+    _ch_list = [
+        {"name": _cn, "channelId": _cid, "videoId": _vid or "", "color": _cc}
+        for _cn, _cid, _vid, _cc in _ch_defs
     ]
 
-    @st.cache_data(ttl=180)
-    def _get_ch_video(ch_id):
-        """Obtiene el ultimo video ID del canal via RSS."""
-        try:
-            _rss = requests.get(
-                f"https://www.youtube.com/feeds/videos.xml?channel_id={ch_id}",
-                timeout=8, headers={"User-Agent": "Mozilla/5.0"})
-            if _rss.status_code == 200:
-                _root = _ET.fromstring(_rss.content)
-                _ns = {"yt": "http://www.youtube.com/xml/schemas/2015",
-                       "atom": "http://www.w3.org/2005/Atom"}
-                for _entry in _root.findall("atom:entry", _ns):
-                    _vid = _entry.find("yt:videoId", _ns)
-                    if _vid is not None:
-                        return _vid.text
-        except Exception:
-            pass
-        return None
-
-    # Construir lista de canales con video IDs obtenidos via RSS
-    _ch_list = []
-    for _cn, _cid, _cc in _ch_defs:
-        _vid = _get_ch_video(_cid)
-        _ch_list.append({
-            "name": _cn,
-            "channelId": _cid,
-            "videoId": _vid or "",
-            "color": _cc
-        })
-
-    # ── GDELT desde Python (sin CORS) ────────────────────────────────────────
     @st.cache_data(ttl=300)
     def _get_gdelt_mon():
+        _base = "https://api.gdeltproject.org/api/v2/doc/doc"
+        _fmt  = "&mode=artlist&format=json&maxrecords=30&sort=DateDesc"
         try:
-            _gr = requests.get(
-                "https://api.gdeltproject.org/api/v2/doc/doc"
-                "?query=war+conflict+sanctions+military+attack"
-                "&mode=artlist&format=json&maxrecords=25&sort=DateDesc&timespan=12h",
-                timeout=12)
-            if _gr.status_code == 200:
-                return _gr.json().get("articles", [])
+            _r1 = requests.get(
+                _base + "?query=guerra+conflicto+sanciones+militar+ataque"
+                + "&sourcelang=Spanish" + _fmt + "&timespan=72h", timeout=12)
+            if _r1.status_code == 200:
+                _a1 = _r1.json().get("articles", [])
+                if _a1:
+                    return _a1
+        except Exception:
+            pass
+        try:
+            _r2 = requests.get(
+                _base + "?query=war+conflict+sanctions+military+attack"
+                + _fmt + "&timespan=12h", timeout=12)
+            if _r2.status_code == 200:
+                return _r2.json().get("articles", [])
         except Exception:
             pass
         return []
 
     _gdelt_arts = _get_gdelt_mon()
 
-    # ── Header ──────────────────────────────────────────────────────────────
     _utc_str = _dtnow.now(_utc.utc).strftime("%a %d %b %Y  %H:%M UTC")
     st.markdown(f"""
 <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;
@@ -2603,93 +2584,110 @@ if _nav == "monitor":
       stroke-dasharray="0 50" stroke-linecap="round" transform="rotate(-90 11 11)"/>
     <text x="11" y="15" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="700">5</text>
   </svg>
-  <span style="font-size:10px;font-weight:700;color:#22c55e;">DEFCON 5 &nbsp;·&nbsp; 0%</span>
+  <span style="font-size:10px;font-weight:700;color:#22c55e;">DEFCON 5</span>
   <span style="color:#1e2a3a;">|</span>
-  <span style="font-size:9px;color:#334155;">GDELT · ACLED · LiveUAMap</span>
+  <span style="font-size:9px;color:#334155;">GDELT · LiveUAMap</span>
   <span style="font-size:10px;color:#475569;margin-left:auto;">{_utc_str}</span>
 </div>""", unsafe_allow_html=True)
 
-    # ── Selector zona ────────────────────────────────────────────────────────
     _mon_maps = {
-        "🌍 Global / Ucrania": "https://liveuamap.com",
-        "🇸🇾 Siria":           "https://syria.liveuamap.com",
-        "🇱🇧 Líbano":          "https://lebanon.liveuamap.com",
-        "🇮🇷 Irán":            "https://iran.liveuamap.com",
-        "🇮🇱 Israel / Gaza":   "https://israel.liveuamap.com",
-        "🌏 Asia":             "https://asia.liveuamap.com",
+        "GLOBAL / Ucrania": "https://liveuamap.com",
+        "Siria":            "https://syria.liveuamap.com",
+        "Libano":           "https://lebanon.liveuamap.com",
+        "Iran":             "https://iran.liveuamap.com",
+        "Israel / Gaza":    "https://israel.liveuamap.com",
+        "Asia":             "https://asia.liveuamap.com",
     }
     _sel_map = st.selectbox("Zona del mapa", list(_mon_maps.keys()), key="mon_map")
     _map_url = _mon_maps[_sel_map]
 
-    # ── Layout ──────────────────────────────────────────────────────────────
     _col_map, _col_right = st.columns([6, 4])
 
     with _col_map:
-        st.markdown("<div style=\'font-size:8px;color:#ef4444;font-weight:700;"
-                    "letter-spacing:.15em;margin-bottom:4px;\'>🔴 SITUACION GLOBAL · EN VIVO</div>",
+        st.markdown("<div style='font-size:8px;color:#ef4444;font-weight:700;"
+                    "letter-spacing:.15em;margin-bottom:4px;'>SITUACION GLOBAL EN VIVO</div>",
                     unsafe_allow_html=True)
         _comp.iframe(_map_url, height=680)
 
     with _col_right:
-        # Serializar datos para inyectar en HTML
         _ch_json  = _json.dumps(_ch_list)
         _art_json = _json.dumps([{
-            "title": _a.get("title",""),
-            "url":   _a.get("url","#"),
-            "domain": _a.get("domain",""),
+            "title":   _a.get("title", ""),
+            "url":     _a.get("url", "#"),
+            "domain":  _a.get("domain", ""),
             "country": (_a.get("sourcecountry") or "??")[:2].upper(),
-            "seen":  _a.get("seendate",""),
+            "seen":    _a.get("seendate", ""),
         } for _a in _gdelt_arts])
 
         _panel_html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <style>
 *{{margin:0;padding:0;box-sizing:border-box;}}
-body{{background:#060d1a;font-family:Inter,sans-serif;color:#e2e8f0;height:700px;overflow:hidden;display:flex;flex-direction:column;}}
-.tabs{{display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:#060d1a;flex-shrink:0;}}
-.tab{{padding:4px 8px;font-size:9px;font-weight:700;letter-spacing:.06em;border-radius:4px;
-      cursor:pointer;border:1px solid #1e2a3a;color:#64748b;background:#0a1020;transition:all .15s;}}
+body{{background:#060d1a;font-family:system-ui,sans-serif;color:#e2e8f0;
+      height:705px;overflow:hidden;display:flex;flex-direction:column;}}
+.tabs{{display:flex;flex-wrap:wrap;gap:3px;padding:7px;background:#060d1a;
+       flex-shrink:0;border-bottom:1px solid #0f1f35;}}
+.tab{{padding:4px 7px;font-size:9px;font-weight:700;letter-spacing:.05em;
+      border-radius:4px;cursor:pointer;border:1px solid #1e2a3a;
+      color:#475569;background:#0a1020;transition:all .12s;white-space:nowrap;}}
 .tab:hover{{color:#e2e8f0;border-color:#475569;}}
 .tab.active{{color:#060d1a;border-color:var(--c);background:var(--c);}}
-.player{{width:100%;height:250px;background:#000;flex-shrink:0;border-top:1px solid #0f1f35;border-bottom:1px solid #0f1f35;}}
-.player iframe{{width:100%;height:250px;border:none;}}
-.note{{font-size:9px;color:#334155;padding:3px 8px;background:#060d1a;flex-shrink:0;}}
-.fhdr{{font-size:8px;color:#f97316;font-weight:700;letter-spacing:.15em;padding:7px 8px 4px;flex-shrink:0;}}
-.feed{{flex:1;overflow-y:auto;padding:0 8px 8px;}}
+.player{{width:100%;height:230px;background:#000;flex-shrink:0;}}
+.player iframe{{width:100%;height:230px;border:none;display:block;}}
+.note{{font-size:9px;color:#475569;padding:3px 9px;background:#060d1a;
+       flex-shrink:0;border-bottom:1px solid #0f1f35;min-height:20px;}}
+.fhdr{{font-size:8px;color:#f97316;font-weight:700;letter-spacing:.14em;
+       padding:6px 9px 4px;flex-shrink:0;}}
+.feed{{flex:1;overflow-y:auto;padding:4px 8px 8px;}}
 .feed::-webkit-scrollbar{{width:3px;}}
-.feed::-webkit-scrollbar-thumb{{background:#1e2a3a;border-radius:2px;}}
-.item{{padding:6px 8px;margin-bottom:4px;background:#0a1020;border-radius:4px;border-left:2px solid #ef4444;}}
-.item a{{font-size:10px;color:#cbd5e1;text-decoration:none;line-height:1.4;display:block;}}
-.item a:hover{{color:#2dd4bf;}}
-.meta{{font-size:8px;color:#334155;margin-top:2px;}}
-.tag{{font-size:7px;font-weight:700;padding:1px 3px;border-radius:2px;margin-right:3px;}}
+.feed::-webkit-scrollbar-thumb{{background:#1e2a3a;border-radius:99px;}}
+.card{{padding:8px 10px;margin-bottom:5px;background:#0a1020;
+       border-radius:5px;border-left:3px solid #475569;}}
+.card a{{font-size:12px;color:#cbd5e1;text-decoration:none;
+          line-height:1.45;display:block;font-weight:500;}}
+.card a:hover{{color:#38bdf8;}}
+.meta{{display:flex;align-items:center;gap:5px;margin-top:4px;}}
+.badge{{font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0;}}
+.src{{font-size:9px;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}}
+.ago{{font-size:9px;color:#1e3a5f;margin-left:auto;flex-shrink:0;}}
 </style>
 </head><body>
 <div class="tabs" id="tabs"></div>
 <div class="player"><iframe id="yt" allowfullscreen
-  allow="accelerometer;autoplay;encrypted-media;picture-in-picture"></iframe></div>
+  allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture"></iframe></div>
 <div class="note" id="note"></div>
-<div class="fhdr">⚡ ALERTAS GDELT · TIEMPO REAL</div>
+<div class="fhdr">NOTICIAS EN TIEMPO REAL</div>
 <div class="feed" id="feed"></div>
 <script>
 var CHS={_ch_json};
 var ARTS={_art_json};
-
-var kc={{war:'#ef4444',conflict:'#ef4444',attack:'#ef4444',kill:'#ef4444',
-         military:'#f97316',sanction:'#f97316',missile:'#f97316',
-         oil:'#eab308',gas:'#eab308',energy:'#eab308',
-         iran:'#ef4444',russia:'#f97316',ukraine:'#f97316',
-         china:'#a855f7',nuclear:'#a855f7'}};
-function getC(t){{t=(t||'').toLowerCase();for(var k in kc){{if(t.indexOf(k)>=0)return kc[k];}}return'#475569';}}
+var KW={{
+  guerra:'#ef4444',conflicto:'#ef4444',ataque:'#ef4444',bombardeo:'#ef4444',muertos:'#ef4444',
+  war:'#ef4444',conflict:'#ef4444',attack:'#ef4444',kill:'#ef4444',dead:'#ef4444',strike:'#ef4444',
+  militar:'#f97316',sancion:'#f97316',misil:'#f97316',tropas:'#f97316',
+  military:'#f97316',sanction:'#f97316',missile:'#f97316',troops:'#f97316',
+  petroleo:'#eab308',energia:'#eab308',oil:'#eab308',gas:'#eab308',energy:'#eab308',
+  iran:'#ef4444',rusia:'#f97316',ukraine:'#f97316',ucrania:'#f97316',
+  israel:'#f97316',gaza:'#ef4444',hamas:'#ef4444',
+  china:'#a855f7',nuclear:'#a855f7',bomba:'#ef4444',bomb:'#ef4444'
+}};
+function getC(t){{
+  t=(t||'').toLowerCase();
+  for(var k in KW){{if(t.indexOf(k)>=0)return KW[k];}}
+  return '#475569';
+}}
 function ago(s){{
+  if(!s||s.length<13)return '';
   try{{
-    var d=new Date(s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8)+'T'+s.slice(9,11)+':'+s.slice(11,13)+':00Z');
+    var d=new Date(s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8)+
+                  'T'+s.slice(9,11)+':'+s.slice(11,13)+':00Z');
     var h=Math.round((Date.now()-d)/3600000);
-    return h<=0?'Ahora':h+'h';
-  }}catch(e){{return'';}}
+    if(h<=0)return 'Ahora';
+    if(h<24)return h+'h';
+    return Math.round(h/24)+'d';
+  }}catch(e){{return '';}}
 }}
 
-// Build channel tabs
 var tabsEl=document.getElementById('tabs');
 CHS.forEach(function(ch,i){{
   var t=document.createElement('div');
@@ -2712,25 +2710,26 @@ function loadVideo(ch){{
     note.textContent='';
   }}else{{
     yt.src='https://www.youtube-nocookie.com/embed/live_stream?channel='+ch.channelId+'&rel=0&modestbranding=1';
-    note.textContent='⚠️ Video en vivo — si no carga, el canal no emite ahora.';
+    note.textContent='Si no carga, el canal no esta emitiendo ahora.';
   }}
 }}
+if(CHS.length>0)loadVideo(CHS[0]);
 
-// Load first channel
-if(CHS.length>0) loadVideo(CHS[0]);
-
-// Render GDELT articles (datos ya cargados desde Python)
 var feedEl=document.getElementById('feed');
 if(!ARTS||ARTS.length===0){{
-  feedEl.innerHTML='<span style="color:#334155;font-size:10px;">Sin alertas recientes.</span>';
+  feedEl.innerHTML='<div style="color:#334155;font-size:11px;padding:16px;">Sin noticias. Los datos se actualizan cada 5 min.</div>';
 }}else{{
   var h='';
   ARTS.forEach(function(a){{
     var c=getC(a.title);
-    h+='<div class="item" style="border-left-color:'+c+'">'+
-       '<a href="'+a.url+'" target="_blank">'+a.title+'</a>'+
-       '<div class="meta"><span class="tag" style="background:'+c+'22;color:'+c+'">'+
-       a.country+'</span>'+a.domain+' · '+ago(a.seen)+'</div></div>';
+    var tm=ago(a.seen);
+    h+='<div class="card" style="border-left-color:'+c+'">'
+      +'<a href="'+a.url+'" target="_blank">'+a.title+'</a>'
+      +'<div class="meta">'
+      +'<span class="badge" style="background:'+c+'22;color:'+c+'">'+a.country+'</span>'
+      +'<span class="src">'+a.domain+'</span>'
+      +(tm?'<span class="ago">'+tm+'</span>':'')
+      +'</div></div>';
   }});
   feedEl.innerHTML=h;
 }}
