@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-30 09:47:05",
+  "timestamp": "2026-04-30 09:47:15",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 198707.76,
-    "equity": 197460.01,
+    "equity": 197499.51,
     "margin": 40385.27,
-    "margin_libre": 157074.74,
-    "margin_nivel": 488.94,
-    "profit_abierto": -1247.75,
+    "margin_libre": 157114.24,
+    "margin_nivel": 489.04,
+    "profit_abierto": -1208.25,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4598.19,
-      "price_current": 4576.48,
+      "price_current": 4576.83,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -260.52,
+      "profit": -256.32,
       "swap": -47.92,
-      "pnl_net": -308.44,
+      "pnl_net": -304.24,
       "time_open": "2026-04-28 15:20:46"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.12,
       "price_open": 4584.13,
-      "price_current": 4576.48,
+      "price_current": 4576.83,
       "sl": 4485.69,
       "tp": 0,
-      "profit": -91.8,
+      "profit": -87.6,
       "swap": -47.92,
-      "pnl_net": -139.72,
+      "pnl_net": -135.52,
       "time_open": "2026-04-28 18:52:26"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.3,
       "price_open": 75390.41,
-      "price_current": 75709.51,
+      "price_current": 75698.52,
       "sl": 76693.66,
       "tp": 0,
-      "profit": -95.73,
+      "profit": -92.43,
       "swap": -17.66,
-      "pnl_net": -113.39,
+      "pnl_net": -110.09,
       "time_open": "2026-04-29 22:05:35"
     },
     {
@@ -64,12 +64,12 @@
       "type": "sell",
       "volume": 10,
       "price_open": 27073.36,
-      "price_current": 27141.98,
+      "price_current": 27139.2,
       "sl": 27229.65,
       "tp": 24927.62,
-      "profit": -686.2,
+      "profit": -658.4,
       "swap": 0,
-      "pnl_net": -686.2,
+      "pnl_net": -658.4,
       "time_open": "2026-04-30 09:08:44"
     }
   ],
