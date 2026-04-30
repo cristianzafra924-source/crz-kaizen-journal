@@ -2646,48 +2646,21 @@ if _nav == "news":
 if _nav == "monitor":
     import streamlit.components.v1 as _comp
     import json as _json
-    import re as _re
     from datetime import datetime as _dtnow, timezone as _utc
 
-    # Canales: (nombre, channel_id, yt_handle, color)
     _ch_defs = [
-        ("Bloomberg",  "UCIALMKvObZNtJ6AmdCLP7Lg", "Bloomberg",        "#f59e0b"),
-        ("Sky News",   "UCoMdktPbSTixAyNGwb-UYkQ", "SkyNews",          "#0ea5e9"),
-        ("Euronews",   "UCSrZ3UV4jOidv8ppoVuvW9Q", "euronews",         "#3b82f6"),
-        ("DW News",    "UCknLrEdhRCp1aegoMqRaCZg", "dwnews",           "#6366f1"),
-        ("CNBC",       "UCrp_UI8XA1V2T9T7bitAZKA", "CNBCi",            "#22c55e"),
-        ("CNN Intl",   "UCupvZG-5ko_eiXAupbDfxWw", "cnni",             "#ef4444"),
-        ("France 24",  "UCQfwfsi5VrQ8yKZ-UWmAEFg", "France24_en",     "#f97316"),
-        ("Al Jazeera", "UCNye-wNBqNL5ZzHSJdpkDEA", "aljazeeraenglish", "#2dd4bf"),
-        ("Al Arabiya", "UCi_lr_ysQEFA46MKKmKMtOg", "AlArabiya",        "#a855f7"),
+        ("Bloomberg",  "UCIALMKvObZNtJ6AmdCLP7Lg", "#f59e0b"),
+        ("Sky News",   "UCoMdktPbSTixAyNGwb-UYkQ", "#0ea5e9"),
+        ("Euronews",   "UCSrZ3UV4jOidv8ppoVuvW9Q", "#3b82f6"),
+        ("DW News",    "UCknLrEdhRCp1aegoMqRaCZg", "#6366f1"),
+        ("CNBC",       "UCrp_UI8XA1V2T9T7bitAZKA", "#22c55e"),
+        ("CNN Intl",   "UCupvZG-5ko_eiXAupbDfxWw", "#ef4444"),
+        ("France 24",  "UCQfwfsi5VrQ8yKZ-UWmAEFg", "#f97316"),
+        ("Al Jazeera", "UCNye-wNBqNL5ZzHSJdpkDEA", "#2dd4bf"),
+        ("Al Arabiya", "UCi_lr_ysQEFA46MKKmKMtOg", "#a855f7"),
     ]
-
-    @st.cache_data(ttl=7200)
-    def _get_live_id(handle, ch_id):
-        """Obtiene video ID del live actual scrapeando la pagina del canal."""
-        _hdrs = {
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Cookie": "CONSENT=YES+cb; SOCS=CAISNQgDEitib3FfaWRlbnRpdHlmcm9udGVuZHVpeGxpYl8yMDIzMDgyOF9SQzI",
-        }
-        for _url in [
-            f"https://www.youtube.com/@{handle}/live",
-            f"https://www.youtube.com/channel/{ch_id}/live",
-        ]:
-            try:
-                _r = requests.get(_url, timeout=10, headers=_hdrs, allow_redirects=True)
-                if _r.status_code == 200 and "consent.youtube" not in _r.url:
-                    _vids = _re.findall(r'"videoId":"([-_a-zA-Z0-9]{11})"', _r.text)
-                    if _vids:
-                        return _vids[0]
-            except Exception:
-                pass
-        return ""
-
-    _ch_list = []
-    for _cn, _cid, _handle, _cc in _ch_defs:
-        _vid = _get_live_id(_handle, _cid)
-        _ch_list.append({"name": _cn, "channelId": _cid, "videoId": _vid, "color": _cc})
+    _ch_list = [{"name": _cn, "channelId": _cid, "color": _cc}
+                for _cn, _cid, _cc in _ch_defs]
 
     @st.cache_data(ttl=600)
     def _get_gdelt_mon():
@@ -2698,28 +2671,27 @@ if _nav == "monitor":
                 "&mode=artlist&format=json&maxrecords=30&sort=DateDesc&timespan=14d",
                 timeout=20)
             if _r.status_code == 200:
-                return _r.json().get("articles", [])
-        except Exception:
-            pass
-        return []
+                _arts = _r.json().get("articles", [])
+                return _arts, _r.status_code, len(_arts)
+            return [], _r.status_code, 0
+        except Exception as _ex:
+            return [], 0, str(_ex)
 
-    _gdelt_arts = _get_gdelt_mon()
+    _gdelt_result = _get_gdelt_mon()
+    _gdelt_arts   = _gdelt_result[0]
+    _gdelt_status = _gdelt_result[1]
+    _gdelt_count  = _gdelt_result[2]
+
+    if _gdelt_status != 200 or not _gdelt_arts:
+        st.caption(f"DEBUG GDELT: status={_gdelt_status} | count={_gdelt_count}")
 
     _utc_str = _dtnow.now(_utc.utc).strftime("%a %d %b %Y  %H:%M UTC")
     st.markdown(f"""
 <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;
      background:#060d1a;border:1px solid #0f1f35;border-radius:8px;margin-bottom:12px;">
   <div style="width:8px;height:8px;background:#ef4444;border-radius:50%;
-       box-shadow:0 0 8px #ef4444;flex-shrink:0;"></div>
+       box-shadow:0 0 8px #ef4444;"></div>
   <span style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;">MONITOR GLOBAL</span>
-  <span style="color:#1e2a3a;">|</span>
-  <svg width="22" height="22" viewBox="0 0 22 22" style="flex-shrink:0">
-    <circle cx="11" cy="11" r="8" fill="none" stroke="#1e2a3a" stroke-width="2.5"/>
-    <circle cx="11" cy="11" r="8" fill="none" stroke="#22c55e" stroke-width="2.5"
-      stroke-dasharray="0 50" stroke-linecap="round" transform="rotate(-90 11 11)"/>
-    <text x="11" y="15" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="700">5</text>
-  </svg>
-  <span style="font-size:10px;font-weight:700;color:#22c55e;">DEFCON 5</span>
   <span style="color:#1e2a3a;">|</span>
   <span style="font-size:9px;color:#334155;">GDELT · LiveUAMap</span>
   <span style="font-size:10px;color:#475569;margin-left:auto;">{_utc_str}</span>
@@ -2745,129 +2717,119 @@ if _nav == "monitor":
         _comp.iframe(_map_url, height=680)
 
     with _col_right:
-        _ch_json  = _json.dumps(_ch_list)
+        _ch_json  = _json.dumps(_ch_list, ensure_ascii=True)
         _art_json = _json.dumps([{
-            "title":   _a.get("title", ""),
+            "title":   _a.get("title", "")[:120],
             "url":     _a.get("url", "#"),
             "domain":  _a.get("domain", ""),
             "country": (_a.get("sourcecountry") or "??")[:2].upper(),
             "seen":    _a.get("seendate", ""),
-        } for _a in _gdelt_arts])
+        } for _a in _gdelt_arts], ensure_ascii=True)
 
-        _panel_html = f"""<!DOCTYPE html>
-<html><head><meta charset="utf-8">
-<style>
-*{{margin:0;padding:0;box-sizing:border-box;}}
-body{{background:#060d1a;font-family:system-ui,sans-serif;color:#e2e8f0;
-      height:705px;overflow:hidden;display:flex;flex-direction:column;}}
-.tabs{{display:flex;flex-wrap:wrap;gap:3px;padding:7px;background:#060d1a;
-       flex-shrink:0;border-bottom:1px solid #0f1f35;}}
-.tab{{padding:4px 7px;font-size:9px;font-weight:700;letter-spacing:.05em;
-      border-radius:4px;cursor:pointer;border:1px solid #1e2a3a;
-      color:#475569;background:#0a1020;transition:all .12s;white-space:nowrap;}}
-.tab:hover{{color:#e2e8f0;border-color:#475569;}}
-.tab.active{{color:#060d1a;border-color:var(--c);background:var(--c);}}
-.player{{width:100%;height:230px;background:#000;flex-shrink:0;}}
-.player iframe{{width:100%;height:230px;border:none;display:block;}}
-.note{{font-size:9px;color:#475569;padding:3px 9px;background:#060d1a;
-       flex-shrink:0;border-bottom:1px solid #0f1f35;min-height:20px;}}
-.fhdr{{font-size:8px;color:#f97316;font-weight:700;letter-spacing:.14em;
-       padding:6px 9px 4px;flex-shrink:0;}}
-.feed{{flex:1;overflow-y:auto;padding:4px 8px 8px;}}
-.feed::-webkit-scrollbar{{width:3px;}}
-.feed::-webkit-scrollbar-thumb{{background:#1e2a3a;border-radius:99px;}}
-.card{{padding:8px 10px;margin-bottom:5px;background:#0a1020;
-       border-radius:5px;border-left:3px solid #475569;}}
-.card a{{font-size:12px;color:#cbd5e1;text-decoration:none;
-          line-height:1.45;display:block;font-weight:500;}}
-.card a:hover{{color:#38bdf8;}}
-.meta{{display:flex;align-items:center;gap:5px;margin-top:4px;}}
-.badge{{font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0;}}
-.src{{font-size:9px;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}}
-.ago{{font-size:9px;color:#1e3a5f;margin-left:auto;flex-shrink:0;}}
-</style>
-</head><body>
-<div class="tabs" id="tabs"></div>
-<div class="player"><iframe id="yt" allowfullscreen
-  allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture"></iframe></div>
-<div class="note" id="note">Selecciona un canal</div>
-<div class="fhdr">NOTICIAS EN TIEMPO REAL</div>
-<div class="feed" id="feed"></div>
-<script>
-var CHS={_ch_json};
-var ARTS={_art_json};
-var KW={{
-  guerra:'#ef4444',conflicto:'#ef4444',ataque:'#ef4444',bombardeo:'#ef4444',
-  war:'#ef4444',conflict:'#ef4444',attack:'#ef4444',kill:'#ef4444',strike:'#ef4444',
-  militar:'#f97316',sancion:'#f97316',misil:'#f97316',
-  military:'#f97316',sanction:'#f97316',missile:'#f97316',
-  petroleo:'#eab308',oil:'#eab308',gas:'#eab308',energy:'#eab308',
-  iran:'#ef4444',rusia:'#f97316',ukraine:'#f97316',ucrania:'#f97316',
-  israel:'#f97316',gaza:'#ef4444',china:'#a855f7',nuclear:'#a855f7'
-}};
-function getC(t){{
-  t=(t||'').toLowerCase();
-  for(var k in KW){{if(t.indexOf(k)>=0)return KW[k];}}
-  return '#475569';
-}}
-function ago(s){{
-  if(!s||s.length<13)return '';
-  try{{
-    var d=new Date(s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8)+
-                  'T'+s.slice(9,11)+':'+s.slice(11,13)+':00Z');
-    var h=Math.round((Date.now()-d)/3600000);
-    if(h<=0)return 'Ahora';
-    if(h<24)return h+'h';
-    return Math.round(h/24)+'d';
-  }}catch(e){{return '';}}
-}}
-
-var tabsEl=document.getElementById('tabs');
-CHS.forEach(function(ch,i){{
-  var t=document.createElement('div');
-  t.className='tab'+(i===0?' active':'');
-  t.textContent=ch.name;
-  t.style.setProperty('--c',ch.color);
-  t.onclick=function(){{
-    document.querySelectorAll('.tab').forEach(function(x){{x.classList.remove('active');}});
-    t.classList.add('active');
-    loadVideo(ch);
-  }};
-  tabsEl.appendChild(t);
-}});
-
-function loadVideo(ch){{
-  var yt=document.getElementById('yt');
-  var note=document.getElementById('note');
-  if(ch.videoId && ch.videoId.length===11){{
-    yt.src='https://www.youtube-nocookie.com/embed/'+ch.videoId+'?rel=0&modestbranding=1';
-    note.textContent='';
-  }}else{{
-    yt.src='https://www.youtube-nocookie.com/embed/live_stream?channel='+ch.channelId+'&rel=0&modestbranding=1';
-    note.textContent='Usando stream directo del canal...';
-  }}
-}}
-if(CHS.length>0)loadVideo(CHS[0]);
-
-var feedEl=document.getElementById('feed');
-if(!ARTS||ARTS.length===0){{
-  feedEl.innerHTML='<div style="color:#334155;font-size:11px;padding:16px;">Cargando noticias...</div>';
-}}else{{
-  var h='';
-  ARTS.forEach(function(a){{
-    var c=getC(a.title);
-    var tm=ago(a.seen);
-    h+='<div class="card" style="border-left-color:'+c+'">'
-      +'<a href="'+a.url+'" target="_blank">'+a.title+'</a>'
-      +'<div class="meta">'
-      +'<span class="badge" style="background:'+c+'22;color:'+c+'">'+a.country+'</span>'
-      +'<span class="src">'+a.domain+'</span>'
-      +(tm?'<span class="ago">'+tm+'</span>':'')
-      +'</div></div>';
-  }});
-  feedEl.innerHTML=h;
-}}
-</script>
-</body></html>"""
+        _panel_html = (
+            '<!DOCTYPE html>\n'
+            '<html><head><meta charset="utf-8">\n'
+            '<style>\n'
+            '*{margin:0;padding:0;box-sizing:border-box}\n'
+            'body{background:#060d1a;font-family:system-ui,sans-serif;color:#e2e8f0;'
+            'height:705px;overflow:hidden;display:flex;flex-direction:column}\n'
+            '.tabs{display:flex;flex-wrap:wrap;gap:3px;padding:7px;background:#060d1a;'
+            'flex-shrink:0;border-bottom:1px solid #0f1f35}\n'
+            '.tab{padding:4px 7px;font-size:9px;font-weight:700;border-radius:4px;'
+            'cursor:pointer;border:1px solid #1e2a3a;color:#475569;background:#0a1020;'
+            'transition:all .12s;white-space:nowrap}\n'
+            '.tab:hover{color:#e2e8f0;border-color:#475569}\n'
+            '.tab.active{color:#060d1a;border-color:var(--c);background:var(--c)}\n'
+            '.player{width:100%;height:230px;background:#000;flex-shrink:0}\n'
+            '.player iframe{width:100%;height:230px;border:none;display:block}\n'
+            '.note{font-size:9px;color:#475569;padding:3px 9px;flex-shrink:0;'
+            'border-bottom:1px solid #0f1f35;min-height:20px;background:#060d1a}\n'
+            '.fhdr{font-size:8px;color:#f97316;font-weight:700;letter-spacing:.14em;'
+            'padding:6px 9px 4px;flex-shrink:0}\n'
+            '.feed{flex:1;overflow-y:auto;padding:4px 8px 8px}\n'
+            '.feed::-webkit-scrollbar{width:3px}\n'
+            '.feed::-webkit-scrollbar-thumb{background:#1e2a3a;border-radius:99px}\n'
+            '.card{padding:8px 10px;margin-bottom:5px;background:#0a1020;'
+            'border-radius:5px;border-left:3px solid #475569}\n'
+            '.card a{font-size:12px;color:#cbd5e1;text-decoration:none;'
+            'line-height:1.45;display:block;font-weight:500}\n'
+            '.card a:hover{color:#38bdf8}\n'
+            '.meta{display:flex;align-items:center;gap:5px;margin-top:4px}\n'
+            '.badge{font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0}\n'
+            '.src{font-size:9px;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n'
+            '.ago{font-size:9px;color:#1e3a5f;margin-left:auto;flex-shrink:0}\n'
+            '</style>\n'
+            '</head><body>\n'
+            '<div class="tabs" id="tabs"></div>\n'
+            '<div class="player"><iframe id="yt" allowfullscreen\n'
+            '  allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture">'
+            '</iframe></div>\n'
+            '<div class="note" id="note">Selecciona un canal</div>\n'
+            '<div class="fhdr">NOTICIAS GLOBALES EN TIEMPO REAL</div>\n'
+            '<div class="feed" id="feed"></div>\n'
+            '<script>\n'
+            'var CHS=' + _ch_json + ';\n'
+            'var ARTS=' + _art_json + ';\n'
+            'var KW={\n'
+            '  guerra:"#ef4444",conflicto:"#ef4444",ataque:"#ef4444",bombardeo:"#ef4444",\n'
+            '  war:"#ef4444",conflict:"#ef4444",attack:"#ef4444",kill:"#ef4444",strike:"#ef4444",\n'
+            '  militar:"#f97316",sancion:"#f97316",military:"#f97316",sanction:"#f97316",missile:"#f97316",\n'
+            '  petroleo:"#eab308",oil:"#eab308",gas:"#eab308",energy:"#eab308",\n'
+            '  iran:"#ef4444",rusia:"#f97316",ukraine:"#f97316",ucrania:"#f97316",\n'
+            '  israel:"#f97316",gaza:"#ef4444",china:"#a855f7",nuclear:"#a855f7"\n'
+            '};\n'
+            'function getC(t){\n'
+            '  t=(t||"").toLowerCase();\n'
+            '  for(var k in KW){if(t.indexOf(k)>=0)return KW[k];}\n'
+            '  return "#475569";\n'
+            '}\n'
+            'function ago(s){\n'
+            '  if(!s||s.length<13)return "";\n'
+            '  try{\n'
+            '    var d=new Date(s.slice(0,4)+"-"+s.slice(4,6)+"-"+s.slice(6,8)+\n'
+            '                  "T"+s.slice(9,11)+":"+s.slice(11,13)+":00Z");\n'
+            '    var h=Math.round((Date.now()-d)/3600000);\n'
+            '    if(h<=0)return "Ahora"; if(h<24)return h+"h"; return Math.round(h/24)+"d";\n'
+            '  }catch(e){return "";}\n'
+            '}\n'
+            'var tabsEl=document.getElementById("tabs");\n'
+            'CHS.forEach(function(ch,i){\n'
+            '  var t=document.createElement("div");\n'
+            '  t.className="tab"+(i===0?" active":"");\n'
+            '  t.textContent=ch.name;\n'
+            '  t.style.setProperty("--c",ch.color);\n'
+            '  t.onclick=function(){\n'
+            '    document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});\n'
+            '    t.classList.add("active");\n'
+            '    loadVideo(ch);\n'
+            '  };\n'
+            '  tabsEl.appendChild(t);\n'
+            '});\n'
+            'function loadVideo(ch){\n'
+            '  var yt=document.getElementById("yt");\n'
+            '  document.getElementById("note").textContent="";\n'
+            '  yt.src="https://www.youtube-nocookie.com/embed/live_stream?channel="+ch.channelId+"&rel=0&modestbranding=1";\n'
+            '}\n'
+            'if(CHS.length>0)loadVideo(CHS[0]);\n'
+            'var feedEl=document.getElementById("feed");\n'
+            'if(!ARTS||ARTS.length===0){\n'
+            '  feedEl.innerHTML=\'<div style="color:#334155;font-size:11px;padding:16px;">Sin noticias disponibles. Recarga en unos segundos.</div>\';\n'
+            '}else{\n'
+            '  var h="";\n'
+            '  ARTS.forEach(function(a){\n'
+            '    var c=getC(a.title),tm=ago(a.seen);\n'
+            '    h+=\'<div class="card" style="border-left-color:\'+c+\'">\'\n'
+            '      +\'<a href="\'+a.url+\'" target="_blank">\'+a.title+\'</a>\'\n'
+            '      +\'<div class="meta">\'\n'
+            '      +\'<span class="badge" style="background:\'+c+\'22;color:\'+c+\'">\'+a.country+\'</span>\'\n'
+            '      +\'<span class="src">\'+a.domain+\'</span>\'\n'
+            '      +(tm?\'<span class="ago">\'+tm+\'</span>\':"")\n'
+            '      +\'</div></div>\';\n'
+            '  });\n'
+            '  feedEl.innerHTML=h;\n'
+            '}\n'
+            '</script>\n'
+            '</body></html>'
+        )
 
         _comp.html(_panel_html, height=705, scrolling=False)
