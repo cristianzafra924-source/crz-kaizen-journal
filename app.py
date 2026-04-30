@@ -2647,7 +2647,9 @@ if _nav == "monitor":
     import streamlit.components.v1 as _comp
     import json as _json
     import time as _time_m
+    import xml.etree.ElementTree as _ET
     from datetime import datetime as _dtnow, timezone as _utc
+    from email.utils import parsedate_to_datetime as _pdt
 
     _ch_defs = [
         ("Euronews",   "UCSrZ3UV4jOidv8ppoVuvW9Q", "#3b82f6"),
@@ -2660,6 +2662,8 @@ if _nav == "monitor":
 
     _yt_key = st.secrets.get("YOUTUBE_API_KEY", "")
     _now_ts = _time_m.time()
+
+    # ── YouTube live IDs (session_state 30 min) ──────────────────────────────
     if "yt_ch_cache" not in st.session_state or _now_ts - st.session_state.get("yt_ch_ts", 0) > 1800:
         _ch_ids_fresh = {}
         for _cn, _cid, _cc in _ch_defs:
@@ -2686,25 +2690,48 @@ if _nav == "monitor":
     _ch_list = [{"name":_cn,"channelId":_cid,"videoId":_vid_map.get(_cid,""),"color":_cc}
                 for _cn, _cid, _cc in _ch_defs]
 
-    if "gdelt_mon" not in st.session_state or _now_ts - st.session_state.get("gdelt_mon_ts", 0) > 600:
+    # ── Google News RSS (session_state 10 min) ───────────────────────────────
+    if "gnews_mon" not in st.session_state or _now_ts - st.session_state.get("gnews_mon_ts", 0) > 600:
         try:
             _gr = requests.get(
-                "https://api.gdeltproject.org/api/v2/doc/doc"
-                "?query=war+conflict+military+attack+sanctions+ukraine+iran+israel+gaza"
-                "&mode=artlist&format=json&maxrecords=30&sort=DateDesc&timespan=14d",
-                timeout=20)
+                "https://news.google.com/rss/search"
+                "?q=war+conflict+ukraine+israel+iran+military+sanctions+attack"
+                "&hl=en&gl=US&ceid=US:en",
+                timeout=15,
+                headers={"User-Agent": "Mozilla/5.0"})
             if _gr.status_code == 200:
-                _g_arts = _gr.json().get("articles", [])
-                st.session_state["gdelt_mon"] = _g_arts
-                st.session_state["gdelt_mon_ts"] = _now_ts
-                st.session_state["gdelt_mon_status"] = f"OK ({len(_g_arts)} arts)"
+                _root = _ET.fromstring(_gr.text)
+                _now_dt = _dtnow.now(_utc.utc)
+                _parsed = []
+                for _item in _root.findall("./channel/item"):
+                    _title = _item.findtext("title", "")
+                    _url   = _item.findtext("link", "#")
+                    _src   = _item.findtext("source", "")
+                    _pub   = _item.findtext("pubDate", "")
+                    try:
+                        _dt  = _pdt(_pub)
+                        _h   = round((_now_dt - _dt).total_seconds() / 3600)
+                        _ago = "Ahora" if _h <= 0 else f"{_h}h" if _h < 24 else f"{round(_h/24)}d"
+                    except Exception:
+                        _ago = ""
+                    _parsed.append({
+                        "title":  _title[:120],
+                        "url":    _url,
+                        "domain": _src[:35],
+                        "country": "GL",
+                        "ago":    _ago,
+                    })
+                st.session_state["gnews_mon"]    = _parsed
+                st.session_state["gnews_mon_ts"] = _now_ts
+                st.session_state["gnews_status"] = f"OK ({len(_parsed)} arts)"
             else:
-                st.session_state["gdelt_mon_status"] = f"HTTP {_gr.status_code}"
+                st.session_state["gnews_status"] = f"HTTP {_gr.status_code}"
         except Exception as _ge:
-            st.session_state["gdelt_mon_status"] = f"ERR: {_ge}"
+            st.session_state["gnews_status"] = f"ERR: {_ge}"
 
-    _gdelt_arts = st.session_state.get("gdelt_mon", [])
+    _news_arts = st.session_state.get("gnews_mon", [])
 
+    # ── Header ───────────────────────────────────────────────────────────────
     _utc_str = _dtnow.now(_utc.utc).strftime("%a %d %b %Y  %H:%M UTC")
     st.markdown(f"""
 <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;
@@ -2713,7 +2740,7 @@ if _nav == "monitor":
        box-shadow:0 0 8px #ef4444;"></div>
   <span style="font-size:11px;color:#2dd4bf;font-weight:700;letter-spacing:.12em;">MONITOR GLOBAL</span>
   <span style="color:#1e2a3a;">|</span>
-  <span style="font-size:9px;color:#334155;">GDELT: {st.session_state.get('gdelt_mon_status','—')} · YT API: {'OK' if _yt_key else 'sin key'}</span>
+  <span style="font-size:9px;color:#334155;">News: {st.session_state.get('gnews_status','—')} · YT API: {'OK' if _yt_key else 'sin key'}</span>
   <span style="font-size:10px;color:#475569;margin-left:auto;">{_utc_str}</span>
 </div>""", unsafe_allow_html=True)
 
@@ -2737,14 +2764,8 @@ if _nav == "monitor":
         _comp.iframe(_map_url, height=680)
 
     with _col_right:
-        _ch_json  = _json.dumps(_ch_list, ensure_ascii=True)
-        _art_json = _json.dumps([{
-            "title":   _a.get("title","")[:120],
-            "url":     _a.get("url","#"),
-            "domain":  _a.get("domain",""),
-            "country": (_a.get("sourcecountry") or "??")[:2].upper(),
-            "seen":    _a.get("seendate",""),
-        } for _a in _gdelt_arts], ensure_ascii=True)
+        _ch_json   = _json.dumps(_ch_list,  ensure_ascii=True)
+        _art_json  = _json.dumps(_news_arts, ensure_ascii=True)
 
         _panel_html = (
             '<!DOCTYPE html><html><head><meta charset="utf-8"><style>'
@@ -2769,13 +2790,13 @@ if _nav == "monitor":
             '.feed::-webkit-scrollbar-thumb{background:#1e2a3a;border-radius:99px}'
             '.card{padding:8px 10px;margin-bottom:5px;background:#0a1020;'
             'border-radius:5px;border-left:3px solid #475569}'
-            '.card a{font-size:12px;color:#cbd5e1;text-decoration:none;'
+            '.card a{font-size:11px;color:#cbd5e1;text-decoration:none;'
             'line-height:1.45;display:block;font-weight:500}'
             '.card a:hover{color:#38bdf8}'
             '.meta{display:flex;align-items:center;gap:5px;margin-top:4px}'
-            '.badge{font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0}'
-            '.src{font-size:9px;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+            '.src{font-size:9px;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}'
             '.ago{font-size:9px;color:#1e3a5f;margin-left:auto;flex-shrink:0}'
+            '.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}'
             '</style></head><body>'
             '<div class="tabs" id="tabs"></div>'
             '<div class="player"><iframe id="yt" allowfullscreen '
@@ -2789,19 +2810,13 @@ if _nav == "monitor":
             'var ARTS=' + _art_json + ';'
             'var KW={'
             'guerra:"#ef4444",conflicto:"#ef4444",ataque:"#ef4444",'
-            'war:"#ef4444",conflict:"#ef4444",attack:"#ef4444",strike:"#ef4444",'
-            'militar:"#f97316",sancion:"#f97316",military:"#f97316",sanction:"#f97316",'
+            'war:"#ef4444",conflict:"#ef4444",attack:"#ef4444",strike:"#ef4444",kill:"#ef4444",'
+            'militar:"#f97316",sancion:"#f97316",military:"#f97316",sanction:"#f97316",missile:"#f97316",'
             'oil:"#eab308",gas:"#eab308",energy:"#eab308",petroleo:"#eab308",'
-            'iran:"#ef4444",rusia:"#f97316",ukraine:"#f97316",ucrania:"#f97316",'
-            'israel:"#f97316",gaza:"#ef4444",china:"#a855f7",nuclear:"#a855f7"'
+            'iran:"#ef4444",russia:"#f97316",ukraine:"#f97316",ucrania:"#f97316",'
+            'israel:"#f97316",gaza:"#ef4444",china:"#a855f7",nuclear:"#a855f7",trump:"#22c55e"'
             '};'
             'function getC(t){t=(t||"").toLowerCase();for(var k in KW){if(t.indexOf(k)>=0)return KW[k];}return "#475569";}'
-            'function ago(s){'
-            '  if(!s||s.length<13)return "";'
-            '  try{var d=new Date(s.slice(0,4)+"-"+s.slice(4,6)+"-"+s.slice(6,8)+"T"+s.slice(9,11)+":"+s.slice(11,13)+":00Z");'
-            '  var h=Math.round((Date.now()-d)/3600000);'
-            '  if(h<=0)return "Ahora";if(h<24)return h+"h";return Math.round(h/24)+"d";}catch(e){return "";}'
-            '}'
             'var tabsEl=document.getElementById("tabs");'
             'CHS.forEach(function(ch,i){'
             '  var t=document.createElement("div");'
@@ -2828,17 +2843,17 @@ if _nav == "monitor":
             'if(CHS.length>0)loadVideo(CHS[0]);'
             'var feedEl=document.getElementById("feed");'
             'if(!ARTS||ARTS.length===0){'
-            '  feedEl.innerHTML=\'<div style="color:#334155;font-size:11px;padding:16px;">Sin noticias aun. Recarga en 1 min.</div>\';'
+            '  feedEl.innerHTML=\'<div style="color:#334155;font-size:11px;padding:16px;">Cargando noticias...</div>\';'
             '}else{'
             '  var h="";'
             '  ARTS.forEach(function(a){'
-            '    var c=getC(a.title),tm=ago(a.seen);'
+            '    var c=getC(a.title);'
             '    h+=\'<div class="card" style="border-left-color:\'+c+\'">\''
             '      +\'<a href="\'+a.url+\'" target="_blank">\'+a.title+\'</a>\''
             '      +\'<div class="meta">\''
-            '      +\'<span class="badge" style="background:\'+c+\'22;color:\'+c+\'">\'+a.country+\'</span>\''
+            '      +\'<div class="dot" style="background:\'+c+\'"></div>\''
             '      +\'<span class="src">\'+a.domain+\'</span>\''
-            '      +(tm?\'<span class="ago">\'+tm+\'</span>\':"")'
+            '      +(a.ago?\'<span class="ago">\'+a.ago+\'</span>\':"")'
             '      +\'</div></div>\';'
             '  });'
             '  feedEl.innerHTML=h;'
