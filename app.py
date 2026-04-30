@@ -2595,8 +2595,10 @@ if _nav == "news":
             _res = _rq.get(_url, timeout=20)
             if _res.status_code == 200:
                 return _res.json().get("articles", [])
-        except:
-            pass
+            elif _res.status_code == 429:
+                st.warning("GDELT: demasiadas peticiones, espera 1 minuto y recarga.")
+        except Exception as _ex:
+            st.warning(f"GDELT error: {_ex}")
         return []
 
     _geo_qen, _geo_qes = _geo_categories[_geo_cat]
@@ -2663,26 +2665,16 @@ if _nav == "monitor":
         for _cn, _cid, _vid, _cc in _ch_defs
     ]
 
-    @st.cache_data(ttl=300)
+    @st.cache_data(ttl=600)
     def _get_gdelt_mon():
-        _base = "https://api.gdeltproject.org/api/v2/doc/doc"
-        _fmt  = "&mode=artlist&format=json&maxrecords=30&sort=DateDesc"
         try:
-            _r1 = requests.get(
-                _base + "?query=guerra+conflicto+sanciones+militar+ataque"
-                + "&sourcelang=Spanish" + _fmt + "&timespan=72h", timeout=12)
-            if _r1.status_code == 200:
-                _a1 = _r1.json().get("articles", [])
-                if _a1:
-                    return _a1
-        except Exception:
-            pass
-        try:
-            _r2 = requests.get(
-                _base + "?query=war+conflict+sanctions+military+attack"
-                + _fmt + "&timespan=12h", timeout=12)
-            if _r2.status_code == 200:
-                return _r2.json().get("articles", [])
+            _r = requests.get(
+                "https://api.gdeltproject.org/api/v2/doc/doc"
+                "?query=war+conflict+military+attack+sanctions+ukraine+iran+israel"
+                "&mode=artlist&format=json&maxrecords=30&sort=DateDesc&timespan=14d",
+                timeout=20)
+            if _r.status_code == 200:
+                return _r.json().get("articles", [])
         except Exception:
             pass
         return []
