@@ -2646,31 +2646,55 @@ if _nav == "news":
 if _nav == "monitor":
     import streamlit.components.v1 as _comp
     import json as _json
+    import re as _re
     from datetime import datetime as _dtnow, timezone as _utc
 
-    # Canales con ID de stream 24/7 fijo; None = usa live_stream?channel= como fallback
+    # Canales: (nombre, channel_id, yt_handle, color)
     _ch_defs = [
-        ("Bloomberg",  "UCIALMKvObZNtJ6AmdCLP7Lg", "dp8PhLsUcFE",  "#f59e0b"),
-        ("Sky News",   "UCoMdktPbSTixAyNGwb-UYkQ", "9Auq9mYxFEE",  "#0ea5e9"),
-        ("Euronews",   "UCSrZ3UV4jOidv8ppoVuvW9Q", "7qCECv0gGaM",  "#3b82f6"),
-        ("DW News",    "UCknLrEdhRCp1aegoMqRaCZg", "GfpIVAXA7gE",  "#6366f1"),
-        ("CNBC",       "UCrp_UI8XA1V2T9T7bitAZKA", "6WQKp91LVCQ",  "#22c55e"),
-        ("CNN Intl",   "UCupvZG-5ko_eiXAupbDfxWw", "aXaFerFsL7o",  "#ef4444"),
-        ("France 24",  "UCQfwfsi5VrQ8yKZ-UWmAEFg", "l8pmfNyEsqw",  "#f97316"),
-        ("Al Jazeera", "UCNye-wNBqNL5ZzHSJdpkDEA", "gCNeDWCI0vo",  "#2dd4bf"),
-        ("Al Arabiya", "UCi_lr_ysQEFA46MKKmKMtOg", None,           "#a855f7"),
+        ("Bloomberg",  "UCIALMKvObZNtJ6AmdCLP7Lg", "Bloomberg",        "#f59e0b"),
+        ("Sky News",   "UCoMdktPbSTixAyNGwb-UYkQ", "SkyNews",          "#0ea5e9"),
+        ("Euronews",   "UCSrZ3UV4jOidv8ppoVuvW9Q", "euronews",         "#3b82f6"),
+        ("DW News",    "UCknLrEdhRCp1aegoMqRaCZg", "dwnews",           "#6366f1"),
+        ("CNBC",       "UCrp_UI8XA1V2T9T7bitAZKA", "CNBCi",            "#22c55e"),
+        ("CNN Intl",   "UCupvZG-5ko_eiXAupbDfxWw", "cnni",             "#ef4444"),
+        ("France 24",  "UCQfwfsi5VrQ8yKZ-UWmAEFg", "France24_en",     "#f97316"),
+        ("Al Jazeera", "UCNye-wNBqNL5ZzHSJdpkDEA", "aljazeeraenglish", "#2dd4bf"),
+        ("Al Arabiya", "UCi_lr_ysQEFA46MKKmKMtOg", "AlArabiya",        "#a855f7"),
     ]
-    _ch_list = [
-        {"name": _cn, "channelId": _cid, "videoId": _vid or "", "color": _cc}
-        for _cn, _cid, _vid, _cc in _ch_defs
-    ]
+
+    @st.cache_data(ttl=7200)
+    def _get_live_id(handle, ch_id):
+        """Obtiene video ID del live actual scrapeando la pagina del canal."""
+        _hdrs = {
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cookie": "CONSENT=YES+cb; SOCS=CAISNQgDEitib3FfaWRlbnRpdHlmcm9udGVuZHVpeGxpYl8yMDIzMDgyOF9SQzI",
+        }
+        for _url in [
+            f"https://www.youtube.com/@{handle}/live",
+            f"https://www.youtube.com/channel/{ch_id}/live",
+        ]:
+            try:
+                _r = requests.get(_url, timeout=10, headers=_hdrs, allow_redirects=True)
+                if _r.status_code == 200 and "consent.youtube" not in _r.url:
+                    _vids = _re.findall(r'"videoId":"([-_a-zA-Z0-9]{11})"', _r.text)
+                    if _vids:
+                        return _vids[0]
+            except Exception:
+                pass
+        return ""
+
+    _ch_list = []
+    for _cn, _cid, _handle, _cc in _ch_defs:
+        _vid = _get_live_id(_handle, _cid)
+        _ch_list.append({"name": _cn, "channelId": _cid, "videoId": _vid, "color": _cc})
 
     @st.cache_data(ttl=600)
     def _get_gdelt_mon():
         try:
             _r = requests.get(
                 "https://api.gdeltproject.org/api/v2/doc/doc"
-                "?query=war+conflict+military+attack+sanctions+ukraine+iran+israel"
+                "?query=war+conflict+military+attack+sanctions+ukraine+iran+israel+gaza"
                 "&mode=artlist&format=json&maxrecords=30&sort=DateDesc&timespan=14d",
                 timeout=20)
             if _r.status_code == 200:
@@ -2766,21 +2790,20 @@ body{{background:#060d1a;font-family:system-ui,sans-serif;color:#e2e8f0;
 <div class="tabs" id="tabs"></div>
 <div class="player"><iframe id="yt" allowfullscreen
   allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture"></iframe></div>
-<div class="note" id="note"></div>
+<div class="note" id="note">Selecciona un canal</div>
 <div class="fhdr">NOTICIAS EN TIEMPO REAL</div>
 <div class="feed" id="feed"></div>
 <script>
 var CHS={_ch_json};
 var ARTS={_art_json};
 var KW={{
-  guerra:'#ef4444',conflicto:'#ef4444',ataque:'#ef4444',bombardeo:'#ef4444',muertos:'#ef4444',
-  war:'#ef4444',conflict:'#ef4444',attack:'#ef4444',kill:'#ef4444',dead:'#ef4444',strike:'#ef4444',
-  militar:'#f97316',sancion:'#f97316',misil:'#f97316',tropas:'#f97316',
-  military:'#f97316',sanction:'#f97316',missile:'#f97316',troops:'#f97316',
-  petroleo:'#eab308',energia:'#eab308',oil:'#eab308',gas:'#eab308',energy:'#eab308',
+  guerra:'#ef4444',conflicto:'#ef4444',ataque:'#ef4444',bombardeo:'#ef4444',
+  war:'#ef4444',conflict:'#ef4444',attack:'#ef4444',kill:'#ef4444',strike:'#ef4444',
+  militar:'#f97316',sancion:'#f97316',misil:'#f97316',
+  military:'#f97316',sanction:'#f97316',missile:'#f97316',
+  petroleo:'#eab308',oil:'#eab308',gas:'#eab308',energy:'#eab308',
   iran:'#ef4444',rusia:'#f97316',ukraine:'#f97316',ucrania:'#f97316',
-  israel:'#f97316',gaza:'#ef4444',hamas:'#ef4444',
-  china:'#a855f7',nuclear:'#a855f7',bomba:'#ef4444',bomb:'#ef4444'
+  israel:'#f97316',gaza:'#ef4444',china:'#a855f7',nuclear:'#a855f7'
 }};
 function getC(t){{
   t=(t||'').toLowerCase();
@@ -2816,19 +2839,19 @@ CHS.forEach(function(ch,i){{
 function loadVideo(ch){{
   var yt=document.getElementById('yt');
   var note=document.getElementById('note');
-  if(ch.videoId){{
+  if(ch.videoId && ch.videoId.length===11){{
     yt.src='https://www.youtube-nocookie.com/embed/'+ch.videoId+'?rel=0&modestbranding=1';
     note.textContent='';
   }}else{{
     yt.src='https://www.youtube-nocookie.com/embed/live_stream?channel='+ch.channelId+'&rel=0&modestbranding=1';
-    note.textContent='Si no carga, el canal no esta emitiendo ahora.';
+    note.textContent='Usando stream directo del canal...';
   }}
 }}
 if(CHS.length>0)loadVideo(CHS[0]);
 
 var feedEl=document.getElementById('feed');
 if(!ARTS||ARTS.length===0){{
-  feedEl.innerHTML='<div style="color:#334155;font-size:11px;padding:16px;">Sin noticias. Los datos se actualizan cada 5 min.</div>';
+  feedEl.innerHTML='<div style="color:#334155;font-size:11px;padding:16px;">Cargando noticias...</div>';
 }}else{{
   var h='';
   ARTS.forEach(function(a){{
