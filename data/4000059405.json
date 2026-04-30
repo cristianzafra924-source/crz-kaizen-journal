@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-30 13:23:29",
+  "timestamp": "2026-04-30 13:23:39",
   "estado": "conectado",
   "cuenta": {
     "login": 4000059405,
@@ -7,11 +7,11 @@
     "empresa": "Tradeslide Trading Tech Limited",
     "servidor": "Darwinex-Live",
     "balance": 1008.53,
-    "equity": 1027.35,
+    "equity": 1027.15,
     "margin": 925.01,
-    "margin_libre": 102.34,
-    "margin_nivel": 111.06,
-    "profit_abierto": 18.82,
+    "margin_libre": 102.14,
+    "margin_nivel": 111.04,
+    "profit_abierto": 18.62,
     "divisa": "USD",
     "apalancamiento": 200
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4626.57,
-      "price_current": 4632.19,
+      "price_current": 4632.14,
       "sl": 0,
       "tp": 0,
-      "profit": 5.62,
+      "profit": 5.57,
       "swap": -3.27,
-      "pnl_net": 2.35,
+      "pnl_net": 2.3,
       "time_open": "2026-04-28 11:01:03"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4626.08,
-      "price_current": 4632.19,
+      "price_current": 4632.14,
       "sl": 0,
       "tp": 0,
-      "profit": 6.11,
+      "profit": 6.06,
       "swap": -3.27,
-      "pnl_net": 2.84,
+      "pnl_net": 2.79,
       "time_open": "2026-04-28 11:01:11"
     },
     {
@@ -50,12 +50,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4620.47,
-      "price_current": 4632.19,
+      "price_current": 4632.14,
       "sl": 0,
       "tp": 0,
-      "profit": 11.72,
+      "profit": 11.67,
       "swap": -3.27,
-      "pnl_net": 8.45,
+      "pnl_net": 8.4,
       "time_open": "2026-04-28 11:05:03"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4627.01,
-      "price_current": 4632.19,
+      "price_current": 4632.14,
       "sl": 0,
       "tp": 0,
-      "profit": 5.18,
+      "profit": 5.13,
       "swap": 0,
-      "pnl_net": 5.18,
+      "pnl_net": 5.13,
       "time_open": "2026-04-30 13:11:39"
     }
   ],
