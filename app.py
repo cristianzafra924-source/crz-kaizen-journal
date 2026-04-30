@@ -2566,12 +2566,18 @@ if _nav == "news":
 </div></div>""", unsafe_allow_html=True)
 
     _geo_categories = {
-        "⚔️ Conflictos":      "war conflict military attack strike invasion",
-        "🚫 Sanciones":       "sanctions embargo trade war tariff",
-        "🛢️ Energía":         "oil gas crude petroleum OPEC energy pipeline",
-        '🏦 Bancos Centrales': 'central bank interest rate federal reserve ECB inflation',
-        "⚠️ Crisis política":  "political crisis protest coup election instability",
-        "🌊 Rutas comerciales": "shipping strait Hormuz Suez Red Sea blockade",
+        "⚔️ Conflictos":       ("war conflict military attack strike invasion",
+                                "guerra conflicto militar ataque invasion bombardeo"),
+        "🚫 Sanciones":        ("sanctions embargo trade war tariff",
+                                "sanciones embargo guerra comercial aranceles"),
+        "🛢️ Energía":          ("oil gas crude petroleum OPEC energy pipeline",
+                                "petroleo gas crudo OPEP energia ducto"),
+        "🏦 Bancos Centrales": ("central bank interest rate federal reserve ECB inflation",
+                                "banco central tipos interes reserva federal BCE inflacion"),
+        "⚠️ Crisis política":  ("political crisis protest coup election instability",
+                                "crisis politica protesta golpe estado elecciones"),
+        "🌊 Rutas comerciales":("shipping strait Hormuz Suez Red Sea blockade",
+                                "envios estrecho Hormuz Suez Mar Rojo bloqueo"),
     }
     _geo_col1, _geo_col2 = st.columns([2, 1])
     with _geo_col1:
@@ -2579,25 +2585,38 @@ if _nav == "news":
     with _geo_col2:
         _geo_lang = st.selectbox("Idioma", ["Español", "English", "Todos"], key="geo_lang")
 
-    @st.cache_data(ttl=600)
+    @st.cache_data(ttl=300)
     def _fetch_gdelt(query, lang):
         import urllib.parse
-        q = urllib.parse.quote(query)
-        url = f"https://api.gdeltproject.org/api/v2/doc/doc?query={q}&mode=artlist&format=json&maxrecords=15&sort=DateDesc&timespan=1d"
+        _lp = ""
+        if lang == "Español":
+            _lp = "&sourcelang=Spanish"
+        elif lang == "English":
+            _lp = "&sourcelang=English"
+        _q = urllib.parse.quote(query)
+        _url = (f"https://api.gdeltproject.org/api/v2/doc/doc?query={_q}"
+                f"&mode=artlist&format=json&maxrecords=25&sort=DateDesc&timespan=7d{_lp}")
         try:
-            res = _rq.get(url, timeout=15)
-            if res.status_code == 200:
-                arts = res.json().get("articles", [])
-                if lang == "Español":
-                    arts = [a for a in arts if a.get("language","").lower() in ("spanish","espanol","es")]
-                elif lang == "English":
-                    arts = [a for a in arts if a.get("language","").lower() in ("english","en")]
-                return arts
+            _res = _rq.get(_url, timeout=15)
+            if _res.status_code == 200:
+                _arts = _res.json().get("articles", [])
+                if _arts:
+                    return _arts
+        except:
+            pass
+        # fallback sin filtro de idioma si no hay resultados
+        try:
+            _url2 = (f"https://api.gdeltproject.org/api/v2/doc/doc?query={_q}"
+                     f"&mode=artlist&format=json&maxrecords=25&sort=DateDesc&timespan=7d")
+            _res2 = _rq.get(_url2, timeout=15)
+            if _res2.status_code == 200:
+                return _res2.json().get("articles", [])
         except:
             pass
         return []
 
-    _geo_query   = _geo_categories[_geo_cat]
+    _geo_qen, _geo_qes = _geo_categories[_geo_cat]
+    _geo_query = _geo_qes if _geo_lang == "Español" else _geo_qen
     _geo_articles = _fetch_gdelt(_geo_query, _geo_lang)
 
     _cat_colors = {
