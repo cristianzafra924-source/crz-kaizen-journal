@@ -1,23 +1,79 @@
 {
-  "timestamp": "2026-04-30 13:10:13",
+  "timestamp": "2026-04-30 13:10:28",
   "estado": "conectado",
   "cuenta": {
     "login": 4000059405,
     "nombre": "CRISTIANZ_MT5",
     "empresa": "Tradeslide Trading Tech Limited",
     "servidor": "Darwinex-Live",
-    "balance": 197136.57,
-    "equity": 198488.57,
-    "margin": 59249.51,
-    "margin_libre": 139239.06,
-    "margin_nivel": 335,
-    "profit_abierto": 1352,
+    "balance": 1008.65,
+    "equity": 1003.57,
+    "margin": 693.66,
+    "margin_libre": 309.91,
+    "margin_nivel": 144.68,
+    "profit_abierto": -5.08,
     "divisa": "USD",
     "apalancamiento": 200
   },
-  "posiciones_abiertas": [],
-  "deals_hoy": [],
-  "pnl_dia": 0,
+  "posiciones_abiertas": [
+    {
+      "ticket": 3149462408,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.01,
+      "price_open": 4626.57,
+      "price_current": 4625.95,
+      "sl": 0,
+      "tp": 0,
+      "profit": -0.62,
+      "swap": -3.27,
+      "pnl_net": -3.89,
+      "time_open": "2026-04-28 11:01:03"
+    },
+    {
+      "ticket": 3149462480,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.01,
+      "price_open": 4626.08,
+      "price_current": 4625.95,
+      "sl": 0,
+      "tp": 0,
+      "profit": -0.13,
+      "swap": -3.27,
+      "pnl_net": -3.4,
+      "time_open": "2026-04-28 11:01:11"
+    },
+    {
+      "ticket": 3149464644,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.01,
+      "price_open": 4620.47,
+      "price_current": 4625.95,
+      "sl": 0,
+      "tp": 0,
+      "profit": 5.48,
+      "swap": -3.27,
+      "pnl_net": 2.21,
+      "time_open": "2026-04-28 11:05:03"
+    }
+  ],
+  "deals_hoy": [
+    {
+      "ticket": 137846412,
+      "symbol": "XTIUSD",
+      "type": "buy",
+      "volume": 0.1,
+      "price": 106,
+      "profit": -1909,
+      "commission": -0.27,
+      "swap": -430.92,
+      "pnl_net": -2340.19,
+      "time": "07:03:27"
+    }
+  ],
+  "pnl_dia": -2340.19,
   "historial": [
     {
       "ticket": 89565588,
@@ -9573,6 +9629,19 @@
       "pnl_net": -0.12,
       "win": false,
       "time": "2026-04-28 11:05:03"
+    },
+    {
+      "ticket": 137846412,
+      "symbol": "XTIUSD",
+      "type": "buy",
+      "volume": 0.1,
+      "price": 106,
+      "profit": -1909,
+      "commission": -0.27,
+      "swap": -430.92,
+      "pnl_net": -2340.19,
+      "win": false,
+      "time": "2026-04-30 07:03:27"
     }
   ],
   "equity_series": [
@@ -10310,7 +10379,8 @@
     -96803.5,
     -96803.62,
     -96803.74,
-    -96803.86
+    -96803.86,
+    -99144.05
   ],
-  "n_trades": 735
+  "n_trades": 736
 }
