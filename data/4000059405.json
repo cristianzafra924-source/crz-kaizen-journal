@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-05-01 18:19:07",
+  "timestamp": "2026-05-01 18:19:16",
   "estado": "conectado",
   "cuenta": {
     "login": 4000059405,
     "nombre": "CRISTIANZ_MT5",
     "empresa": "Tradeslide Trading Tech Limited",
     "servidor": "Darwinex-Live",
-    "balance": 963.77,
-    "equity": 996.34,
-    "margin": 693.66,
-    "margin_libre": 302.68,
-    "margin_nivel": 143.64,
-    "profit_abierto": 32.57,
+    "balance": 963.65,
+    "equity": 996.54,
+    "margin": 925.67,
+    "margin_libre": 70.87,
+    "margin_nivel": 107.66,
+    "profit_abierto": 32.89,
     "divisa": "USD",
     "apalancamiento": 200
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4626.57,
-      "price_current": 4639.14,
+      "price_current": 4639.48,
       "sl": 0,
       "tp": 0,
-      "profit": 12.57,
+      "profit": 12.91,
       "swap": -3.91,
-      "pnl_net": 8.66,
+      "pnl_net": 9,
       "time_open": "2026-04-28 11:01:03"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4626.08,
-      "price_current": 4639.14,
+      "price_current": 4639.48,
       "sl": 0,
       "tp": 0,
-      "profit": 13.06,
+      "profit": 13.4,
       "swap": -3.91,
-      "pnl_net": 9.15,
+      "pnl_net": 9.49,
       "time_open": "2026-04-28 11:01:11"
     },
     {
@@ -50,13 +50,27 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4620.47,
-      "price_current": 4639.14,
+      "price_current": 4639.48,
       "sl": 0,
       "tp": 0,
-      "profit": 18.67,
+      "profit": 19.01,
       "swap": -3.91,
-      "pnl_net": 14.76,
+      "pnl_net": 15.1,
       "time_open": "2026-04-28 11:05:03"
+    },
+    {
+      "ticket": 3150371689,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.01,
+      "price_open": 4640.18,
+      "price_current": 4639.48,
+      "sl": 0,
+      "tp": 0,
+      "profit": -0.7,
+      "swap": 0,
+      "pnl_net": -0.7,
+      "time_open": "2026-05-01 18:19:12"
     }
   ],
   "deals_hoy": [
@@ -71,9 +85,21 @@
       "swap": -0.64,
       "pnl_net": -44.76,
       "time": "10:48:29"
+    },
+    {
+      "ticket": 138175985,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.01,
+      "price": 4640.18,
+      "profit": 0,
+      "commission": -0.12,
+      "swap": 0,
+      "pnl_net": -0.12,
+      "time": "18:19:12"
     }
   ],
-  "pnl_dia": -44.76,
+  "pnl_dia": -44.88,
   "historial": [
     {
       "ticket": 89798195,
@@ -9629,6 +9655,19 @@
       "pnl_net": -44.76,
       "win": false,
       "time": "2026-05-01 10:48:29"
+    },
+    {
+      "ticket": 138175985,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.01,
+      "price": 4640.18,
+      "profit": 0,
+      "commission": -0.12,
+      "swap": 0,
+      "pnl_net": -0.12,
+      "win": false,
+      "time": "2026-05-01 18:19:12"
     }
   ],
   "equity_series": [
@@ -10366,7 +10405,8 @@
     -98410.13,
     -100750.32,
     -100750.44,
-    -100795.2
+    -100795.2,
+    -100795.32
   ],
-  "n_trades": 735
+  "n_trades": 736
 }
