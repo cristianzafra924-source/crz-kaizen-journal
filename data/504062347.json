@@ -1,21 +1,36 @@
 {
-  "timestamp": "2026-05-01 17:51:13",
+  "timestamp": "2026-05-01 17:51:22",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
     "nombre": " Cristian Zafra gomez",
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
-    "balance": 197295.16,
-    "equity": 197295.16,
-    "margin": 0,
-    "margin_libre": 197295.16,
-    "margin_nivel": 0,
-    "profit_abierto": 0,
+    "balance": 197294.84,
+    "equity": 197295.14,
+    "margin": 4629.77,
+    "margin_libre": 192665.37,
+    "margin_nivel": 4261.45,
+    "profit_abierto": 0.3,
     "divisa": "USD",
     "apalancamiento": 100
   },
-  "posiciones_abiertas": [],
+  "posiciones_abiertas": [
+    {
+      "ticket": 14933487,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.1,
+      "price_open": 4629.77,
+      "price_current": 4629.8,
+      "sl": 0,
+      "tp": 0,
+      "profit": 0.3,
+      "swap": 0,
+      "pnl_net": 0.3,
+      "time_open": "2026-05-01 17:51:18"
+    }
+  ],
   "deals_hoy": [
     {
       "ticket": 13912259,
@@ -196,9 +211,21 @@
       "swap": 0,
       "pnl_net": 29.76,
       "time": "17:50:50"
+    },
+    {
+      "ticket": 13936291,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.1,
+      "price": 4629.77,
+      "profit": 0,
+      "commission": -0.32,
+      "swap": 0,
+      "pnl_net": -0.32,
+      "time": "17:51:18"
     }
   ],
-  "pnl_dia": 783.21,
+  "pnl_dia": 782.89,
   "historial": [
     {
       "ticket": 13708343,
@@ -1954,6 +1981,19 @@
       "pnl_net": 29.76,
       "win": true,
       "time": "2026-05-01 17:50:50"
+    },
+    {
+      "ticket": 13936291,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.1,
+      "price": 4629.77,
+      "profit": 0,
+      "commission": -0.32,
+      "swap": 0,
+      "pnl_net": -0.32,
+      "win": false,
+      "time": "2026-05-01 17:51:18"
     }
   ],
   "equity_series": [
@@ -2091,7 +2131,8 @@
     -2420.03,
     -2731.36,
     -2734.6,
-    -2704.84
+    -2704.84,
+    -2705.16
   ],
-  "n_trades": 135
+  "n_trades": 136
 }
