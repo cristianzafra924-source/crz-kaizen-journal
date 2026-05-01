@@ -1,47 +1,33 @@
 {
-  "timestamp": "2026-05-01 17:58:30",
+  "timestamp": "2026-05-01 17:58:40",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
     "nombre": " Cristian Zafra gomez",
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
-    "balance": 197294.52,
-    "equity": 197298.92,
-    "margin": 9263.48,
-    "margin_libre": 188035.44,
-    "margin_nivel": 2129.86,
-    "profit_abierto": 4.4,
+    "balance": 197297.4,
+    "equity": 197265.1,
+    "margin": 4633.71,
+    "margin_libre": 192631.39,
+    "margin_nivel": 4257.17,
+    "profit_abierto": -32.3,
     "divisa": "USD",
     "apalancamiento": 100
   },
   "posiciones_abiertas": [
-    {
-      "ticket": 14933487,
-      "symbol": "XAUUSD",
-      "type": "buy",
-      "volume": 0.1,
-      "price_open": 4629.77,
-      "price_current": 4631.96,
-      "sl": 4630.16,
-      "tp": 0,
-      "profit": 21.9,
-      "swap": 0,
-      "pnl_net": 21.9,
-      "time_open": "2026-05-01 17:51:18"
-    },
     {
       "ticket": 14933685,
       "symbol": "XAUUSD",
       "type": "buy",
       "volume": 0.1,
       "price_open": 4633.71,
-      "price_current": 4631.96,
+      "price_current": 4630.48,
       "sl": 4564.2,
       "tp": 0,
-      "profit": -17.5,
+      "profit": -32.3,
       "swap": 0,
-      "pnl_net": -17.5,
+      "pnl_net": -32.3,
       "time_open": "2026-05-01 17:56:22"
     }
   ],
@@ -249,9 +235,21 @@
       "swap": 0,
       "pnl_net": -0.32,
       "time": "17:56:22"
+    },
+    {
+      "ticket": 13936527,
+      "symbol": "XAUUSD",
+      "type": "sell",
+      "volume": 0.1,
+      "price": 4630.09,
+      "profit": 3.2,
+      "commission": -0.32,
+      "swap": 0,
+      "pnl_net": 2.88,
+      "time": "17:58:38"
     }
   ],
-  "pnl_dia": 782.57,
+  "pnl_dia": 785.45,
   "historial": [
     {
       "ticket": 13708343,
@@ -2033,6 +2031,19 @@
       "pnl_net": -0.32,
       "win": false,
       "time": "2026-05-01 17:56:22"
+    },
+    {
+      "ticket": 13936527,
+      "symbol": "XAUUSD",
+      "type": "sell",
+      "volume": 0.1,
+      "price": 4630.09,
+      "profit": 3.2,
+      "commission": -0.32,
+      "swap": 0,
+      "pnl_net": 2.88,
+      "win": true,
+      "time": "2026-05-01 17:58:38"
     }
   ],
   "equity_series": [
@@ -2172,7 +2183,8 @@
     -2734.6,
     -2704.84,
     -2705.16,
-    -2705.48
+    -2705.48,
+    -2702.6
   ],
-  "n_trades": 137
+  "n_trades": 138
 }
