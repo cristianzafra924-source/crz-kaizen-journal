@@ -2550,10 +2550,32 @@ if _nav == "news":
                                 _WUA = {"User-Agent": "CRZKaizenJournal/1.0 (streamlit-app)"}
                                 _clean_ev = _re_w.sub(r"\s+(m/m|y/y|q/q|mom|yoy|qoq)", "", _event, flags=_re_w.IGNORECASE)
                                 _clean_ev = _re_w.sub(r"\s*[\(\[].*?[\)\]]", "", _clean_ev).strip()
-                                for _wlang in ["es", "en"]:
-                                    _sr = _rq.get(
-                                        f"https://{_wlang}.wikipedia.org/w/api.php",
-                                        params={"action":"query","list":"search","srsearch":_clean_ev,
+                                _ev_es = {
+                                    "non-farm payroll":"nomina no agricola","nonfarm payroll":"nomina no agricola",
+                                    "cpi":"indice de precios al consumidor","consumer price":"indice de precios al consumidor",
+                                    "ppi":"indice de precios al productor","producer price":"indice de precios al productor",
+                                    "gdp":"producto interior bruto","gross domestic":"producto interior bruto",
+                                    "pmi":"indice de gestores de compras","purchasing manager":"indice de gestores de compras",
+                                    "unemployment":"tasa de desempleo","jobless":"tasa de desempleo",
+                                    "interest rate":"tipos de interes","fed rate":"reserva federal tipos interes",
+                                    "fomc":"comite federal mercado abierto","federal reserve":"reserva federal",
+                                    "retail sales":"ventas minoristas","trade balance":"balanza comercial",
+                                    "inflation":"inflacion","ism":"indice gestores compras",
+                                    "housing":"mercado inmobiliario","durable goods":"bienes de capital",
+                                    "jobless claims":"solicitudes desempleo","initial claims":"solicitudes desempleo",
+                                    "payroll":"nomina empleo","nfp":"nomina no agricola",
+                                    "ecb":"banco central europeo","boe":"banco de inglaterra",
+                                    "core":"subyacente",
+                                }
+                                _cl = _clean_ev.lower()
+                                _es_term = _clean_ev
+                                for _k, _v in _ev_es.items():
+                                    if _k in _cl:
+                                        _es_term = _v
+                                        break
+                                for _term in list(dict.fromkeys([_es_term, _clean_ev])):
+                                    _sr = _rq.get("https://es.wikipedia.org/w/api.php",
+                                        params={"action":"query","list":"search","srsearch":_term,
                                                 "format":"json","srlimit":1,"utf8":1},
                                         headers=_WUA, timeout=8)
                                     if _sr.status_code == 200:
@@ -2561,7 +2583,7 @@ if _nav == "news":
                                         if _hits:
                                             _ptitle = _hits[0]["title"]
                                             _wr = _rq.get(
-                                                f"https://{_wlang}.wikipedia.org/api/rest_v1/page/summary/{_urlp.quote(_ptitle)}",
+                                                f"https://es.wikipedia.org/api/rest_v1/page/summary/{_urlp.quote(_ptitle)}",
                                                 headers=_WUA, timeout=8)
                                             if _wr.status_code == 200:
                                                 _ext = _wr.json().get("extract","")
@@ -2569,6 +2591,7 @@ if _nav == "news":
                                                     st.session_state[_cache_key] = _ext[:700]
                                                     _got_desc = True
                                                     break
+                                    if _got_desc: break
                             except Exception:
                                 pass
                 if _cache_key in st.session_state:
