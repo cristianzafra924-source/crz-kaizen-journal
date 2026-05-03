@@ -129,8 +129,33 @@
       "time_open": "2026-05-01 18:42:47"
     }
   ],
-  "deals_hoy": [],
-  "pnl_dia": 0,
+  "deals_hoy": [
+    {
+      "ticket": 138179559,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.01,
+      "price": 4643.99,
+      "profit": 0,
+      "commission": -0.12,
+      "swap": 0,
+      "pnl_net": -0.12,
+      "time": "18:42:34"
+    },
+    {
+      "ticket": 138179589,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.01,
+      "price": 4644.97,
+      "profit": 0,
+      "commission": -0.12,
+      "swap": 0,
+      "pnl_net": -0.12,
+      "time": "18:42:47"
+    }
+  ],
+  "pnl_dia": -0.24,
   "historial": [
     {
       "ticket": 97319679,
@@ -8633,6 +8658,32 @@
       "pnl_net": -0.58,
       "win": false,
       "time": "2026-04-30 13:27:32"
+    },
+    {
+      "ticket": 138179559,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.01,
+      "price": 4643.99,
+      "profit": 0,
+      "commission": -0.12,
+      "swap": 0,
+      "pnl_net": -0.12,
+      "win": false,
+      "time": "2026-05-01 18:42:34"
+    },
+    {
+      "ticket": 138179589,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 0.01,
+      "price": 4644.97,
+      "profit": 0,
+      "commission": -0.12,
+      "swap": 0,
+      "pnl_net": -0.12,
+      "win": false,
+      "time": "2026-05-01 18:42:47"
     }
   ],
   "equity_series": [
