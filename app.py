@@ -2572,8 +2572,7 @@ if _nav == "news":
                             break
                     if _desc_found:
                         st.session_state[_cache_key] = _desc_found
-                    else:
-                        with st.spinner("Buscando descripción..."):
+                    if _cache_key not in st.session_state:
                         import time as _time, urllib.parse as _urlp
                         _groq_key = st.secrets.get("GROQ_API_KEY", "")
                         _got_desc = False
