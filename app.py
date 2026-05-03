@@ -2307,13 +2307,17 @@ if _nav == "news":
         st.stop()
 
     _today = date.today()
+    if "cal_from" not in st.session_state: st.session_state["cal_from"] = _today
+    if "cal_to"   not in st.session_state: st.session_state["cal_to"]   = _today + timedelta(days=7)
+    if "cal_imp"  not in st.session_state: st.session_state["cal_imp"]  = 0
+    if "cal_ctry" not in st.session_state: st.session_state["cal_ctry"] = 0
     _col1, _col2, _col3, _col4 = st.columns(4)
     with _col1:
-        _from = st.date_input("Desde", value=_today, key="news_from")
+        _from = st.date_input("Desde", value=st.session_state["cal_from"], key="news_from")
     with _col2:
-        _to   = st.date_input("Hasta", value=_today + timedelta(days=7), key="news_to")
+        _to   = st.date_input("Hasta", value=st.session_state["cal_to"],   key="news_to")
     with _col3:
-        _impact_filter = st.selectbox("Impacto", ["Todos", "high", "medium", "low"], index=0, key="news_impact")
+        _impact_filter = st.selectbox("Impacto", ["Todos", "high", "medium", "low"], index=st.session_state["cal_imp"], key="news_impact")
     with _col4:
         _country_options = {
             "Todos": None,
@@ -2327,8 +2331,12 @@ if _nav == "news":
             "🇨🇭 CHF": "CH",
             "🇳🇿 NZD": "NZ",
         }
-        _country_label = st.selectbox("País", list(_country_options.keys()), index=0, key="news_country")
+        _country_label = st.selectbox("País", list(_country_options.keys()), index=st.session_state["cal_ctry"], key="news_country")
         _country_filter = _country_options[_country_label]
+    st.session_state["cal_from"] = _from
+    st.session_state["cal_to"]   = _to
+    st.session_state["cal_imp"]  = ["Todos", "high", "medium", "low"].index(_impact_filter)
+    st.session_state["cal_ctry"] = list(_country_options.keys()).index(_country_label)
 
     @st.cache_data(ttl=300)
     def _fetch_calendar(from_dt, to_dt, api_key):
@@ -2471,6 +2479,9 @@ if _nav == "news":
             if n in _ES_NAMES: return _ES_NAMES[n]
             for en, es in _ES_SFXS: n = n.replace(en, es)
             return n
+        _DAYS_ES = ["LUNES","MARTES","MIÉRCOLES","JUEVES","VIERNES","SÁBADO","DOMINGO"]
+        _MONTHS_ES = ["","ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"]
+        _cur_date = None
         for ev in sorted(_events, key=lambda x: x.get("time","")):
             _imp   = ev.get("impact", "low")
             _color = _impact_colors.get(_imp, "#475569")
@@ -2483,6 +2494,16 @@ if _nav == "news":
             _time    = ev.get("time",    "")
             _event   = ev.get("event",   "")
             _event_es = _translate_ev(_event)
+            try:
+                from datetime import datetime as _dt_ev
+                _ev_date = _dt_ev.fromisoformat(_time[:10]).date()
+                if _ev_date != _cur_date:
+                    _cur_date = _ev_date
+                    _dname = _DAYS_ES[_ev_date.weekday()]
+                    _mname = _MONTHS_ES[_ev_date.month]
+                    st.markdown(f"<div style='font-size:11px;font-weight:700;color:#2dd4bf;letter-spacing:.1em;text-transform:uppercase;margin:16px 0 6px;padding:6px 12px;background:#0d1117;border-left:3px solid #2dd4bf;border-radius:4px;'>{_dname} {_ev_date.day:02d} {_mname} {_ev_date.year}</div>", unsafe_allow_html=True)
+            except: pass
+            _time_disp = _time[11:16] if len(_time) >= 16 else _time
 
             def _fmt(v):
                 if v is None or v == "": return "—"
@@ -2493,7 +2514,7 @@ if _nav == "news":
 <div style='background:#111520;border:1px solid #182035;border-left:3px solid {_color};
      border-radius:8px;padding:12px 16px;margin-bottom:2px;
      display:flex;align-items:center;gap:16px;flex-wrap:wrap;'>
-  <div style='min-width:90px;font-family:JetBrains Mono,monospace;font-size:11px;color:#475569;'>{_time}</div>
+  <div style='min-width:90px;font-family:JetBrains Mono,monospace;font-size:11px;color:#475569;'>{_time_disp}</div>
   <div style='min-width:36px;background:{_color}22;border:1px solid {_color}44;border-radius:4px;
        padding:2px 6px;font-size:9px;font-weight:700;color:{_color};text-align:center;'>{_country}</div>
   <div style='flex:1;font-size:13px;font-weight:600;color:#e2e8f0;'>{_event_es}</div>
