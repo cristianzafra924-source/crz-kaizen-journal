@@ -2518,7 +2518,62 @@ if _nav == "news":
             with st.expander(f"📖 ¿Qué es '{_event}'?", expanded=False):
                 _cache_key = f"news_desc_{_event}"
                 if _cache_key not in st.session_state:
-                    with st.spinner("Buscando descripción..."):
+                    _DICT_ES = {
+                        "non-farm payroll":"Las Nóminas No Agrícolas (NFP) miden el empleo en EEUU excluyendo el sector agrícola. Es el dato de empleo más importante del mercado, publicado el primer viernes de cada mes. Un dato mejor de lo esperado fortalece el dólar y puede anticipar subidas de tipos por parte de la Fed.",
+                        "nonfarm payroll":"Las Nóminas No Agrícolas (NFP) miden el empleo en EEUU excluyendo el sector agrícola. Publicado el primer viernes de cada mes, genera alta volatilidad en el dólar y en todos los mercados financieros.",
+                        "nfp":"Las Nóminas No Agrícolas (NFP) miden el empleo en EEUU excluyendo agricultura. Es el indicador de empleo más seguido del mundo y genera enorme volatilidad mensual en el dólar.",
+                        "consumer price":"El Índice de Precios al Consumidor (IPC/CPI) mide la variación en el precio de una cesta de bienes de consumo. Es el principal indicador de inflación. Si supera las expectativas, los bancos centrales tienden a subir tipos, fortaleciendo la moneda.",
+                        "cpi":"El IPC (Índice de Precios al Consumidor) mide la inflación de una economía. Un dato más alto de lo esperado suele fortalecer la moneda porque aumenta las probabilidades de subida de tipos de interés.",
+                        "core cpi":"El IPC Subyacente excluye alimentos y energía para mostrar la tendencia real de la inflación. Es el dato que más vigila la Reserva Federal para sus decisiones de política monetaria.",
+                        "producer price":"El Índice de Precios al Productor (IPP/PPI) mide la variación en los precios que reciben los productores. Es un indicador adelantado de la inflación al consumidor, ya que los aumentos de costes de producción suelen trasladarse al precio final.",
+                        "ppi":"El PPI (Índice de Precios al Productor) mide los precios a los que venden los productores. Es un indicador adelantado de la inflación al consumidor con impacto directo en el dólar.",
+                        "gross domestic":"El PIB (Producto Interior Bruto) mide el valor total de bienes y servicios producidos en un país. Es el indicador macroeconómico más amplio. Un PIB en crecimiento indica expansión económica y suele fortalecer la moneda.",
+                        "gdp":"El PIB (Producto Interior Bruto) es el indicador más importante de la actividad económica de un país. Un crecimiento superior al esperado fortalece la divisa y puede llevar a subidas de tipos de interés.",
+                        "purchasing manager":"El PMI (Índice de Gestores de Compras) mide la actividad empresarial. Un valor superior a 50 indica expansión; inferior a 50, contracción. Es un indicador adelantado muy seguido por los mercados.",
+                        "pmi":"El PMI (Índice de Gestores de Compras) es un indicador adelantado de la economía. Por encima de 50 = expansión; por debajo de 50 = contracción. Tiene gran impacto en los mercados de divisas.",
+                        "ism manufacturing":"El ISM Manufacturero mide la actividad del sector industrial de EEUU. Un dato superior a 50 indica expansión. Es uno de los indicadores adelantados más importantes para el dólar y los mercados de renta variable.",
+                        "ism services":"El ISM de Servicios mide la actividad del sector servicios de EEUU, que representa el 80% del PIB americano. Un dato superior a 50 indica expansión y es positivo para el dólar.",
+                        "ism non":"El ISM No Manufacturero mide la actividad del sector servicios en EEUU. Con un valor superior a 50 indica expansión. Es crucial porque los servicios representan la mayor parte de la economía americana.",
+                        "unemployment rate":"La Tasa de Desempleo mide el porcentaje de la población activa sin empleo. Una tasa baja indica una economía robusta y suele fortalecer la divisa. La Fed la monitoriza de cerca junto con la inflación.",
+                        "unemployment":"La Tasa de Desempleo es un indicador clave del mercado laboral y de la salud económica. Valores bajos suelen fortalecer la moneda y aumentar la probabilidad de subidas de tipos.",
+                        "jobless claims":"Las Solicitudes de Desempleo miden el número de personas que piden prestaciones por desempleo semanalmente. Datos bajos indican un mercado laboral sólido y son positivos para el dólar.",
+                        "initial claims":"Las Solicitudes Iniciales de Desempleo son un indicador semanal adelantado del mercado laboral. Un número bajo indica fortaleza del empleo y es positivo para el dólar.",
+                        "fomc":"El FOMC (Comité Federal de Mercado Abierto) es el organismo de la Fed que decide los tipos de interés en EEUU. Sus reuniones son de los eventos más importantes del calendario económico global.",
+                        "federal reserve":"La Reserva Federal (Fed) es el banco central de EEUU. Sus decisiones sobre tipos de interés tienen un impacto directo en el dólar y en todos los mercados financieros mundiales.",
+                        "fed rate":"La decisión de tipos de la Fed es el evento más importante del mercado. Subidas fortalecen el dólar; bajadas lo debilitan. Los mercados analizan cada palabra del comunicado y la rueda de prensa.",
+                        "interest rate":"La decisión de tipos de interés determina el coste del dinero. Tipos más altos atraen capital y fortalecen la moneda, pero pueden frenar el crédito y el crecimiento económico.",
+                        "retail sales":"Las Ventas Minoristas miden el valor de las ventas al por menor y son un indicador clave del consumo privado, que representa ~70% del PIB. Un dato fuerte impulsa la moneda y las bolsas.",
+                        "trade balance":"La Balanza Comercial mide la diferencia entre exportaciones e importaciones. Un superávit (más exportaciones) fortalece la moneda; un déficit puede debilitarla. Refleja la competitividad de una economía.",
+                        "durable goods":"Los Pedidos de Bienes Duraderos miden los nuevos pedidos de manufacturas con vida útil superior a 3 años. Es un indicador adelantado de la inversión empresarial y de la actividad industrial.",
+                        "housing starts":"Los Inicios de Construcción de Viviendas miden nuevas construcciones residenciales iniciadas. Es un indicador del sector inmobiliario y de la confianza económica, con alta correlación con el crecimiento del PIB.",
+                        "building permits":"Los Permisos de Construcción miden autorizaciones para nuevas edificaciones. Es un indicador adelantado del sector inmobiliario y de la actividad económica futura.",
+                        "consumer confidence":"El Índice de Confianza del Consumidor mide el optimismo de los hogares sobre la situación económica. Un índice alto indica mayor predisposición al gasto, impulsando el crecimiento económico.",
+                        "consumer sentiment":"El Sentimiento del Consumidor de la Universidad de Michigan mide las expectativas de los hogares americanos sobre la economía. Es un indicador adelantado del consumo y del crecimiento.",
+                        "ecb":"El BCE (Banco Central Europeo) fija la política monetaria de la zona euro. Sus decisiones sobre tipos de interés y los comunicados de su presidenta tienen enorme impacto en el euro y los mercados europeos.",
+                        "boe":"El Banco de Inglaterra (BoE) es el banco central del Reino Unido. Sus decisiones sobre tipos de interés afectan directamente a la libra esterlina (GBP) y a los mercados financieros británicos.",
+                        "bank of england":"El Banco de Inglaterra (BoE) establece la política monetaria del Reino Unido. Sus decisiones de tipos afectan directamente a la libra esterlina (GBP).",
+                        "boj":"El Banco de Japón (BoJ) establece la política monetaria de Japón. Sus políticas de tipos ultrabajos tienen un gran impacto en el yen (JPY) y en los mercados de carry trade globales.",
+                        "bank of japan":"El Banco de Japón fija los tipos de interés japoneses. Sus decisiones afectan directamente al yen (JPY) y suelen generar alta volatilidad en los mercados asiáticos.",
+                        "industrial production":"La Producción Industrial mide el volumen de producción del sector industrial. Es un indicador de la actividad económica real y del ciclo de negocios, con impacto en la divisa del país.",
+                        "pce":"El PCE (Gasto de Consumo Personal) es el indicador de inflación preferido por la Reserva Federal. Mide los cambios en precios de bienes y servicios consumidos por los hogares americanos.",
+                        "core pce":"El PCE Subyacente es el indicador de inflación favorito de la Fed, excluyendo alimentos y energía. Su nivel respecto al objetivo del 2% determina en gran medida las decisiones de política monetaria.",
+                        "payroll":"Las Nóminas miden el empleo generado en un período. Son un indicador fundamental del mercado laboral y de la salud económica, con impacto directo en la política monetaria y en el valor de la divisa.",
+                        "inflation":"La Inflación mide el aumento generalizado de precios en la economía. Una inflación alta puede llevar a los bancos centrales a subir tipos de interés, lo que suele fortalecer la moneda pero enfriar el crecimiento.",
+                        "balance of trade":"La Balanza Comercial refleja la diferencia entre exportaciones e importaciones de un país. Un saldo positivo (superávit) tiende a fortalecer la moneda nacional.",
+                        "current account":"La Cuenta Corriente mide el flujo de bienes, servicios y transferencias entre un país y el resto del mundo. Un déficit persistente puede presionar a la baja la moneda nacional.",
+                        "manufacturing":"El índice manufacturero mide la actividad del sector industrial. Es un indicador adelantado de la economía; valores altos indican expansión y suelen ser positivos para la divisa.",
+                        "services":"El índice de servicios mide la actividad del sector servicios, que representa la mayor parte del PIB en economías desarrolladas. Valores superiores a 50 indican expansión económica.",
+                    }
+                    _cl = _event.lower()
+                    _desc_found = None
+                    for _dk, _dv in _DICT_ES.items():
+                        if _dk in _cl:
+                            _desc_found = _dv
+                            break
+                    if _desc_found:
+                        st.session_state[_cache_key] = _desc_found
+                    else:
+                        with st.spinner("Buscando descripción..."):
                         import time as _time, urllib.parse as _urlp
                         _groq_key = st.secrets.get("GROQ_API_KEY", "")
                         _got_desc = False
