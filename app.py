@@ -2547,20 +2547,22 @@ if _nav == "news":
                         if not _got_desc and _cache_key not in st.session_state:
                             try:
                                 import re as _re_w
-                                _clean_ev = _re_w.sub(r"\s*[\(\[/].*", "", _event).strip()
+                                _WUA = {"User-Agent": "CRZKaizenJournal/1.0 (streamlit-app)"}
+                                _clean_ev = _re_w.sub(r"\s+(m/m|y/y|q/q|mom|yoy|qoq)", "", _event, flags=_re_w.IGNORECASE)
+                                _clean_ev = _re_w.sub(r"\s*[\(\[].*?[\)\]]", "", _clean_ev).strip()
                                 for _wlang in ["es", "en"]:
                                     _sr = _rq.get(
                                         f"https://{_wlang}.wikipedia.org/w/api.php",
                                         params={"action":"query","list":"search","srsearch":_clean_ev,
                                                 "format":"json","srlimit":1,"utf8":1},
-                                        timeout=8)
+                                        headers=_WUA, timeout=8)
                                     if _sr.status_code == 200:
                                         _hits = _sr.json().get("query",{}).get("search",[])
                                         if _hits:
                                             _ptitle = _hits[0]["title"]
                                             _wr = _rq.get(
                                                 f"https://{_wlang}.wikipedia.org/api/rest_v1/page/summary/{_urlp.quote(_ptitle)}",
-                                                timeout=8)
+                                                headers=_WUA, timeout=8)
                                             if _wr.status_code == 200:
                                                 _ext = _wr.json().get("extract","")
                                                 if len(_ext) > 40:
