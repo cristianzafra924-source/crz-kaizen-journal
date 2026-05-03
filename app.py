@@ -2518,43 +2518,49 @@ if _nav == "news":
             with st.expander(f"📖 ¿Qué es '{_event}'?", expanded=False):
                 _cache_key = f"news_desc_{_event}"
                 if _cache_key not in st.session_state:
-                    _groq_key = st.secrets.get("GROQ_API_KEY", "")
-                    if _groq_key:
-                        with st.spinner("Generando descripción..."):
-                            import time as _time
-                            _groq_payload = {
-                                "model": "llama-3.3-70b-versatile",
-                                "max_tokens": 300,
-                                "messages": [{"role":"user","content":
-                                    f"Explica en español, en 3-4 frases claras y concisas, qué es el indicador económico '{_event}' ({_country}), "
-                                    f"qué mide, por qué es importante para los mercados financieros y cómo afecta al trading. "
-                                    f"Sé directo y práctico. Sin introducción ni conclusión."}]
-                            }
+                    with st.spinner("Buscando descripción..."):
+                        import time as _time, urllib.parse as _urlp
+                        _groq_key = st.secrets.get("GROQ_API_KEY", "")
+                        _got_desc = False
+                        if _groq_key:
                             try:
-                                _resp = _rq.post(
-                                    "https://api.groq.com/openai/v1/chat/completions",
+                                _gpl = {"model":"llama-3.1-8b-instant","max_tokens":300,
+                                         "messages":[{"role":"user","content":
+                                             f"Explica en español, en 3-4 frases claras y concisas, qué es el indicador económico '{_event}' ({_country}), "
+                                             f"qué mide, por qué es importante para los mercados financieros y cómo afecta al trading. "
+                                             f"Sé directo y práctico. Sin introducción ni conclusión."}]}
+                                _gr = _rq.post("https://api.groq.com/openai/v1/chat/completions",
                                     headers={"Content-Type":"application/json","Authorization":f"Bearer {_groq_key}"},
-                                    json=_groq_payload, timeout=15
-                                )
-                                if _resp.status_code == 429:
-                                    _time.sleep(3)
-                                    _resp = _rq.post(
-                                        "https://api.groq.com/openai/v1/chat/completions",
+                                    json=_gpl, timeout=15)
+                                if _gr.status_code == 429:
+                                    _time.sleep(2)
+                                    _gr = _rq.post("https://api.groq.com/openai/v1/chat/completions",
                                         headers={"Content-Type":"application/json","Authorization":f"Bearer {_groq_key}"},
-                                        json=_groq_payload, timeout=15
-                                    )
-                                if _resp.status_code == 200:
-                                    st.session_state[_cache_key] = _resp.json()["choices"][0]["message"]["content"]
-                                elif _resp.status_code == 429:
-                                    st.markdown("<div style='font-size:12px;color:#f59e0b;'>⏳ Límite de peticiones alcanzado. Cierra y vuelve a abrir en unos segundos.</div>", unsafe_allow_html=True)
-                                else:
-                                    st.markdown(f"<div style='font-size:12px;color:#ef4444;'>Error {_resp.status_code} al obtener descripción.</div>", unsafe_allow_html=True)
-                            except Exception as _ex:
-                                st.markdown(f"<div style='font-size:12px;color:#ef4444;'>Error de conexión: {_ex}</div>", unsafe_allow_html=True)
-                    else:
-                        st.markdown("<div style='font-size:12px;color:#64748b;'>Añade <b>GROQ_API_KEY</b> en Streamlit Cloud → Settings → Secrets para ver la descripción.</div>", unsafe_allow_html=True)
+                                        json=_gpl, timeout=15)
+                                if _gr.status_code == 200:
+                                    st.session_state[_cache_key] = _gr.json()["choices"][0]["message"]["content"]
+                                    _got_desc = True
+                                elif _gr.status_code == 429:
+                                    st.markdown("<div style='font-size:12px;color:#f59e0b;'>⏳ Límite alcanzado. Inténtalo en unos segundos.</div>", unsafe_allow_html=True)
+                            except Exception:
+                                pass
+                        if not _got_desc and _cache_key not in st.session_state:
+                            try:
+                                _wq = _urlp.quote(_event.replace(" ", "_"))
+                                for _wlang in ["es", "en"]:
+                                    _wr = _rq.get(f"https://{_wlang}.wikipedia.org/api/rest_v1/page/summary/{_wq}", timeout=8)
+                                    if _wr.status_code == 200:
+                                        _ext = _wr.json().get("extract", "")
+                                        if len(_ext) > 40:
+                                            st.session_state[_cache_key] = _ext[:700]
+                                            _got_desc = True
+                                            break
+                            except Exception:
+                                pass
                 if _cache_key in st.session_state:
                     st.markdown(f"<div style='font-size:13px;color:#94a3b8;line-height:1.7;padding:4px 0;'>{st.session_state[_cache_key]}</div>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<div style='font-size:12px;color:#64748b;'>No se encontró descripción para este indicador.</div>", unsafe_allow_html=True)
 
             st.markdown("<div style='margin-bottom:6px;'></div>", unsafe_allow_html=True)
 
