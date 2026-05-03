@@ -2579,87 +2579,102 @@ if _nav == "news":
             st.markdown("<div style='margin-bottom:6px;'></div>", unsafe_allow_html=True)
 
 
-    # ── Riesgo Geopolítico (GDELT) ─────────────────────────────────────────
+    # ── Riesgo Geopolítico (Google News RSS) ──────────────────────────────
     st.markdown("""<div style='margin-top:32px;margin-bottom:16px;'>
 <div style='font-size:9px;color:#2dd4bf;font-weight:700;letter-spacing:.15em;text-transform:uppercase;'>
-🌍 Riesgo Geopolítico · GDELT en tiempo real
+🌍 Riesgo Geopolítico · Noticias en tiempo real
 </div></div>""", unsafe_allow_html=True)
 
     _geo_categories = {
-        "⚔️ Conflictos":       ("war conflict military attack strike invasion",
-                                "guerra conflicto militar ataque invasion bombardeo"),
-        "🚫 Sanciones":        ("sanctions embargo trade war tariff",
-                                "sanciones embargo guerra comercial aranceles"),
-        "🛢️ Energía":          ("oil gas crude petroleum OPEC energy pipeline",
-                                "petroleo gas crudo OPEP energia ducto"),
-        "🏦 Bancos Centrales": ("central bank interest rate federal reserve ECB inflation",
+        "⚔️ Conflictos":       ("war conflict military attack strike invasion Ukraine Gaza",
+                                "guerra conflicto militar ataque invasion Ucrania Gaza bombardeo"),
+        "🚫 Sanciones":        ("sanctions embargo tariff trade war",
+                                "sanciones embargo aranceles guerra comercial"),
+        "🛢️ Energía":          ("oil gas petroleum OPEC energy pipeline crude",
+                                "petroleo gas OPEP energia oleoducto crudo"),
+        "🏦 Bancos Centrales": ("central bank interest rate Federal Reserve ECB inflation",
                                 "banco central tipos interes reserva federal BCE inflacion"),
         "⚠️ Crisis política":  ("political crisis protest coup election instability",
-                                "crisis politica protesta golpe estado elecciones"),
-        "🌊 Rutas comerciales":("shipping strait Hormuz Suez Red Sea blockade",
-                                "envios estrecho Hormuz Suez Mar Rojo bloqueo"),
+                                "crisis politica protesta golpe estado elecciones inestabilidad"),
+        "🌊 Rutas comerciales":("shipping Hormuz Suez Red Sea blockade maritime",
+                                "Hormuz Suez Mar Rojo bloqueo maritimo envios"),
     }
+    _cat_colors = {
+        "⚔️ Conflictos":       "#ef4444",
+        "🚫 Sanciones":        "#f97316",
+        "🛢️ Energía":          "#eab308",
+        "🏦 Bancos Centrales": "#3b82f6",
+        "⚠️ Crisis política":  "#a855f7",
+        "🌊 Rutas comerciales":"#06b6d4",
+    }
+
     _geo_col1, _geo_col2 = st.columns([2, 1])
     with _geo_col1:
         _geo_cat = st.selectbox("Categoría", list(_geo_categories.keys()), key="geo_cat")
     with _geo_col2:
-        _geo_lang = st.selectbox("Idioma", ["Español", "English", "Todos"], key="geo_lang")
+        _geo_lang = st.selectbox("Idioma", ["Español", "English"], key="geo_lang")
+
+    _geo_color = _cat_colors.get(_geo_cat, "#2dd4bf")
+    _geo_qen, _geo_qes = _geo_categories[_geo_cat]
 
     @st.cache_data(ttl=600)
-    def _fetch_gdelt(query, lang):
-        import urllib.parse
-        _q = urllib.parse.quote(query)
-        _url = (f"https://api.gdeltproject.org/api/v2/doc/doc?query={_q}"
-                f"&mode=artlist&format=json&maxrecords=30&sort=DateDesc&timespan=14d")
+    def _fetch_gnews(query_es, query_en, lang):
+        import re as _re, urllib.parse as _up
+        from datetime import datetime as _dt2, timezone as _tz2
+        from email.utils import parsedate_to_datetime
+        if lang == "Español":
+            _q = _up.quote(query_es)
+            _url = f"https://news.google.com/rss/search?q={_q}&hl=es&gl=ES&ceid=ES:es"
+        else:
+            _q = _up.quote(query_en)
+            _url = f"https://news.google.com/rss/search?q={_q}&hl=en&gl=US&ceid=US:en"
         try:
-            _res = _rq.get(_url, timeout=20)
-            if _res.status_code == 200:
-                return _res.json().get("articles", [])
-            elif _res.status_code == 429:
-                st.warning("GDELT: demasiadas peticiones, espera 1 minuto y recarga.")
+            _rss = _rq.get(_url, headers={"User-Agent":"Mozilla/5.0"}, timeout=15)
+            if _rss.status_code != 200:
+                return []
+            _items = _re.findall(r"<item>(.*?)</item>", _rss.text, _re.DOTALL)
+            _now2 = _dt2.now(_tz2.utc)
+            _arts = []
+            for _it in _items[:25]:
+                _t = _re.search(r"<title>(.*?)</title>", _it)
+                _l = _re.search(r"<link>(.*?)</link>", _it)
+                _s = _re.search(r"<source[^>]*>(.*?)</source>", _it)
+                _p = _re.search(r"<pubDate>(.*?)</pubDate>", _it)
+                if not _t: continue
+                _pub_str = _p.group(1).strip() if _p else ""
+                _time_str = ""
+                try:
+                    _pdt = parsedate_to_datetime(_pub_str)
+                    _diff_m = int((_now2 - _pdt).total_seconds() / 60)
+                    if _diff_m < 60:   _time_str = f"hace {_diff_m}min"
+                    elif _diff_m < 1440: _time_str = _pdt.strftime("%H:%M")
+                    else:              _time_str = f"hace {_diff_m//1440}d"
+                except: pass
+                _arts.append({
+                    "title":  _t.group(1).strip()[:160],
+                    "url":    _l.group(1).strip() if _l else "#",
+                    "source": _s.group(1).strip() if _s else "",
+                    "time":   _time_str,
+                })
+            return _arts
         except Exception as _ex:
-            st.warning(f"GDELT error: {_ex}")
-        return []
+            return []
 
-    _geo_qen, _geo_qes = _geo_categories[_geo_cat]
-    _geo_query = _geo_qes if _geo_lang == "Español" else _geo_qen
-    _geo_articles = _fetch_gdelt(_geo_query, _geo_lang)
-
-    _cat_colors = {
-        "⚔️ Conflictos":      "#ef4444",
-        "🚫 Sanciones":       "#f97316",
-        "🛢️ Energía":         "#eab308",
-        "🏦 Bancos Centrales": "#3b82f6",
-        "⚠️ Crisis política":  "#a855f7",
-        "🌊 Rutas comerciales": "#06b6d4",
-    }
-    _geo_color = _cat_colors.get(_geo_cat, "#2dd4bf")
+    _geo_articles = _fetch_gnews(_geo_qes, _geo_qen, _geo_lang)
 
     if not _geo_articles:
-        st.info("No se encontraron noticias. Prueba otra categoría o idioma.")
+        st.info("Cargando noticias... Si persiste, recarga la página.")
     else:
-        from datetime import datetime as _dt, timezone as _tz
-        _now = _dt.now(_tz.utc)
         for _art in _geo_articles:
-            _title  = _art.get("title", "Sin título")
-            _url    = _art.get("url", "#")
-            _domain = _art.get("domain", "")
-            _seen   = _art.get("seendate", "")
-            try:
-                _pub = _dt.strptime(_seen, "%Y%m%dT%H%M%SZ").replace(tzinfo=_tz.utc)
-                _diff = int((_now - _pub).total_seconds() / 3600)
-                _time_str = f"hace {_diff}h" if _diff > 0 else "Ahora"
-            except:
-                _time_str = ""
             st.markdown(f"""
 <div style='background:#0d1117;border:1px solid #1e2a3a;border-left:3px solid {_geo_color};
      border-radius:8px;padding:12px 16px;margin-bottom:8px;'>
   <div style='font-size:13px;color:#e2e8f0;line-height:1.5;margin-bottom:6px;'>
-    <a href='{_url}' target='_blank' style='color:#e2e8f0;text-decoration:none;'>{_title}</a>
+    <a href='{_art["url"]}' target='_blank' style='color:#e2e8f0;text-decoration:none;'>{_art["title"]}</a>
   </div>
   <div style='font-size:11px;color:#475569;'>
     <span style='color:{_geo_color};font-weight:600;'>{_geo_cat}</span>
-    &nbsp;·&nbsp;{_domain}&nbsp;·&nbsp;{_time_str}
+    &nbsp;·&nbsp;{_art["source"]}&nbsp;·&nbsp;<span style='color:#2dd4bf;'>{_art["time"]}</span>
   </div>
 </div>""", unsafe_allow_html=True)
 
