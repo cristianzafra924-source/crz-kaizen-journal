@@ -2546,15 +2546,27 @@ if _nav == "news":
                                 pass
                         if not _got_desc and _cache_key not in st.session_state:
                             try:
-                                _wq = _urlp.quote(_event.replace(" ", "_"))
+                                import re as _re_w
+                                _clean_ev = _re_w.sub(r"\s*[\(\[/].*", "", _event).strip()
                                 for _wlang in ["es", "en"]:
-                                    _wr = _rq.get(f"https://{_wlang}.wikipedia.org/api/rest_v1/page/summary/{_wq}", timeout=8)
-                                    if _wr.status_code == 200:
-                                        _ext = _wr.json().get("extract", "")
-                                        if len(_ext) > 40:
-                                            st.session_state[_cache_key] = _ext[:700]
-                                            _got_desc = True
-                                            break
+                                    _sr = _rq.get(
+                                        f"https://{_wlang}.wikipedia.org/w/api.php",
+                                        params={"action":"query","list":"search","srsearch":_clean_ev,
+                                                "format":"json","srlimit":1,"utf8":1},
+                                        timeout=8)
+                                    if _sr.status_code == 200:
+                                        _hits = _sr.json().get("query",{}).get("search",[])
+                                        if _hits:
+                                            _ptitle = _hits[0]["title"]
+                                            _wr = _rq.get(
+                                                f"https://{_wlang}.wikipedia.org/api/rest_v1/page/summary/{_urlp.quote(_ptitle)}",
+                                                timeout=8)
+                                            if _wr.status_code == 200:
+                                                _ext = _wr.json().get("extract","")
+                                                if len(_ext) > 40:
+                                                    st.session_state[_cache_key] = _ext[:700]
+                                                    _got_desc = True
+                                                    break
                             except Exception:
                                 pass
                 if _cache_key in st.session_state:
