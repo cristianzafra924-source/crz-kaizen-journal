@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-05 01:05:24",
+  "timestamp": "2026-05-05 01:05:35",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 189586.77,
-    "equity": 189223.92,
-    "margin": 18466.39,
-    "margin_libre": 170757.53,
-    "margin_nivel": 1024.69,
-    "profit_abierto": -362.85,
+    "equity": 189095.67,
+    "margin": 55377.71,
+    "margin_libre": 133717.96,
+    "margin_nivel": 341.47,
+    "profit_abierto": -491.1,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,16 +22,43 @@
       "type": "buy",
       "volume": 10,
       "price_open": 27685.74,
-      "price_current": 27654.37,
+      "price_current": 27651.07,
       "sl": 27580.18,
       "tp": 0,
-      "profit": -313.7,
+      "profit": -346.7,
       "swap": -49.15,
-      "pnl_net": -362.85,
+      "pnl_net": -395.85,
       "time_open": "2026-05-04 21:04:24"
+    },
+    {
+      "ticket": 14992056,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 20.01,
+      "price_open": 27655.83,
+      "price_current": 27651.07,
+      "sl": 27628.69,
+      "tp": 0,
+      "profit": -95.25,
+      "swap": 0,
+      "pnl_net": -95.25,
+      "time_open": "2026-05-05 01:05:28"
     }
   ],
-  "deals_hoy": [],
+  "deals_hoy": [
+    {
+      "ticket": 13987831,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 20.01,
+      "price": 27655.83,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "01:05:28"
+    }
+  ],
   "pnl_dia": 0,
   "historial": [
     {
@@ -2581,6 +2608,19 @@
       "pnl_net": -1,
       "win": false,
       "time": "2026-05-04 23:00:44"
+    },
+    {
+      "ticket": 13987831,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 20.01,
+      "price": 27655.83,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-05-05 01:05:28"
     }
   ],
   "equity_series": [
@@ -2779,7 +2819,8 @@
     -10413.63,
     -10412.23,
     -10412.23,
+    -10413.23,
     -10413.23
   ],
-  "n_trades": 196
+  "n_trades": 197
 }
