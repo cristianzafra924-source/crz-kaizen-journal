@@ -46,6 +46,9 @@ html,body,[class*="css"] { font-family:'Space Grotesk','Inter',sans-serif; }
 .stApp { background:#1c2333; }
 #MainMenu,footer,header { visibility:hidden; }
 .block-container { padding:1.2rem 2rem 3rem; max-width:100%; }
+html,body { overflow-anchor:auto; scroll-behavior:auto !important; }
+[data-testid="stAppViewContainer"] { overflow-anchor:auto; }
+@media (max-width:768px) { .block-container { padding:.5rem 1rem 2rem; } }
 
 /* ── Sidebar: fijo en desktop, overlay en móvil ─────── */
 @media (min-width: 769px) {
@@ -344,13 +347,23 @@ div[data-testid="stMarkdownContainer"] span { color:#c8d4e0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# Heartbeat to keep WebSocket alive on mobile
+# Mobile: reconnect on tab-focus + scroll stability
 import streamlit.components.v1 as _hb_comp
 _hb_comp.html(
-    '<script>setInterval(function(){'
-    '  var ev=new MouseEvent("mousemove",{bubbles:true,cancelable:true,view:window});'
-    '  document.dispatchEvent(ev);'
-    '},25000);</script>',
+    '<script>'
+    'var _p=window.parent;'
+    '_p.document.addEventListener("visibilitychange",function(){'
+    '  if(!_p.document.hidden){'
+    '    setTimeout(function(){'
+    '      var s=_p.document.querySelector("[data-testid=\"stStatusWidget\"]");'
+    '      if(s&&s.textContent.indexOf("Error")>=0)_p.location.reload();'
+    '    },1500);'
+    '  }'
+    '});'
+    'setInterval(function(){'
+    '  fetch(_p.location.origin+"/_stcore/health").catch(function(){});'
+    '},20000);'
+    '</script>',
     height=0
 )
 
