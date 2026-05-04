@@ -1,38 +1,111 @@
 {
-  "timestamp": "2026-05-03 20:18:15",
+  "timestamp": "2026-05-04 11:04:01",
   "estado": "conectado",
   "cuenta": {
     "login": 60150333,
     "nombre": "zafra gomez cristian",
     "empresa": "AxiCorp Financial Services Pty Ltd",
     "servidor": "Axi-US51-Live",
-    "balance": 195273.65,
-    "equity": 195973.62,
-    "margin": 36934.23,
-    "margin_libre": 159039.39,
-    "margin_nivel": 530.6,
-    "profit_abierto": 699.97,
+    "balance": 192028.75,
+    "equity": 191923.75,
+    "margin": 37048.13,
+    "margin_libre": 154875.62,
+    "margin_nivel": 518.04,
+    "profit_abierto": -105,
     "divisa": "USD",
     "apalancamiento": 100
   },
   "posiciones_abiertas": [
     {
-      "ticket": 14940798,
+      "ticket": 14957362,
       "symbol": "USTEC",
       "type": "sell",
       "volume": 20,
-      "price_open": 27686.83,
-      "price_current": 27652.39,
-      "sl": 27686.44,
-      "tp": 0,
-      "profit": 688.8,
-      "swap": 11.17,
-      "pnl_net": 699.97,
-      "time_open": "2026-05-01 23:11:36"
+      "price_open": 27772.21,
+      "price_current": 27777.46,
+      "sl": 27841.13,
+      "tp": 26135.18,
+      "profit": -105,
+      "swap": 0,
+      "pnl_net": -105,
+      "time_open": "2026-05-04 09:26:20"
     }
   ],
-  "deals_hoy": [],
-  "pnl_dia": 0,
+  "deals_hoy": [
+    {
+      "ticket": 13946065,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 20,
+      "price": 27754.19,
+      "profit": -1347.2,
+      "commission": 0,
+      "swap": 11.17,
+      "pnl_net": -1336.03,
+      "time": "01:05:00"
+    },
+    {
+      "ticket": 13946140,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 20,
+      "price": 27745.62,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "01:09:37"
+    },
+    {
+      "ticket": 13946843,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 20,
+      "price": 27746.19,
+      "profit": -11.4,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": -11.4,
+      "time": "01:46:00"
+    },
+    {
+      "ticket": 13946853,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 1,
+      "price": 4629.33,
+      "profit": 0,
+      "commission": -3.24,
+      "swap": 0,
+      "pnl_net": -3.24,
+      "time": "01:46:54"
+    },
+    {
+      "ticket": 13947989,
+      "symbol": "XAUUSD",
+      "type": "sell",
+      "volume": 1,
+      "price": 4610.42,
+      "profit": -1891,
+      "commission": -3.23,
+      "swap": 0,
+      "pnl_net": -1894.23,
+      "time": "03:00:04"
+    },
+    {
+      "ticket": 13956770,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 20,
+      "price": 27772.21,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "09:26:20"
+    }
+  ],
+  "pnl_dia": -3244.9,
   "historial": [
     {
       "ticket": 13708343,
@@ -2191,6 +2264,84 @@
       "pnl_net": 0,
       "win": false,
       "time": "2026-05-01 23:11:36"
+    },
+    {
+      "ticket": 13946065,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 20,
+      "price": 27754.19,
+      "profit": -1347.2,
+      "commission": 0,
+      "swap": 11.17,
+      "pnl_net": -1336.03,
+      "win": false,
+      "time": "2026-05-04 01:05:00"
+    },
+    {
+      "ticket": 13946140,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 20,
+      "price": 27745.62,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-05-04 01:09:37"
+    },
+    {
+      "ticket": 13946843,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 20,
+      "price": 27746.19,
+      "profit": -11.4,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": -11.4,
+      "win": false,
+      "time": "2026-05-04 01:46:00"
+    },
+    {
+      "ticket": 13946853,
+      "symbol": "XAUUSD",
+      "type": "buy",
+      "volume": 1,
+      "price": 4629.33,
+      "profit": 0,
+      "commission": -3.24,
+      "swap": 0,
+      "pnl_net": -3.24,
+      "win": false,
+      "time": "2026-05-04 01:46:54"
+    },
+    {
+      "ticket": 13947989,
+      "symbol": "XAUUSD",
+      "type": "sell",
+      "volume": 1,
+      "price": 4610.42,
+      "profit": -1891,
+      "commission": -3.23,
+      "swap": 0,
+      "pnl_net": -1894.23,
+      "win": false,
+      "time": "2026-05-04 03:00:04"
+    },
+    {
+      "ticket": 13956770,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 20,
+      "price": 27772.21,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-05-04 09:26:20"
     }
   ],
   "equity_series": [
@@ -2359,7 +2510,13 @@
     -4725.75,
     -4725.75,
     -4726.35,
-    -4726.35
+    -4726.35,
+    -6062.38,
+    -6062.38,
+    -6073.78,
+    -6077.02,
+    -7971.25,
+    -7971.25
   ],
-  "n_trades": 166
+  "n_trades": 172
 }
