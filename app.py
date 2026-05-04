@@ -47,35 +47,51 @@ html,body,[class*="css"] { font-family:'Space Grotesk','Inter',sans-serif; }
 #MainMenu,footer,header { visibility:hidden; }
 .block-container { padding:1.2rem 2rem 3rem; max-width:100%; }
 
-/* ── Sidebar: fijo en desktop, colapsable en móvil ─────── */
+/* ── Sidebar: fijo en desktop, overlay en móvil ─────── */
 @media (min-width: 769px) {
 section[data-testid="stSidebar"] {
     transform:none !important;
     visibility:visible !important;
     display:flex !important;
 }
-[data-testid="stSidebarCollapseButton"] {
-    display:none !important;
-}
-[data-testid="stSidebarCollapsedControl"] {
-    display:none !important;
-}
+[data-testid="stSidebarCollapseButton"] { display:none !important; }
+[data-testid="stSidebarCollapsedControl"] { display:none !important; }
 }
 @media (max-width: 768px) {
 section[data-testid="stSidebar"] {
-    min-width:280px !important;
-    max-width:85vw !important;
+    position:fixed !important;
+    top:0 !important; left:0 !important;
+    height:100dvh !important;
+    min-width:80vw !important;
+    max-width:88vw !important;
     z-index:9999 !important;
+    box-shadow:4px 0 24px rgba(0,0,0,.7) !important;
 }
 [data-testid="stSidebarCollapseButton"] {
     display:flex !important;
     visibility:visible !important;
     opacity:1 !important;
+    position:absolute !important;
+    top:8px !important;
+    right:8px !important;
+    z-index:10000 !important;
+}
+[data-testid="stSidebarCollapseButton"] button {
+    width:40px !important; height:40px !important;
+    font-size:18px !important;
 }
 [data-testid="stSidebarCollapsedControl"] {
     display:block !important;
     visibility:visible !important;
     opacity:1 !important;
+    position:fixed !important;
+    left:0 !important;
+    top:12px !important;
+    z-index:99999 !important;
+}
+[data-testid="stSidebarCollapsedControl"] button {
+    width:36px !important; height:52px !important;
+    font-size:18px !important;
 }
 }
 
@@ -327,6 +343,17 @@ div[data-testid="stMarkdownContainer"] span { color:#c8d4e0 !important; }
 }
 </style>
 """, unsafe_allow_html=True)
+
+# Heartbeat to keep WebSocket alive on mobile
+import streamlit.components.v1 as _hb_comp
+_hb_comp.html(
+    '<script>setInterval(function(){'
+    '  var ev=new MouseEvent("mousemove",{bubbles:true,cancelable:true,view:window});'
+    '  document.dispatchEvent(ev);'
+    '},25000);</script>',
+    height=0
+)
+
 
 
 # ── Force sidebar open via JS ──────────────────────────────────────────────────
