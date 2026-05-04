@@ -2827,10 +2827,6 @@ if _nav == "monitor":
                 for _cn, _cid, _cc in _ch_defs]
     _ch_json = _json.dumps(_ch_list, ensure_ascii=True)
 
-    _news_json  = _json.dumps(_fetch_monitor_news('geopolitica guerra conflicto Iran Rusia OTAN China aranceles Trump'), ensure_ascii=False)
-    _trump_json = _json.dumps(_fetch_monitor_news('Trump'), ensure_ascii=False)
-    _yt_ok = 'OK'
-
     @st.cache_data(ttl=300)
     def _fetch_monitor_news(query):
         import re as _rem, urllib.parse as _upm
@@ -2864,6 +2860,10 @@ if _nav == "monitor":
                               "ago": _ago})
             return _arts
         except: return []
+
+    _news_json  = _json.dumps(_fetch_monitor_news('geopolitica guerra conflicto Iran Rusia OTAN China aranceles Trump'), ensure_ascii=False)
+    _trump_json = _json.dumps(_fetch_monitor_news('Trump'), ensure_ascii=False)
+    _yt_ok = 'OK'
 
 
 
