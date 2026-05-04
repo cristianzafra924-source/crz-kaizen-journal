@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-04 10:50:31",
+  "timestamp": "2026-05-04 10:50:41",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 192028.75,
-    "equity": 191351.95,
+    "equity": 191354.75,
     "margin": 37048.13,
-    "margin_libre": 154303.82,
+    "margin_libre": 154306.62,
     "margin_nivel": 516.5,
-    "profit_abierto": -676.8,
+    "profit_abierto": -674,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "sell",
       "volume": 20,
       "price_open": 27772.21,
-      "price_current": 27805.8,
+      "price_current": 27805.91,
       "sl": 27841.13,
       "tp": 26135.18,
-      "profit": -671.8,
+      "profit": -674,
       "swap": 0,
-      "pnl_net": -671.8,
+      "pnl_net": -674,
       "time_open": "2026-05-04 09:26:20"
     }
   ],
