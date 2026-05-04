@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 189586.77,
-    "equity": 188901.87,
+    "equity": 188852.72,
     "margin": 18466.39,
-    "margin_libre": 170435.48,
-    "margin_nivel": 1022.95,
-    "profit_abierto": -684.9,
+    "margin_libre": 170386.33,
+    "margin_nivel": 1022.68,
+    "profit_abierto": -734.05,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -26,8 +26,8 @@
       "sl": 27580.18,
       "tp": 0,
       "profit": -684.9,
-      "swap": 0,
-      "pnl_net": -684.9,
+      "swap": -49.15,
+      "pnl_net": -734.05,
       "time_open": "2026-05-04 21:04:24"
     }
   ],
