@@ -356,20 +356,6 @@ _hb_comp.html(
 
 
 
-# ── Force sidebar open via JS ──────────────────────────────────────────────────
-import streamlit.components.v1 as _sc
-_sc.html("""<script>
-(function(){
-  function tryOpen(){
-    var btn = window.parent.document.querySelector(
-      '[data-testid="stSidebarCollapsedControl"] button'
-    );
-    if(btn){ btn.click(); return; }
-    setTimeout(tryOpen, 250);
-  }
-  setTimeout(tryOpen, 150);
-})();
-</script>""", height=0)
 
 # ── Parser MT5 ─────────────────────────────────────────────────────────────────
 def parse_mt5(file) -> dict:
