@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-04 04:28:09",
+  "timestamp": "2026-05-04 10:03:49",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,15 +7,30 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 192028.75,
-    "equity": 192028.75,
-    "margin": 0,
-    "margin_libre": 192028.75,
-    "margin_nivel": 0,
-    "profit_abierto": 0,
+    "equity": 192017.15,
+    "margin": 37048.13,
+    "margin_libre": 154969.02,
+    "margin_nivel": 518.29,
+    "profit_abierto": -11.6,
     "divisa": "USD",
     "apalancamiento": 100
   },
-  "posiciones_abiertas": [],
+  "posiciones_abiertas": [
+    {
+      "ticket": 14957362,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 20,
+      "price_open": 27772.21,
+      "price_current": 27772.79,
+      "sl": 27812.7,
+      "tp": 0,
+      "profit": -11.6,
+      "swap": 0,
+      "pnl_net": -11.6,
+      "time_open": "2026-05-04 09:26:20"
+    }
+  ],
   "deals_hoy": [
     {
       "ticket": 13946065,
@@ -76,6 +91,18 @@
       "swap": 0,
       "pnl_net": -1894.23,
       "time": "03:00:04"
+    },
+    {
+      "ticket": 13956770,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 20,
+      "price": 27772.21,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "09:26:20"
     }
   ],
   "pnl_dia": -3244.9,
@@ -2302,6 +2329,19 @@
       "pnl_net": -1894.23,
       "win": false,
       "time": "2026-05-04 03:00:04"
+    },
+    {
+      "ticket": 13956770,
+      "symbol": "USTEC",
+      "type": "sell",
+      "volume": 20,
+      "price": 27772.21,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-05-04 09:26:20"
     }
   ],
   "equity_series": [
@@ -2475,7 +2515,8 @@
     -6062.38,
     -6073.78,
     -6077.02,
+    -7971.25,
     -7971.25
   ],
-  "n_trades": 171
+  "n_trades": 172
 }
