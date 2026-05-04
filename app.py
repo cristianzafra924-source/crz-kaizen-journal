@@ -61,9 +61,63 @@ section[data-testid="stSidebar"] {
 [data-testid="stSidebarCollapsedControl"] { display:none !important; }
 }
 @media (max-width: 820px) {
+/* Sidebar oculto — hamburger JS lo maneja */
 section[data-testid="stSidebar"] { display:none !important; }
 [data-testid="stAppViewContainer"] > .main { margin-left:0 !important; }
-.block-container { padding:.6rem 1rem 2rem !important; }
+
+/* Espacio arriba para el botón hamburguesa */
+.block-container { padding:3.2rem .75rem 2rem !important; max-width:100vw !important; }
+
+/* Header compacto */
+.crz-header { padding:8px 14px !important; margin:-3.2rem -.75rem 1rem !important; }
+.crz-logo { font-size:14px !important; }
+.crz-tagline { font-size:7px !important; }
+
+/* Metric cards más pequeñas */
+.metric-card { padding:10px 12px !important; border-radius:8px !important; }
+.metric-value { font-size:17px !important; }
+.metric-label { font-size:8px !important; letter-spacing:.08em !important; margin-bottom:6px !important; }
+.metric-sub { font-size:10px !important; margin-top:4px !important; }
+
+/* Columnas: wrap automático — 2 por fila en móvil */
+[data-testid="stHorizontalBlock"] { flex-wrap:wrap !important; gap:6px !important; }
+[data-testid="column"] { min-width:calc(50% - 6px) !important; flex:1 1 calc(50% - 6px) !important; box-sizing:border-box !important; }
+
+/* Texto general más compacto */
+[data-testid="stMarkdownContainer"] p { font-size:12px !important; line-height:1.5 !important; }
+[data-testid="stMarkdownContainer"] h3 { font-size:13px !important; }
+.stSelectbox label, [data-testid="stSelectbox"] label { font-size:10px !important; }
+[data-testid="stDateInput"] label { font-size:10px !important; }
+[data-testid="stNumberInput"] label { font-size:10px !important; }
+[data-testid="stCaptionContainer"] p { font-size:10px !important; }
+
+/* Botones: más compactos */
+[data-testid="stButton"] button { font-size:12px !important; padding:7px 10px !important; }
+
+/* Dataframes: scroll horizontal */
+[data-testid="stDataFrame"] { overflow-x:auto !important; max-width:100% !important; }
+[data-testid="stDataFrame"] * { font-size:10px !important; }
+
+/* Expanders: más compactos */
+[data-testid="stExpander"] summary { font-size:12px !important; padding:8px 12px !important; }
+
+/* Plotly: usa todo el ancho */
+.js-plotly-plot, .plotly { max-width:100% !important; }
+.stPlotlyChart { overflow-x:auto !important; }
+
+/* Selectbox popup */
+[data-baseweb="popover"] { max-width:90vw !important; }
+
+/* Ocultar decoración extra en móvil */
+.crz-header > div:last-child { display:none !important; }
+}
+
+@media (max-width: 480px) {
+/* Pantallas muy pequeñas: columnas a 100% */
+[data-testid="column"] { min-width:100% !important; flex:1 1 100% !important; }
+.metric-value { font-size:15px !important; }
+.block-container { padding:3rem .5rem 1.5rem !important; }
+.crz-header { margin:-3rem -.5rem .75rem !important; }
 }
 
 /* ── Sidebar panel ───────────────────────────────────────── */
