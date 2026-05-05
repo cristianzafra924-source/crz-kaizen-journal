@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-05 04:21:38",
+  "timestamp": "2026-05-05 09:02:12",
   "estado": "conectado",
   "cuenta": {
     "login": 504062347,
@@ -7,11 +7,11 @@
     "empresa": "TTP Ltd",
     "servidor": "TTPMarkets-Server",
     "balance": 188717.14,
-    "equity": 188658.29,
-    "margin": 18466.39,
-    "margin_libre": 170191.9,
-    "margin_nivel": 1021.63,
-    "profit_abierto": -58.85,
+    "equity": 189168.19,
+    "margin": 55452.77,
+    "margin_libre": 133715.42,
+    "margin_nivel": 341.13,
+    "profit_abierto": 451.05,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,13 +22,27 @@
       "type": "buy",
       "volume": 10,
       "price_open": 27685.74,
-      "price_current": 27684.77,
-      "sl": 27580.18,
+      "price_current": 27729.2,
+      "sl": 27687.82,
       "tp": 0,
-      "profit": -9.7,
+      "profit": 434.6,
       "swap": -49.15,
-      "pnl_net": -58.85,
+      "pnl_net": 385.45,
       "time_open": "2026-05-04 21:04:24"
+    },
+    {
+      "ticket": 15000694,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 20,
+      "price_open": 27725.92,
+      "price_current": 27729.2,
+      "sl": 27703.4,
+      "tp": 0,
+      "profit": 65.6,
+      "swap": 0,
+      "pnl_net": 65.6,
+      "time_open": "2026-05-05 08:42:58"
     }
   ],
   "deals_hoy": [
@@ -55,6 +69,18 @@
       "swap": 0,
       "pnl_net": -869.63,
       "time": "02:51:05"
+    },
+    {
+      "ticket": 13995061,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 20,
+      "price": 27725.92,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "08:42:58"
     }
   ],
   "pnl_dia": -869.63,
@@ -2632,6 +2658,19 @@
       "pnl_net": -869.63,
       "win": false,
       "time": "2026-05-05 02:51:05"
+    },
+    {
+      "ticket": 13995061,
+      "symbol": "USTEC",
+      "type": "buy",
+      "volume": 20,
+      "price": 27725.92,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-05-05 08:42:58"
     }
   ],
   "equity_series": [
@@ -2832,7 +2871,8 @@
     -10412.23,
     -10413.23,
     -10413.23,
+    -11282.86,
     -11282.86
   ],
-  "n_trades": 198
+  "n_trades": 199
 }
