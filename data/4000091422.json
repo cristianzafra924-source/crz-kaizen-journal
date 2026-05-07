@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-07 12:13:58",
+  "timestamp": "2026-05-07 12:14:09",
   "estado": "conectado",
   "cuenta": {
     "login": 4000091422,
@@ -7,11 +7,11 @@
     "empresa": "Tradeslide Trading Tech Limited",
     "servidor": "Darwinex-Live",
     "balance": 99992.41,
-    "equity": 99999.41,
+    "equity": 99998.99,
     "margin": 429.79,
-    "margin_libre": 99569.62,
-    "margin_nivel": 23267.04,
-    "profit_abierto": 7,
+    "margin_libre": 99569.2,
+    "margin_nivel": 23266.94,
+    "profit_abierto": 6.58,
     "divisa": "USD",
     "apalancamiento": 200
   },
@@ -22,12 +22,12 @@
       "type": "sell",
       "volume": 0.01,
       "price_open": 28648.8,
-      "price_current": 28630.2,
+      "price_current": 28631.6,
       "sl": 29794.3,
       "tp": 27473.1,
-      "profit": 1.86,
+      "profit": 1.72,
       "swap": 0.18,
-      "pnl_net": 2.04,
+      "pnl_net": 1.9,
       "time_open": "2026-05-06 23:11:58"
     },
     {
@@ -36,12 +36,12 @@
       "type": "sell",
       "volume": 0.01,
       "price_open": 28685.3,
-      "price_current": 28630.2,
+      "price_current": 28631.6,
       "sl": 29780.1,
       "tp": 27477.9,
-      "profit": 5.51,
+      "profit": 5.37,
       "swap": 0.18,
-      "pnl_net": 5.69,
+      "pnl_net": 5.55,
       "time_open": "2026-05-06 23:16:29"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.01,
       "price_open": 28622.9,
-      "price_current": 28630.2,
+      "price_current": 28631.6,
       "sl": 29793.6,
       "tp": 27478.4,
-      "profit": -0.73,
+      "profit": -0.87,
       "swap": 0,
-      "pnl_net": -0.73,
+      "pnl_net": -0.87,
       "time_open": "2026-05-07 09:27:12"
     }
   ],
