@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-07 15:59:43",
+  "timestamp": "2026-05-07 15:59:53",
   "estado": "conectado",
   "cuenta": {
     "login": 69459,
@@ -7,11 +7,11 @@
     "empresa": "Noctorial Ltd.",
     "servidor": "Noctorial-Trade",
     "balance": 4907.93,
-    "equity": 4949.9,
-    "margin": 732.19,
-    "margin_libre": 4217.71,
-    "margin_nivel": 676.04,
-    "profit_abierto": 41.97,
+    "equity": 4944.02,
+    "margin": 1341.23,
+    "margin_libre": 3602.79,
+    "margin_nivel": 368.62,
+    "profit_abierto": 36.09,
     "divisa": "EUR",
     "apalancamiento": 30
   },
@@ -22,12 +22,12 @@
       "type": "sell",
       "volume": 0.1,
       "price_open": 28803.4,
-      "price_current": 28661.5,
+      "price_current": 28665.6,
       "sl": 28802.3,
       "tp": 0,
-      "profit": 12.06,
+      "profit": 11.71,
       "swap": 0,
-      "pnl_net": 12.06,
+      "pnl_net": 11.71,
       "time_open": "2026-05-07 15:00:44"
     },
     {
@@ -36,13 +36,27 @@
       "type": "sell",
       "volume": 0.5,
       "price_open": 28731.85,
-      "price_current": 28661.5,
+      "price_current": 28665.6,
       "sl": 28730.67,
       "tp": 0,
-      "profit": 29.91,
+      "profit": 28.16,
       "swap": 0,
-      "pnl_net": 29.91,
+      "pnl_net": 28.16,
       "time_open": "2026-05-07 15:06:43"
+    },
+    {
+      "ticket": 10730705,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.5,
+      "price_open": 28656.7,
+      "price_current": 28665.6,
+      "sl": 28756.72,
+      "tp": 0,
+      "profit": -3.78,
+      "swap": 0,
+      "pnl_net": -3.78,
+      "time_open": "2026-05-07 15:59:44"
     }
   ],
   "deals_hoy": [
@@ -165,6 +179,18 @@
       "swap": 0,
       "pnl_net": 0,
       "time": "15:06:43"
+    },
+    {
+      "ticket": 10134018,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.5,
+      "price": 28656.7,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "15:59:44"
     }
   ],
   "pnl_dia": -92.07,
@@ -298,6 +324,19 @@
       "pnl_net": 0,
       "win": false,
       "time": "2026-05-07 15:06:43"
+    },
+    {
+      "ticket": 10134018,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.5,
+      "price": 28656.7,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-05-07 15:59:44"
     }
   ],
   "equity_series": [
@@ -310,7 +349,8 @@
     -24.26,
     -92.07,
     -92.07,
+    -92.07,
     -92.07
   ],
-  "n_trades": 10
+  "n_trades": 11
 }
