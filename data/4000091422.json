@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-07 19:19:11",
+  "timestamp": "2026-05-07 19:19:21",
   "estado": "conectado",
   "cuenta": {
     "login": 4000091422,
@@ -7,11 +7,11 @@
     "empresa": "Tradeslide Trading Tech Limited",
     "servidor": "Darwinex-Live",
     "balance": 99991.86,
-    "equity": 100029.17,
+    "equity": 100029.86,
     "margin": 3287,
-    "margin_libre": 96742.17,
-    "margin_nivel": 3043.18,
-    "profit_abierto": 37.31,
+    "margin_libre": 96742.86,
+    "margin_nivel": 3043.2,
+    "profit_abierto": 38,
     "divisa": "USD",
     "apalancamiento": 200
   },
@@ -22,12 +22,12 @@
       "type": "sell",
       "volume": 0.01,
       "price_open": 28648.8,
-      "price_current": 28566.5,
+      "price_current": 28566.2,
       "sl": 28645.8,
       "tp": 26896.7,
-      "profit": 8.23,
+      "profit": 8.26,
       "swap": 0.18,
-      "pnl_net": 8.41,
+      "pnl_net": 8.44,
       "time_open": "2026-05-06 23:11:58"
     },
     {
@@ -36,12 +36,12 @@
       "type": "sell",
       "volume": 0.01,
       "price_open": 28685.3,
-      "price_current": 28566.5,
+      "price_current": 28566.2,
       "sl": 28683.4,
       "tp": 26912.4,
-      "profit": 11.88,
+      "profit": 11.91,
       "swap": 0.18,
-      "pnl_net": 12.06,
+      "pnl_net": 12.09,
       "time_open": "2026-05-06 23:16:29"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.01,
       "price_open": 28622.9,
-      "price_current": 28566.5,
+      "price_current": 28566.2,
       "sl": 29793.6,
       "tp": 27471.2,
-      "profit": 5.64,
+      "profit": 5.67,
       "swap": 0,
-      "pnl_net": 5.64,
+      "pnl_net": 5.67,
       "time_open": "2026-05-07 09:27:12"
     },
     {
@@ -64,12 +64,12 @@
       "type": "sell",
       "volume": 0.2,
       "price_open": 28572.1,
-      "price_current": 28566.5,
+      "price_current": 28566.2,
       "sl": 28753.4,
       "tp": 27472.2,
-      "profit": 11.2,
+      "profit": 11.8,
       "swap": 0,
-      "pnl_net": 11.2,
+      "pnl_net": 11.8,
       "time_open": "2026-05-07 19:18:52"
     }
   ],
