@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-07 16:08:08",
+  "timestamp": "2026-05-07 16:08:15",
   "estado": "conectado",
   "cuenta": {
     "login": 69459,
@@ -7,11 +7,11 @@
     "empresa": "Noctorial Ltd.",
     "servidor": "Noctorial-Trade",
     "balance": 4907.93,
-    "equity": 4994.08,
+    "equity": 4986.31,
     "margin": 1341.23,
-    "margin_libre": 3652.85,
-    "margin_nivel": 372.35,
-    "profit_abierto": 86.15,
+    "margin_libre": 3645.08,
+    "margin_nivel": 371.77,
+    "profit_abierto": 78.38,
     "divisa": "EUR",
     "apalancamiento": 30
   },
@@ -22,12 +22,12 @@
       "type": "sell",
       "volume": 0.1,
       "price_open": 28803.4,
-      "price_current": 28612.1,
+      "price_current": 28620.4,
       "sl": 28802.3,
       "tp": 27455.66,
-      "profit": 16.27,
+      "profit": 15.56,
       "swap": 0,
-      "pnl_net": 16.27,
+      "pnl_net": 15.56,
       "time_open": "2026-05-07 15:00:44"
     },
     {
@@ -36,12 +36,12 @@
       "type": "sell",
       "volume": 0.5,
       "price_open": 28731.85,
-      "price_current": 28612.1,
+      "price_current": 28620.4,
       "sl": 28730.67,
       "tp": 27455.66,
-      "profit": 50.92,
+      "profit": 47.39,
       "swap": 0,
-      "pnl_net": 50.92,
+      "pnl_net": 47.39,
       "time_open": "2026-05-07 15:06:43"
     },
     {
@@ -50,12 +50,12 @@
       "type": "sell",
       "volume": 0.5,
       "price_open": 28656.7,
-      "price_current": 28612.1,
+      "price_current": 28620.4,
       "sl": 28756.72,
       "tp": 27455.66,
-      "profit": 18.96,
+      "profit": 15.43,
       "swap": 0,
-      "pnl_net": 18.96,
+      "pnl_net": 15.43,
       "time_open": "2026-05-07 15:59:44"
     }
   ],
