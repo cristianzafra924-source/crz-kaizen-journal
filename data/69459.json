@@ -1,0 +1,200 @@
+{
+  "timestamp": "2026-05-07 14:04:25",
+  "estado": "conectado",
+  "cuenta": {
+    "login": 69459,
+    "nombre": "Noctorial - Phase 1 - Free - T2 - Cristian Zafra Gomez",
+    "empresa": "Noctorial Ltd.",
+    "servidor": "Noctorial-Trade",
+    "balance": 5000.1,
+    "equity": 4952.27,
+    "margin": 850.87,
+    "margin_libre": 4101.4,
+    "margin_nivel": 582.02,
+    "profit_abierto": -47.83,
+    "divisa": "EUR",
+    "apalancamiento": 30
+  },
+  "posiciones_abiertas": [
+    {
+      "ticket": 10707501,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.1,
+      "price_open": 28611.6,
+      "price_current": 28684.05,
+      "sl": 28748.82,
+      "tp": 27459.16,
+      "profit": -6.16,
+      "swap": 0,
+      "pnl_net": -6.16,
+      "time_open": "2026-05-07 09:55:19"
+    },
+    {
+      "ticket": 10708781,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.1,
+      "price_open": 28619.2,
+      "price_current": 28684.05,
+      "sl": 28745.52,
+      "tp": 27459.16,
+      "profit": -5.52,
+      "swap": 0,
+      "pnl_net": -5.52,
+      "time_open": "2026-05-07 10:42:47"
+    },
+    {
+      "ticket": 10709675,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.5,
+      "price_open": 28599,
+      "price_current": 28684.05,
+      "sl": 28748.82,
+      "tp": 27448.72,
+      "profit": -36.15,
+      "swap": 0,
+      "pnl_net": -36.15,
+      "time_open": "2026-05-07 11:15:04"
+    }
+  ],
+  "deals_hoy": [
+    {
+      "ticket": 10110638,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.1,
+      "price": 28634.1,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "09:31:23"
+    },
+    {
+      "ticket": 10111222,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.1,
+      "price": 28611.6,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "09:55:19"
+    },
+    {
+      "ticket": 10112450,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.1,
+      "price": 28619.2,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "10:42:47"
+    },
+    {
+      "ticket": 10112849,
+      "symbol": "NDXUSD",
+      "type": "buy",
+      "volume": 0.1,
+      "price": 28632.9,
+      "profit": 0.1,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0.1,
+      "time": "11:00:12"
+    },
+    {
+      "ticket": 10113282,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.5,
+      "price": 28599,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "time": "11:15:04"
+    }
+  ],
+  "pnl_dia": 0.1,
+  "historial": [
+    {
+      "ticket": 10110638,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.1,
+      "price": 28634.1,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-05-07 09:31:23"
+    },
+    {
+      "ticket": 10111222,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.1,
+      "price": 28611.6,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-05-07 09:55:19"
+    },
+    {
+      "ticket": 10112450,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.1,
+      "price": 28619.2,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-05-07 10:42:47"
+    },
+    {
+      "ticket": 10112849,
+      "symbol": "NDXUSD",
+      "type": "buy",
+      "volume": 0.1,
+      "price": 28632.9,
+      "profit": 0.1,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0.1,
+      "win": true,
+      "time": "2026-05-07 11:00:12"
+    },
+    {
+      "ticket": 10113282,
+      "symbol": "NDXUSD",
+      "type": "sell",
+      "volume": 0.5,
+      "price": 28599,
+      "profit": 0,
+      "commission": 0,
+      "swap": 0,
+      "pnl_net": 0,
+      "win": false,
+      "time": "2026-05-07 11:15:04"
+    }
+  ],
+  "equity_series": [
+    0,
+    0,
+    0,
+    0.1,
+    0.1
+  ],
+  "n_trades": 5
+}
