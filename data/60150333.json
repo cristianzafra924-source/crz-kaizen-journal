@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-11 14:20:42",
+  "timestamp": "2026-05-11 14:20:52",
   "estado": "conectado",
   "cuenta": {
     "login": 60150333,
@@ -7,11 +7,11 @@
     "empresa": "AxiCorp Financial Services Pty Ltd",
     "servidor": "Axi-US51-Live",
     "balance": 740.24,
-    "equity": 703.87,
+    "equity": 706.27,
     "margin": 467.3,
-    "margin_libre": 236.57,
-    "margin_nivel": 150.62,
-    "profit_abierto": -36.37,
+    "margin_libre": 238.97,
+    "margin_nivel": 151.14,
+    "profit_abierto": -33.97,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4672.03,
-      "price_current": 4669.4,
+      "price_current": 4669.64,
       "sl": 4613.86,
       "tp": 5446.4,
-      "profit": -2.63,
+      "profit": -2.39,
       "swap": 0,
-      "pnl_net": -2.63,
+      "pnl_net": -2.39,
       "time_open": "2026-05-11 07:35:31"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.04,
       "price_open": 4675.35,
-      "price_current": 4669.4,
+      "price_current": 4669.64,
       "sl": 4614.3,
       "tp": 5451.62,
-      "profit": -23.8,
+      "profit": -22.84,
       "swap": 0,
-      "pnl_net": -23.8,
+      "pnl_net": -22.84,
       "time_open": "2026-05-11 08:24:54"
     },
     {
@@ -50,12 +50,12 @@
       "type": "buy",
       "volume": 0.04,
       "price_open": 4674.23,
-      "price_current": 4669.4,
+      "price_current": 4669.64,
       "sl": 4613.86,
       "tp": 5451.62,
-      "profit": -19.32,
+      "profit": -18.36,
       "swap": 0,
-      "pnl_net": -19.32,
+      "pnl_net": -18.36,
       "time_open": "2026-05-11 08:32:10"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4660.02,
-      "price_current": 4669.4,
+      "price_current": 4669.64,
       "sl": 4629.01,
       "tp": 5454.23,
-      "profit": 9.38,
+      "profit": 9.62,
       "swap": 0,
-      "pnl_net": 9.38,
+      "pnl_net": 9.62,
       "time_open": "2026-05-11 09:04:24"
     }
   ],
