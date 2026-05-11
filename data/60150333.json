@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-11 14:42:42",
+  "timestamp": "2026-05-11 14:42:51",
   "estado": "conectado",
   "cuenta": {
     "login": 60150333,
@@ -7,11 +7,11 @@
     "empresa": "AxiCorp Financial Services Pty Ltd",
     "servidor": "Axi-US51-Live",
     "balance": 740.24,
-    "equity": 780.07,
+    "equity": 780.67,
     "margin": 467.3,
-    "margin_libre": 312.77,
-    "margin_nivel": 166.93,
-    "profit_abierto": 39.83,
+    "margin_libre": 313.37,
+    "margin_nivel": 167.06,
+    "profit_abierto": 40.43,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4672.03,
-      "price_current": 4677.03,
+      "price_current": 4677.07,
       "sl": 4613.86,
       "tp": 5446.4,
-      "profit": 5,
+      "profit": 5.04,
       "swap": 0,
-      "pnl_net": 5,
+      "pnl_net": 5.04,
       "time_open": "2026-05-11 07:35:31"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.04,
       "price_open": 4675.35,
-      "price_current": 4677.03,
+      "price_current": 4677.07,
       "sl": 4614.3,
       "tp": 5451.62,
-      "profit": 6.72,
+      "profit": 6.88,
       "swap": 0,
-      "pnl_net": 6.72,
+      "pnl_net": 6.88,
       "time_open": "2026-05-11 08:24:54"
     },
     {
@@ -50,12 +50,12 @@
       "type": "buy",
       "volume": 0.04,
       "price_open": 4674.23,
-      "price_current": 4677.03,
+      "price_current": 4677.07,
       "sl": 4613.86,
       "tp": 5451.62,
-      "profit": 11.2,
+      "profit": 11.36,
       "swap": 0,
-      "pnl_net": 11.2,
+      "pnl_net": 11.36,
       "time_open": "2026-05-11 08:32:10"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4660.02,
-      "price_current": 4677.03,
+      "price_current": 4677.07,
       "sl": 4629.01,
       "tp": 5454.23,
-      "profit": 17.01,
+      "profit": 17.05,
       "swap": 0,
-      "pnl_net": 17.01,
+      "pnl_net": 17.05,
       "time_open": "2026-05-11 09:04:24"
     }
   ],
