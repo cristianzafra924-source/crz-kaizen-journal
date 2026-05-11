@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-11 15:11:12",
+  "timestamp": "2026-05-11 15:11:22",
   "estado": "conectado",
   "cuenta": {
     "login": 60150333,
@@ -7,11 +7,11 @@
     "empresa": "AxiCorp Financial Services Pty Ltd",
     "servidor": "Axi-US51-Live",
     "balance": 740.24,
-    "equity": 689.87,
+    "equity": 689.37,
     "margin": 467.3,
-    "margin_libre": 222.57,
-    "margin_nivel": 147.63,
-    "profit_abierto": -50.37,
+    "margin_libre": 222.07,
+    "margin_nivel": 147.52,
+    "profit_abierto": -50.87,
     "divisa": "USD",
     "apalancamiento": 100
   },
