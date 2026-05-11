@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-11 14:45:32",
+  "timestamp": "2026-05-11 14:45:42",
   "estado": "conectado",
   "cuenta": {
     "login": 60150333,
@@ -7,11 +7,11 @@
     "empresa": "AxiCorp Financial Services Pty Ltd",
     "servidor": "Axi-US51-Live",
     "balance": 740.24,
-    "equity": 750.47,
+    "equity": 757.07,
     "margin": 467.3,
-    "margin_libre": 283.17,
-    "margin_nivel": 160.6,
-    "profit_abierto": 10.23,
+    "margin_libre": 289.77,
+    "margin_nivel": 162.01,
+    "profit_abierto": 16.83,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4672.03,
-      "price_current": 4674,
+      "price_current": 4674.73,
       "sl": 4613.86,
       "tp": 5446.4,
-      "profit": 1.97,
+      "profit": 2.7,
       "swap": 0,
-      "pnl_net": 1.97,
+      "pnl_net": 2.7,
       "time_open": "2026-05-11 07:35:31"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.04,
       "price_open": 4675.35,
-      "price_current": 4674,
+      "price_current": 4674.73,
       "sl": 4614.3,
       "tp": 5451.62,
-      "profit": -5.4,
+      "profit": -2.48,
       "swap": 0,
-      "pnl_net": -5.4,
+      "pnl_net": -2.48,
       "time_open": "2026-05-11 08:24:54"
     },
     {
@@ -50,12 +50,12 @@
       "type": "buy",
       "volume": 0.04,
       "price_open": 4674.23,
-      "price_current": 4674,
+      "price_current": 4674.73,
       "sl": 4613.86,
       "tp": 5451.62,
-      "profit": -0.92,
+      "profit": 2,
       "swap": 0,
-      "pnl_net": -0.92,
+      "pnl_net": 2,
       "time_open": "2026-05-11 08:32:10"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4660.02,
-      "price_current": 4674,
+      "price_current": 4674.73,
       "sl": 4629.01,
       "tp": 5454.23,
-      "profit": 13.98,
+      "profit": 14.71,
       "swap": 0,
-      "pnl_net": 13.98,
+      "pnl_net": 14.71,
       "time_open": "2026-05-11 09:04:24"
     }
   ],
