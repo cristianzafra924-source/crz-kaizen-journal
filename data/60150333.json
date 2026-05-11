@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-11 13:47:05",
+  "timestamp": "2026-05-11 13:47:15",
   "estado": "conectado",
   "cuenta": {
     "login": 60150333,
@@ -7,11 +7,11 @@
     "empresa": "AxiCorp Financial Services Pty Ltd",
     "servidor": "Axi-US51-Live",
     "balance": 740.24,
-    "equity": 624.77,
+    "equity": 629.97,
     "margin": 467.3,
-    "margin_libre": 157.47,
-    "margin_nivel": 133.7,
-    "profit_abierto": -115.47,
+    "margin_libre": 162.67,
+    "margin_nivel": 134.81,
+    "profit_abierto": -110.27,
     "divisa": "USD",
     "apalancamiento": 100
   },
@@ -22,12 +22,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4672.03,
-      "price_current": 4661.49,
+      "price_current": 4662.01,
       "sl": 4613.86,
       "tp": 5446.4,
-      "profit": -10.54,
+      "profit": -10.02,
       "swap": 0,
-      "pnl_net": -10.54,
+      "pnl_net": -10.02,
       "time_open": "2026-05-11 07:35:31"
     },
     {
@@ -36,12 +36,12 @@
       "type": "buy",
       "volume": 0.04,
       "price_open": 4675.35,
-      "price_current": 4661.49,
+      "price_current": 4662.01,
       "sl": 4614.3,
       "tp": 5451.62,
-      "profit": -55.44,
+      "profit": -53.36,
       "swap": 0,
-      "pnl_net": -55.44,
+      "pnl_net": -53.36,
       "time_open": "2026-05-11 08:24:54"
     },
     {
@@ -50,12 +50,12 @@
       "type": "buy",
       "volume": 0.04,
       "price_open": 4674.23,
-      "price_current": 4661.49,
+      "price_current": 4662.01,
       "sl": 4613.86,
       "tp": 5451.62,
-      "profit": -50.96,
+      "profit": -48.88,
       "swap": 0,
-      "pnl_net": -50.96,
+      "pnl_net": -48.88,
       "time_open": "2026-05-11 08:32:10"
     },
     {
@@ -64,12 +64,12 @@
       "type": "buy",
       "volume": 0.01,
       "price_open": 4660.02,
-      "price_current": 4661.49,
+      "price_current": 4662.01,
       "sl": 4629.01,
       "tp": 5454.23,
-      "profit": 1.47,
+      "profit": 1.99,
       "swap": 0,
-      "pnl_net": 1.47,
+      "pnl_net": 1.99,
       "time_open": "2026-05-11 09:04:24"
     }
   ],
